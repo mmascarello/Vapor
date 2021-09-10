@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace Vapor
+namespace VaporServer
 {
     class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World maxi!");
+            Console.WriteLine("Hello World!");
         }
     }
 }
