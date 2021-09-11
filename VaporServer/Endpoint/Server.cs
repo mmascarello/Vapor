@@ -4,6 +4,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using Common;
+using Common.Interfaces;
 using Common.StringProtocol;
 using VaporServer.BusinessLogic;
 
@@ -14,7 +16,7 @@ namespace VaporServer.Endpoint
         private Logic _businessLogic;
         static bool _exit = false;
         private static List<Socket> _clients = new List<Socket>();
-
+        private static readonly ISettingsManager SettingsManager = new SettingsManager();
         public Server(Logic business)
         {
             this._businessLogic = business;
@@ -22,11 +24,14 @@ namespace VaporServer.Endpoint
 
         public void Start()
         {
-            Console.WriteLine("Holis");
-            
+
+            var serverIpAddress = SettingsManager.ReadSetting(ServerConfig.ServerIpConfigKey);
+            var serverPort = Int32.Parse(SettingsManager.ReadSetting(ServerConfig.SeverPortConfigKey));
+            var backlog = Int32.Parse(SettingsManager.ReadSetting(ServerConfig.MaxConnectionConfigKey));
+
             var socketServer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            socketServer.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 20000));
-            socketServer.Listen(100);
+            socketServer.Bind(new IPEndPoint(IPAddress.Parse(serverIpAddress),serverPort));
+            socketServer.Listen(backlog);
             
             //Lanzar un thread para manejar las conexiones
             var threadServer = new Thread(()=> ListenForConnections(socketServer));
