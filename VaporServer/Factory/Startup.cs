@@ -1,4 +1,6 @@
-﻿using VaporServer.DataAccess;
+﻿using SettingsManagerImplementation;
+using SettingsManagerInterface;
+using VaporServer.DataAccess;
 using VaporServer.BusinessLogic;
 using VaporServer.Endpoint;
 
@@ -6,20 +8,24 @@ namespace VaporServer.Factory
 {
     public class Startup
     {
-        private readonly MemoryDataBase DataBase;
-        private readonly Logic BusinessLogic;
-        private readonly Server Server;
+        private readonly MemoryDataBase dataBase;
+        private readonly Logic businessLogic;
+        private readonly Server server;
+        private readonly ISettingsManager manager;
+        
 
         public Startup()
         {
-            this.DataBase = new MemoryDataBase();
-            this.BusinessLogic = new Logic(DataBase);
-            this.Server = new Server(BusinessLogic);
+            this.manager = new SettingsManager();
+            this.dataBase = new MemoryDataBase();
+            this.businessLogic = new Logic(dataBase);
+            this.server = new Server(businessLogic,manager);
         }
 
         public void Start()
         {
-            this.Server.Start();
+            TestDataGame.Load(dataBase);
+            this.server.Start();
         }
 
         // factory

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Common.Domain;
+using Domain;
 using VaporServer.DataAccess;
 
 namespace VaporServer.BusinessLogic
@@ -25,6 +25,11 @@ namespace VaporServer.BusinessLogic
             User userToAdd = new User();
             userToAdd.UserLogin = user;
             this._memoryDataBase.AddUser(userToAdd);
+        }
+        
+        public List<Game> GetGames()
+        {
+            return this._memoryDataBase.GetGames();
         }
     }
 }

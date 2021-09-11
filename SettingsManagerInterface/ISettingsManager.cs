@@ -1,4 +1,4 @@
-namespace Common.Interfaces
+namespace SettingsManagerInterface
 {
     public interface ISettingsManager
     {

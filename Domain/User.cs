@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Common.Domain
+namespace Domain
 {
     public class User
     {

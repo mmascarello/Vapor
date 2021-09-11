@@ -7,6 +7,10 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Common\Common.csproj" />
+      <ProjectReference Include="..\Domain\Domain.csproj" />
+      <ProjectReference Include="..\SettingsManagerInterface\SettingsManagerInterface.csproj" />
+      <ProjectReference Include="..\SettingsManagerImplementation\SettingsManagerImplementation.csproj" />
+      <ProjectReference Include="..\StringProtocol\StringProtocol.csproj" />
     </ItemGroup>
 
 </Project>

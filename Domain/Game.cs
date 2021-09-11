@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using Domain;
 
-namespace Common.Domain
+namespace Domain
 {
     public class Game
     {

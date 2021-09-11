@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Common.Domain;
+using Domain;
 
 namespace VaporServer.DataAccess
 {
@@ -17,6 +17,16 @@ namespace VaporServer.DataAccess
         public List<User> GetUsers()
         {
             return Users;
+        }
+
+        public void AddGames(Game game)
+        {
+            this.Games.Add(game);
+        }
+
+        public List<Game> GetGames()
+        {
+            return Games;
         }
     }
 }

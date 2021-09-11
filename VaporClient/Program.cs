@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using Common.StringProtocol;
+using StringProtocol;
 
 namespace VaporClient
 {
@@ -15,6 +15,7 @@ namespace VaporClient
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 0));
             socket.Connect("127.0.0.1", 20000);
+            
             var connected = true;
             Console.WriteLine("Bienvenido al Sistema Client");
             Console.WriteLine("Opciones validas: ");

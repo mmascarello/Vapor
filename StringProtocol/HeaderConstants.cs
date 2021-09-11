@@ -1,4 +1,4 @@
-﻿namespace Common.StringProtocol
+﻿namespace StringProtocol
 {
     public static class HeaderConstants
     {

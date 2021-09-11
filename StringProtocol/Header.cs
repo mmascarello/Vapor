@@ -1,6 +1,7 @@
 using System;
 using System.Text;
-namespace Common.StringProtocol
+
+namespace StringProtocol
 {
     
     /*

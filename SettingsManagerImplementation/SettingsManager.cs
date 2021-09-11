@@ -1,8 +1,8 @@
 using System;
-using Common.Interfaces;
 using  System.Configuration;
+using SettingsManagerInterface;
 
-namespace Common
+namespace SettingsManagerImplementation
 {
     public class SettingsManager : ISettingsManager
     {

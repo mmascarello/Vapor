@@ -4,31 +4,31 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using Common;
-using Common.Interfaces;
-using Common.StringProtocol;
+using SettingsManagerInterface;
+using StringProtocol;
 using VaporServer.BusinessLogic;
 
 namespace VaporServer.Endpoint
 {
     public class Server
     {
-        private Logic _businessLogic;
-        static bool _exit = false;
-        private static List<Socket> _clients = new List<Socket>();
-        private static readonly ISettingsManager SettingsManager = new SettingsManager();
-        public Server(Logic business)
+        private Logic businessLogic;
+        static bool exit = false;
+        private static List<Socket> clients = new List<Socket>();
+        private readonly ISettingsManager settingsManager;
+        private static string serverIpAddress; 
+        private static int serverPort; 
+        public Server(Logic business,ISettingsManager settingsManager)
         {
-            this._businessLogic = business;
+            this.settingsManager = settingsManager;
+            this.businessLogic = business;
         }
 
         public void Start()
         {
-
-            var serverIpAddress = SettingsManager.ReadSetting(ServerConfig.ServerIpConfigKey);
-            var serverPort = Int32.Parse(SettingsManager.ReadSetting(ServerConfig.SeverPortConfigKey));
-            var backlog = Int32.Parse(SettingsManager.ReadSetting(ServerConfig.MaxConnectionConfigKey));
-
+            serverIpAddress = settingsManager.ReadSetting(ServerConfig.ServerIpConfigKey);
+            serverPort = Int32.Parse(settingsManager.ReadSetting(ServerConfig.SeverPortConfigKey));
+            var backlog = Int32.Parse(settingsManager.ReadSetting(ServerConfig.MaxConnectionConfigKey));
             var socketServer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socketServer.Bind(new IPEndPoint(IPAddress.Parse(serverIpAddress),serverPort));
             socketServer.Listen(backlog);
@@ -37,11 +37,14 @@ namespace VaporServer.Endpoint
             var threadServer = new Thread(()=> ListenForConnections(socketServer));
             threadServer.Start();
             
-            Console.WriteLine("Bienvenido al Sistema Server");
-            Console.WriteLine("Opciones validas: ");
-            Console.WriteLine("exit -> abandonar el programa");
-            Console.WriteLine("Ingrese su opcion: ");
-            while (!_exit)
+            ShowMenu();
+
+            HandleServer(socketServer);
+        }
+
+        private static void HandleServer(Socket socketServer)
+        {
+            while (!exit)
             {
                 var userInput = Console.ReadLine();
                 switch (userInput)
@@ -50,15 +53,16 @@ namespace VaporServer.Endpoint
                     // 1 - Cerrar el socket que esta escuchando conexiones nuevas
                     // 2 - Cerrar todas las conexiones abiertas desde los clientes
                     case "exit":
-                        _exit = true;
+                        exit = true;
                         socketServer.Close(0);
-                        foreach (var client in _clients)
+                        foreach (var client in clients)
                         {
                             client.Shutdown(SocketShutdown.Both);
                             client.Close();
                         }
-                        var fakeSocket = new Socket(AddressFamily.InterNetwork,SocketType.Stream,ProtocolType.Tcp);
-                        fakeSocket.Connect("127.0.0.1",20000);
+
+                        var fakeSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                        fakeSocket.Connect(serverIpAddress, serverPort);
                         break;
                     default:
                         Console.WriteLine("Opcion incorrecta ingresada");
@@ -66,15 +70,23 @@ namespace VaporServer.Endpoint
                 }
             }
         }
-        
+
+        private static void ShowMenu()
+        {
+            Console.WriteLine("Bienvenido al Sistema Server");
+            Console.WriteLine("Opciones validas: ");
+            Console.WriteLine("exit -> abandonar el programa");
+            Console.WriteLine("Ingrese su opcion: ");
+        }
+
         private void ListenForConnections(Socket socketServer)
         {
-            while (!_exit)
+            while (!exit)
             {
                 try
                 {
                     var clientConnected = socketServer.Accept();
-                    _clients.Add(clientConnected);
+                    clients.Add(clientConnected);
                     Console.WriteLine("Accepted new connection...");
                     var threadcClient = new Thread(() => HandleClient(clientConnected));
                     threadcClient.Start();
@@ -82,7 +94,7 @@ namespace VaporServer.Endpoint
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
-                    _exit = true;
+                    exit = true;
                 }
             }
             Console.WriteLine("Exiting....");
@@ -90,7 +102,7 @@ namespace VaporServer.Endpoint
         
         private void HandleClient(Socket clientSocket)
         {
-            while (!_exit)
+            while (!exit)
             {
                 var headerLength = HeaderConstants.Request.Length + HeaderConstants.CommandLength +
                                    HeaderConstants.DataLength;
@@ -100,6 +112,7 @@ namespace VaporServer.Endpoint
                     ReceiveData(clientSocket, headerLength, buffer);
                     var header = new Header();
                     header.DecodeData(buffer);
+                    
                     switch (header.ICommand)
                     {
                         case CommandConstants.Login:
@@ -108,7 +121,7 @@ namespace VaporServer.Endpoint
                             ReceiveData(clientSocket,header.IDataLength,bufferDataLogin);
                             var dataInString = Encoding.UTF8.GetString(bufferDataLogin);
                             this.AddUser(dataInString);
-                            Console.WriteLine(this._businessLogic.GetUsers().Count);
+                            Console.WriteLine(this.businessLogic.GetUsers().Count);
                             break;
                         
                         case CommandConstants.ListUsers:
@@ -123,6 +136,16 @@ namespace VaporServer.Endpoint
                             ReceiveData(clientSocket,header.IDataLength,bufferData);
                             Console.WriteLine("Message received: " + Encoding.UTF8.GetString(bufferData));
                             break;
+                        
+                        case CommandConstants.GetGames:
+                            var bufferData2 = new byte[header.IDataLength];  
+                            ReceiveData(clientSocket,header.IDataLength,bufferData2);
+                           
+                            //To do: Verificar el funcionamiento del send data. 
+                            // El send data recibe un parametro que se llama command, si aplicamos esta logica para todos queda muy grande el Command Constant. 
+                            //Dificil de mantener. 
+                            
+                            break;
                     }
                 }
                 catch (Exception e)
@@ -132,17 +155,17 @@ namespace VaporServer.Endpoint
             }
         }
 
-        private void ReceiveData(Socket clientSocket,  int Length, byte[] buffer)
+        private void ReceiveData(Socket clientSocket,  int length, byte[] buffer)
         {
             var iRecv = 0;
-            while (iRecv < Length)
+            while (iRecv < length)
             {
                 try
                 {
-                    var localRecv = clientSocket.Receive(buffer, iRecv, Length - iRecv, SocketFlags.None);
+                    var localRecv = clientSocket.Receive(buffer, iRecv, length - iRecv, SocketFlags.None);
                     if (localRecv == 0) // Si recieve retorna 0 -> la conexion se cerro desde el endpoint remoto
                     {
-                        if (!_exit)
+                        if (!exit)
                         {
                             clientSocket.Shutdown(SocketShutdown.Both);
                             clientSocket.Close();
@@ -163,10 +186,31 @@ namespace VaporServer.Endpoint
                 
             }
         }
+        
+        private static void SendData(Socket ourSocket, int command, string data)
+        {
+            var headerLogin = new Header(HeaderConstants.Request, command, data.Length);
+            var dataLogin = headerLogin.GetRequest();
+                        
+            var sentBytesLogin = 0;
+            while (sentBytesLogin < dataLogin.Length)
+            {
+                sentBytesLogin += ourSocket.Send(dataLogin, sentBytesLogin, dataLogin.Length - sentBytesLogin, SocketFlags.None);
+            }
+
+            sentBytesLogin = 0;
+                        
+            var bytesMessageLogin = Encoding.UTF8.GetBytes(data);
+            while (sentBytesLogin < bytesMessageLogin.Length)
+            {
+                sentBytesLogin += ourSocket.Send(bytesMessageLogin, sentBytesLogin, bytesMessageLogin.Length - sentBytesLogin,
+                    SocketFlags.None);
+            }
+        }
 
         private void AddUser(string user)
         {
-            this._businessLogic.AddUser(user);
+            this.businessLogic.AddUser(user);
         }
     }
 }

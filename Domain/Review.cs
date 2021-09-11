@@ -1,4 +1,4 @@
-﻿namespace Common.Domain
+﻿namespace Domain
 {
     public class Review
     {
