@@ -56,7 +56,7 @@ namespace StringProtocol
             _dataLength = Encoding.UTF8.GetBytes(stringData);
         }
 
-        public byte[] GetRequest()
+        public byte[] BuildRequest()
         {
             var header = new byte[HeaderConstants.Request.Length + HeaderConstants.CommandLength + HeaderConstants.DataLength];
             Array.Copy(_direction, 0, header, 0, 3);
@@ -67,11 +67,20 @@ namespace StringProtocol
 
         public bool DecodeData(byte[] data)
         {
-            _sDirection = Encoding.UTF8.GetString(data, 0, HeaderConstants.Request.Length);
-            var command = Encoding.UTF8.GetString(data, HeaderConstants.Request.Length, HeaderConstants.CommandLength);
-            _iCommand = int.Parse(command);
-            var dataLength = Encoding.UTF8.GetString(data, HeaderConstants.Request.Length + HeaderConstants.CommandLength, HeaderConstants.DataLength);
-            _iDataLength = int.Parse(dataLength);
+            try
+            {
+                _sDirection = Encoding.UTF8.GetString(data, 0, HeaderConstants.Request.Length);
+                var command =
+                    Encoding.UTF8.GetString(data, HeaderConstants.Request.Length, HeaderConstants.CommandLength);
+                _iCommand = int.Parse(command);
+                var dataLength = Encoding.UTF8.GetString(data,
+                    HeaderConstants.Request.Length + HeaderConstants.CommandLength, HeaderConstants.DataLength);
+                _iDataLength = int.Parse(dataLength);
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
             return true;
         }
 

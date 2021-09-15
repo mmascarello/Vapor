@@ -1,4 +1,6 @@
-﻿using SettingsManagerImplementation;
+﻿using CommunicationImplementation;
+using CommunicationInterface;
+using SettingsManagerImplementation;
 using SettingsManagerInterface;
 using VaporServer.DataAccess;
 using VaporServer.BusinessLogic;
@@ -12,6 +14,7 @@ namespace VaporServer.Factory
         private readonly Logic businessLogic;
         private readonly Server server;
         private readonly ISettingsManager manager;
+        private readonly ICommunication communication;
         
 
         public Startup()
@@ -19,7 +22,9 @@ namespace VaporServer.Factory
             this.manager = new SettingsManager();
             this.dataBase = new MemoryDataBase();
             this.businessLogic = new Logic(dataBase);
-            this.server = new Server(businessLogic,manager);
+            this.communication = new Communication();
+            
+            this.server = new Server(businessLogic,manager,communication);
         }
 
         public void Start()

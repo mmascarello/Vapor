@@ -6,7 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Common\Common.csproj" />
+      <ProjectReference Include="..\CommunicationImplementation\CommunicationImplementation.csproj" />
+      <ProjectReference Include="..\CommunicationInterface\CommunicationInterface.csproj" />
       <ProjectReference Include="..\Domain\Domain.csproj" />
       <ProjectReference Include="..\SettingsManagerInterface\SettingsManagerInterface.csproj" />
       <ProjectReference Include="..\SettingsManagerImplementation\SettingsManagerImplementation.csproj" />

@@ -10,11 +10,13 @@ namespace VaporClient
 {
     class Program
     {
+        public static bool exit = false;
         static void Main(string[] args)
         {
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 0));
             socket.Connect("127.0.0.1", 20000);
+            
             
             var connected = true;
             Console.WriteLine("Bienvenido al Sistema Client");
@@ -34,22 +36,31 @@ namespace VaporClient
                         socket.Close();
                         connected = false;
                         break;
-                    case "message":
-                        Console.WriteLine("Ingrese el mensaje a enviar:");
-                        var mensaje = Console.ReadLine();
-                        send(mensaje,CommandConstants.Message , socket);
-
-                        break;
-                    
-                    case "login":
-                        Console.WriteLine("Login:");
-                        var usuario = Console.ReadLine();
-                        send(usuario, CommandConstants.Login, socket);
-                        break;
-                    
-                    case "user-list":
+                    case "juegos":
                         
-                        break;
+                            SendMessage(String.Empty, CommandConstants.GetGames, socket);
+                        
+                            var headerLength = HeaderConstants.Request.Length + HeaderConstants.CommandLength +
+                                               HeaderConstants.DataLength;
+                            var buffer = new byte[headerLength];
+                            try
+                            {
+                                Console.WriteLine("antes del primer recive data");
+                                ReceiveData(socket, headerLength, buffer);
+                                var header = new Header();
+                                header.DecodeData(buffer);
+                                Console.WriteLine("despues de hacer el decode del buffer");
+                                //swtich
+                                
+                                var bufferData2 = new byte[header.IDataLength];
+                                Console.WriteLine("antes del segundo recive data");
+                                ReceiveData(socket,header.IDataLength,bufferData2);
+                                Console.WriteLine("Message received: " + Encoding.UTF8.GetString(bufferData2));
+                            }catch(Exception e)
+                            {
+                                Console.WriteLine("explote");
+                            }
+                            break;
                     default:
                         Console.WriteLine("Opcion invalida");
                         break;
@@ -59,23 +70,58 @@ namespace VaporClient
             Console.WriteLine("Exiting Application");
         }
         
-        private static void send(string data, int command, Socket socket)
+        private static void ReceiveData(Socket clientSocket,  int length, byte[] buffer)
         {
-            var headerLogin = new Header(HeaderConstants.Request, command, data.Length);
-            var dataLogin = headerLogin.GetRequest();
-                        
-            var sentBytesLogin = 0;
-            while (sentBytesLogin < dataLogin.Length)
+            var iRecv = 0;
+            Console.WriteLine("antes del while en ReciveData");
+            while (iRecv < length)
             {
-                sentBytesLogin += socket.Send(dataLogin, sentBytesLogin, dataLogin.Length - sentBytesLogin, SocketFlags.None);
+                try
+                {
+                    Console.WriteLine("antes de recibir la parte en ReciveData");
+                    var localRecv = clientSocket.Receive(buffer, iRecv, length - iRecv, SocketFlags.None);
+                    Console.WriteLine("recibi la parte en ReciveData");
+                    if (localRecv == 0) // Si recieve retorna 0 -> la conexion se cerro desde el endpoint remoto
+                    {
+                        if (!exit)
+                        {
+                            clientSocket.Shutdown(SocketShutdown.Both);
+                            clientSocket.Close();
+                        }
+                        else
+                        {
+                            throw new Exception("Server is closing");
+                        }
+                        
+                        
+                    }
+
+                    iRecv += localRecv;
+                }
+                catch (SocketException se)
+                {
+                    Console.WriteLine(se.Message);
+                    return;
+                }
+                
+            }
+        }
+        
+        private static void SendMessage(String mensaje, int command, Socket socket)
+        {
+            var header = new Header(HeaderConstants.Request, command, mensaje.Length);
+            var data = header.BuildRequest();
+            var sentBytes = 0;
+            while (sentBytes < data.Length)
+            {
+                sentBytes += socket.Send(data, sentBytes, data.Length - sentBytes, SocketFlags.None);
             }
 
-            sentBytesLogin = 0;
-                        
-            var bytesMessageLogin = Encoding.UTF8.GetBytes(data);
-            while (sentBytesLogin < bytesMessageLogin.Length)
+            sentBytes = 0;
+            var bytesMessage = Encoding.UTF8.GetBytes(mensaje);
+            while (sentBytes < bytesMessage.Length)
             {
-                sentBytesLogin += socket.Send(bytesMessageLogin, sentBytesLogin, bytesMessageLogin.Length - sentBytesLogin,
+                sentBytes += socket.Send(bytesMessage, sentBytes, bytesMessage.Length - sentBytes,
                     SocketFlags.None);
             }
         }

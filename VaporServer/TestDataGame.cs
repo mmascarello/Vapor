@@ -9,7 +9,6 @@ namespace VaporServer
     {
         public static void Load(MemoryDataBase db)
         {
-            db = new MemoryDataBase();
             db.AddGames(new Game(){ Title = "Super Mario"});
             db.AddGames(new Game(){ Title = "Bomberman"});
             db.AddGames(new Game(){ Title = "Pokemon"});
