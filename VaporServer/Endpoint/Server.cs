@@ -147,7 +147,7 @@ namespace VaporServer.Endpoint
                                 communication.SendData(clientSocket,new Header(HeaderConstants.Response, CommandConstants.BuyGame,
                                     ResponseConstants.Ok.Length),ResponseConstants.Ok);
                                
-                                // validar porque no funciona adquirir 2 juegos seguidos / adquirir un juego y error.
+                                // ToDo:validar porque no funciona adquirir 2 juegos seguidos / adquirir un juego y error.
                             }
                             catch (Exception e)
                             {
