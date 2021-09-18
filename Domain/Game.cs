@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Domain;
 
 namespace Domain
@@ -6,10 +7,16 @@ namespace Domain
     public class Game
     {
         public string Title;
-        public List<Review> Reviews;
+        public List<Guid> Reviews;
         public int AverageReviewScore;
         public string Gender;
         public string Sinopsis;
         public string CoverPage;
+        public Guid Id;
+
+        public Game()
+        {
+            Reviews = new List<Guid>();
+        }
     }
 }

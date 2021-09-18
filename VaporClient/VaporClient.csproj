@@ -7,6 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\CommunicationImplementation\CommunicationImplementation.csproj" />
+      <ProjectReference Include="..\CommunicationInterface\CommunicationInterface.csproj" />
+      <ProjectReference Include="..\SettingsManagerImplementation\SettingsManagerImplementation.csproj" />
+      <ProjectReference Include="..\SettingsManagerInterface\SettingsManagerInterface.csproj" />
       <ProjectReference Include="..\StringProtocol\StringProtocol.csproj" />
     </ItemGroup>
 

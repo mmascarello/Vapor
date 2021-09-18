@@ -6,6 +6,7 @@ namespace StringProtocol
         public const int ListUsers = 2;
         public const int Message = 3;
         public const int GetGames = 4;
+        public const int BuyGame = 5;
 
     }
 }

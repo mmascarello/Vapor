@@ -1,10 +1,13 @@
-﻿namespace Domain
+﻿using System;
+
+namespace Domain
 {
     public class Review
     {
-        public User Reviewer;
+        public Guid UserId;
         public string Description;
         public int Rating;
+        public Guid Id;
 
     }
 }
