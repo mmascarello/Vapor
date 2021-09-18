@@ -23,6 +23,7 @@ namespace VaporServer.Factory
             this.dataBase = new MemoryDataBase();
             this.businessLogic = new Logic(dataBase);
             this.communication = new Communication();
+            
             this.server = new Server(businessLogic,manager,communication);
         }
 

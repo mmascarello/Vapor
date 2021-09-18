@@ -1,22 +1,27 @@
 ﻿using System;
 using System.Net.Sockets;
-using EndpointFactory;
+using System.Text;
+using CommunicationInterface;
 using StringProtocol;
 using VaporServer.BusinessLogic;
+using VaporServer.Endpoint.EndpointFactory;
 
-namespace EndpointFactory.Implementations
+namespace VaporServer.Endpoint.Implementations
 {
     public class GetGamesCommand : CommandInterface
     {
-        private readonly Socket socket;
-        private readonly GameLogic gameLogic;
-        public GetGamesCommand(Socket socket,GameLogic gameLogic)
-        {
-            this.socket = socket;
-            this.gameLogic = gameLogic;
-        }
         
-        public void Send()
+        private readonly GameLogic gameLogic;
+        private readonly ICommunication communication;
+        
+        public GetGamesCommand(GameLogic gameLogic, ICommunication communication)
+        {
+            this.gameLogic = gameLogic;
+            this.communication = communication;
+        }
+
+
+        public void Send(Socket ourSocket)
         {
             var gameList = gameLogic.GetGames();
             String games = String.Empty;
@@ -24,12 +29,16 @@ namespace EndpointFactory.Implementations
                             
             var headerToSend = new Header(HeaderConstants.Response, CommandConstants.GetGames,
                 games.Length);
-            communication.SendData(clientSocket,headerToSend,games);
+            communication.SendData(ourSocket,headerToSend,games);
         }
 
-        public void Receive()
+        public void Receive(Socket clientSocket, Header header)
         {
-            throw new System.NotImplementedException();
+            var newBuffer = new byte[header.IDataLength];
+
+            communication.ReceiveData(clientSocket,header.IDataLength,newBuffer);
+
+            var data = Encoding.UTF8.GetString(newBuffer).Split('|');
         }
     }
 }

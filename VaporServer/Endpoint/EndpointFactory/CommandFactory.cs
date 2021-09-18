@@ -1,25 +1,22 @@
 ﻿using System.Net.Sockets;
 using CommunicationInterface;
-using EndpointFactory.Implementations;
 using StringProtocol;
 using VaporServer.BusinessLogic;
+using VaporServer.Endpoint.Implementations;
 
-namespace EndpointFactory
+namespace VaporServer.Endpoint.EndpointFactory
 {
-    public  abstract class CommandFactory
+    public abstract class CommandFactory
     {
-        private readonly ICommunication communication;
-        private readonly Logic businessLogic;
-        
-        public static CommandInterface CreateServerCommand(int command,Socket socket,Logic businessLogic)
+       public static CommandInterface CreateServerCommand(Logic businessLogic, ICommunication communication, int command)
         {
             if (command == CommandConstants.BuyGame)
             {
-                return new BuyGameCommand();
+                return new BuyGameCommand(businessLogic.gameLogic, communication);
             }
             else
             {
-                return new GetGamesCommand(socket,businessLogic.gameLogic);
+                return new GetGamesCommand(businessLogic.gameLogic, communication);
             }
         }
 

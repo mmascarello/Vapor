@@ -6,9 +6,9 @@ using StringProtocol;
 
 namespace CommunicationImplementation
 {
-    public static class Communication : ICommunication
+    public class Communication : ICommunication
     {
-        public static void ReceiveData(Socket clientSocket,  int length, byte[] buffer)
+        public void ReceiveData(Socket clientSocket,  int length, byte[] buffer)
         {
             var iRecv = 0;
             while (iRecv < length)
@@ -34,7 +34,7 @@ namespace CommunicationImplementation
             }
         }
         
-        public static void SendData(Socket ourSocket, Header header, string data)
+        public void SendData(Socket ourSocket, Header header, string data)
         {
             var dataToSend = header.BuildRequest();
                         

@@ -5,10 +5,10 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using CommunicationInterface;
-using EndpointFactory;
 using SettingsManagerInterface;
 using StringProtocol;
 using VaporServer.BusinessLogic;
+using VaporServer.Endpoint.EndpointFactory;
 
 namespace VaporServer.Endpoint
 {
@@ -120,7 +120,7 @@ namespace VaporServer.Endpoint
                     var header = new Header();
                     header.DecodeData(buffer);
 
-                    CommandFactory.CreateServerCommand(header.ICommand, clientSocket);
+                    var command = CommandFactory.CreateServerCommand(businessLogic,communication,header.ICommand);
                     
                     switch (header.ICommand)
                     {
