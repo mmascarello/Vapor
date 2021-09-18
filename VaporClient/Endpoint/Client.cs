@@ -84,11 +84,32 @@ namespace VaporCliente.Endpoint
 
                         break;
                     case "adquirir juego":
-
-                        /*var gameName = Console.ReadLine();
-                        communication.SendData(socket,new Header(HeaderConstants.Request,CommandConstants.BuyGame,gameName.Lenght));
-                        */
                         
+                        Console.WriteLine("Sugerencia: Imprimir listado de usuarios");
+                        Console.WriteLine("Ingrese un usuario");
+                        var userName = Console.ReadLine();
+                        Console.WriteLine("Sugerencia: Imprimir listado de juegos");
+                        Console.WriteLine("Ingrese un juego");
+                        var gameName = Console.ReadLine();
+                        var userAndGame = userName + "|" + gameName;
+                        
+                        communication.SendData(socket,new Header(HeaderConstants.Request,CommandConstants.BuyGame,userAndGame.Length),userAndGame);
+                        
+                        var newHeaderLength = HeaderConstants.Response.Length + HeaderConstants.CommandLength +
+                                           HeaderConstants.DataLength;
+
+                        var newBuffer = new Byte[newHeaderLength];
+                        communication.ReceiveData(socket,newHeaderLength,newBuffer);
+                        
+                        var newHeader = new Header();
+                        newHeader.DecodeData(newBuffer);
+                        
+                        var newBufferData = new byte[newHeader.IDataLength];
+                        communication.ReceiveData(socket,newHeader.IDataLength,newBufferData);
+
+                        var message = Encoding.UTF8.GetString(newBufferData);
+                        
+                        Console.WriteLine(message);
                         
                         break;
                         

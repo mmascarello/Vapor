@@ -5,27 +5,20 @@ namespace VaporServer.DataAccess
 {
     public class MemoryDataBase
     {
-        private readonly List<User> Users = new List<User>();
-        private List<Game> Games = new List<Game>();
-        
-        
-        public void AddUser(User user){
-            this.Users.Add(user);
-        }
+        private readonly List<User> users = new List<User>();
+        private readonly List<Game> games = new List<Game>();
+        public readonly UserDataBase UserDataBase;
+        public readonly GameDataBase GameDataBase;
 
-        public List<User> GetUsers()
+        public MemoryDataBase()
         {
-            return Users;
+            this.UserDataBase = new UserDataBase(users);
+            this.GameDataBase = new GameDataBase(games);
         }
+     
 
-        public void AddGames(Game game)
-        {
-            this.Games.Add(game);
-        }
+      
 
-        public List<Game> GetGames()
-        {
-            return Games;
-        }
+       
     }
 }

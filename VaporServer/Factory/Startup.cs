@@ -23,13 +23,12 @@ namespace VaporServer.Factory
             this.dataBase = new MemoryDataBase();
             this.businessLogic = new Logic(dataBase);
             this.communication = new Communication();
-            
             this.server = new Server(businessLogic,manager,communication);
         }
 
         public void Start()
         {
-            TestData.Load(dataBase);
+            TestData.Load(dataBase.GameDataBase, dataBase.UserDataBase);
             this.server.Start();
         }
 

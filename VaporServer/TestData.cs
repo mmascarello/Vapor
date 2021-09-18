@@ -7,7 +7,7 @@ namespace VaporServer
 {
     public static class TestData
     {
-        public static void Load(MemoryDataBase db)
+        public static void Load(GameDataBase gameDataBase, UserDataBase userDataBase)
         {
             Guid superMarioId = new Guid();
             Guid bomermanId = new Guid();
@@ -17,17 +17,17 @@ namespace VaporServer
             Guid micaId = new Guid();
             Guid maxiId = new Guid();
 
-            db.AddGames(new Game(){ Title = "Super Mario",Id = superMarioId});
-            db.AddGames(new Game(){ Title = "Bomberman",Id = bomermanId});
-            db.AddGames(new Game(){ Title = "Pokemon",Id = pokemonId});
-            db.AddGames(new Game(){ Title = "WarCraft",Id = warCraftId});
+            gameDataBase.AddGames(new Game(){ Title = "Super Mario",Id = superMarioId}); 
+            gameDataBase.AddGames(new Game(){ Title = "Bomberman",Id = bomermanId});
+            gameDataBase.AddGames(new Game(){ Title = "Pokemon",Id = pokemonId});
+            gameDataBase.AddGames(new Game(){ Title = "WarCraft",Id = warCraftId});
             
-            db.AddUser(new User(){UserLogin = "Mica", Id = micaId, MyOwnedGames= new List<Guid>()
+            userDataBase.AddUser(new User(){UserLogin = "Mica", Id = micaId, MyOwnedGames= new List<Guid>()
             {
                 superMarioId,bomermanId
             }});
             
-            db.AddUser(new User(){UserLogin = "Maxi", Id = maxiId, MyOwnedGames= new List<Guid>()
+            userDataBase.AddUser(new User(){UserLogin = "Maxi", Id = maxiId, MyOwnedGames= new List<Guid>()
             {
                 pokemonId,warCraftId
             }});
