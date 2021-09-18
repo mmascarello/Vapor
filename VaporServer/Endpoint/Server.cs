@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using CommunicationInterface;
+using EndpointFactory;
 using SettingsManagerInterface;
 using StringProtocol;
 using VaporServer.BusinessLogic;
@@ -114,13 +115,16 @@ namespace VaporServer.Endpoint
                 
                 try
                 {
+                    
                     communication.ReceiveData(clientSocket, headerLength, buffer);
                     var header = new Header();
                     header.DecodeData(buffer);
+
+                    CommandFactory.CreateServerCommand(header.ICommand, clientSocket);
                     
                     switch (header.ICommand)
                     {
-                        case CommandConstants.GetGames:
+                        /*case CommandConstants.GetGames:
                             var gameList = businessLogic.gameLogic.GetGames();
                             String games = String.Empty;
                             gameList.ForEach(g => games += g.Title + "-" );
@@ -128,7 +132,9 @@ namespace VaporServer.Endpoint
                             var headerToSend = new Header(HeaderConstants.Response, CommandConstants.GetGames,
                                 games.Length);
                             communication.SendData(clientSocket,headerToSend,games);
-                            break;
+                            break;*/
+                        
+                        
                         case  CommandConstants.BuyGame:
 
                             var newBuffer = new byte[header.IDataLength];

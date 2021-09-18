@@ -5,7 +5,7 @@ namespace CommunicationInterface
 {
     public interface ICommunication
     {
-        void ReceiveData(Socket clientSocket, int length, byte[] buffer);
-        void SendData(Socket ourSocket, Header header, string data);
+        static void ReceiveData(Socket clientSocket, int length, byte[] buffer);
+       static void SendData(Socket ourSocket, Header header, string data);
     }
 }
