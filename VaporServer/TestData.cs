@@ -9,13 +9,13 @@ namespace VaporServer
     {
         public static void Load(GameDataBase gameDataBase, UserDataBase userDataBase)
         {
-            Guid superMarioId = new Guid();
-            Guid bomermanId = new Guid();
-            Guid pokemonId = new Guid();
-            Guid warCraftId = new Guid();
+            Guid superMarioId = Guid.NewGuid();
+            Guid bomermanId = Guid.NewGuid();
+            Guid pokemonId = Guid.NewGuid();
+            Guid warCraftId = Guid.NewGuid();
 
-            Guid micaId = new Guid();
-            Guid maxiId = new Guid();
+            Guid micaId = Guid.NewGuid();
+            Guid maxiId = Guid.NewGuid();
 
             gameDataBase.AddGames(new Game(){ Title = "Super Mario",Id = superMarioId}); 
             gameDataBase.AddGames(new Game(){ Title = "Bomberman",Id = bomermanId});
