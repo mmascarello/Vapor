@@ -12,7 +12,6 @@
       <ProjectReference Include="..\SettingsManagerInterface\SettingsManagerInterface.csproj" />
       <ProjectReference Include="..\SettingsManagerImplementation\SettingsManagerImplementation.csproj" />
       <ProjectReference Include="..\StringProtocol\StringProtocol.csproj" />
-      <ProjectReference Include="..\UIFactory\UIFactory.csproj" />
     </ItemGroup>
 
 </Project>

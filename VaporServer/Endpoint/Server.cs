@@ -8,7 +8,6 @@ using CommunicationInterface;
 using SettingsManagerInterface;
 using StringProtocol;
 using VaporServer.BusinessLogic;
-using VaporServer.Endpoint.EndpointFactory;
 
 namespace VaporServer.Endpoint
 {
@@ -119,49 +118,15 @@ namespace VaporServer.Endpoint
                     communication.ReceiveData(clientSocket, headerLength, buffer);
                     var header = new Header();
                     header.DecodeData(buffer);
-
-                    var command = CommandFactory.CreateServerCommand(businessLogic,communication,header.ICommand);
                     
                     switch (header.ICommand)
                     {
-                        /*case CommandConstants.GetGames:
-                            var gameList = businessLogic.gameLogic.GetGames();
-                            String games = String.Empty;
-                            gameList.ForEach(g => games += g.Title + "-" );
-                            
-                            var headerToSend = new Header(HeaderConstants.Response, CommandConstants.GetGames,
-                                games.Length);
-                            communication.SendData(clientSocket,headerToSend,games);
-                            break;*/
-                        
+                        case CommandConstants.GetGames:
+                            GetGames(clientSocket);
+                            break;
                         
                         case  CommandConstants.BuyGame:
-
-                            var newBuffer = new byte[header.IDataLength];
-
-                            communication.ReceiveData(clientSocket,header.IDataLength,newBuffer);
-
-                            var userAndGame = Encoding.UTF8.GetString(newBuffer).Split('|');
-                            var user = userAndGame[0];
-                            var game = userAndGame[1];
-                            
-                            Console.WriteLine($"Message received: {user} and {game}");
-
-                            try
-                            {
-                                businessLogic.userLogic.BuyGame(user, game);
-                                communication.SendData(clientSocket,new Header(HeaderConstants.Response, CommandConstants.BuyGame,
-                                    ResponseConstants.Ok.Length),ResponseConstants.Ok);
-                               
-                                // ToDo:validar porque no funciona adquirir 2 juegos seguidos / adquirir un juego y error.
-                            }
-                            catch (Exception e)
-                            {
-                                var datalength = (e.Message.Length + ResponseConstants.Error.Length);
-                                var errorMessage = ResponseConstants.Error + e.Message;
-                                communication.SendData(clientSocket,new Header(HeaderConstants.Response, CommandConstants.BuyGame,
-                                    datalength),errorMessage);
-                            }
+                            BuyGame(clientSocket, header);
                             break;
                     }
                 }
@@ -170,6 +135,50 @@ namespace VaporServer.Endpoint
                     Console.WriteLine($"Server is closing, will not process more data -> Message {e.Message}..");    
                 }
             }
+        }
+
+        private void BuyGame(Socket clientSocket, Header header)
+        {
+            var dataBuffer = new byte[header.IDataLength];
+
+            communication.ReceiveData(clientSocket, header.IDataLength, dataBuffer);
+
+            var userAndGame = Encoding.UTF8.GetString(dataBuffer).Split('|');
+            var user = userAndGame[0];
+            var game = userAndGame[1];
+
+            Console.WriteLine($"Message received: {user} and {game}");
+            
+            Header headerResponse;
+            try
+            {
+                businessLogic.userLogic.BuyGame(user, game);
+                    headerResponse = new Header(HeaderConstants.Response, CommandConstants.BuyGame,
+                    ResponseConstants.Ok.Length);
+                
+                communication.SendData(clientSocket, headerResponse, ResponseConstants.Ok);
+
+                // ToDo:validar porque no funciona adquirir 2 juegos seguidos / adquirir un juego y error.
+            }
+            catch (Exception e)
+            {
+                var dataLength = (e.Message.Length + ResponseConstants.Error.Length);
+                var errorMessage = ResponseConstants.Error + e.Message;
+                headerResponse = new Header(HeaderConstants.Response, CommandConstants.BuyGame,
+                    dataLength);
+                communication.SendData(clientSocket, headerResponse, errorMessage);
+            }
+        }
+
+        private void GetGames(Socket clientSocket)
+        {
+            var gameList = businessLogic.gameLogic.GetGames();
+            String games = String.Empty;
+            gameList.ForEach(g => games += g.Title + "-");
+
+            var headerToSend = new Header(HeaderConstants.Response, CommandConstants.GetGames,
+                games.Length);
+            communication.SendData(clientSocket, headerToSend, games);
         }
     }
 }
