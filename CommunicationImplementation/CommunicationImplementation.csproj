@@ -6,6 +6,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\CommunicationInterface\CommunicationInterface.csproj" />
+      <ProjectReference Include="..\FileProtocol\FileProtocol.csproj" />
     </ItemGroup>
 
 </Project>

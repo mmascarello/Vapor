@@ -4,6 +4,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using FileProtocol.Protocol;
 using StringProtocol;
 using VaporServer;
 
@@ -13,7 +14,6 @@ namespace VaporCliente.Endpoint
     {
         private readonly ICommunication communication;
         private readonly ISettingsManager manager;
-        public static bool exit = false;
         private static string clientIpAddress;
         private static int clientPort;
         private static string serverIp;
@@ -55,6 +55,24 @@ namespace VaporCliente.Endpoint
                         socket.Shutdown(SocketShutdown.Both);
                         socket.Close();
                         connected = false;
+                        break;
+                    case "obtener caratula":
+                        
+                        var path = "C:/Vapor/yay.png";
+                        var headerToSendImg = new Header(HeaderConstants.Request, CommandConstants.SendImage, path.Length);
+                        
+                        communication.SendData(socket, headerToSendImg, path);//esto es para enviar el juego del que necesita la caratua
+
+                        try
+                        {
+                            communication.ReceiveFile(socket); // esto recibe la imagen
+                            Console.WriteLine("Message received ");
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("explote");
+                        }
+                        
                         break;
                     case "juegos":
 

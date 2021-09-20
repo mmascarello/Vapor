@@ -7,6 +7,7 @@ namespace StringProtocol
         public const int Message = 3;
         public const int GetGames = 4;
         public const int BuyGame = 5;
+        public const int SendImage = 6;
 
     }
 }

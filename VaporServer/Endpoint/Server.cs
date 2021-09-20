@@ -119,6 +119,10 @@ namespace VaporServer.Endpoint
                     var header = new Header();
                     header.DecodeData(buffer);
                     
+                    //recibir primero los datos 
+                    // crear la instancia del factory
+                    // enviar por parametro lo que necesita
+                    
                     switch (header.ICommand)
                     {
                         case CommandConstants.GetGames:
@@ -128,6 +132,9 @@ namespace VaporServer.Endpoint
                         case  CommandConstants.BuyGame:
                             BuyGame(clientSocket, header);
                             break;
+                        case CommandConstants.SendImage:
+                            SendImage(clientSocket, header);
+                            break;
                     }
                 }
                 catch (Exception e)
@@ -135,6 +142,21 @@ namespace VaporServer.Endpoint
                     Console.WriteLine($"Server is closing, will not process more data -> Message {e.Message}..");    
                 }
             }
+        }
+
+        private void SendImage(Socket clientSocket, Header header)
+        {
+            var dataBuffer = new byte[header.IDataLength];
+            
+            communication.ReceiveData(clientSocket, header.IDataLength, dataBuffer);
+            
+            var game = Encoding.UTF8.GetString(dataBuffer);
+            
+            //buscar la ruta de la imagen con el nombre del juego en la bl
+            
+            Console.WriteLine(game);
+            
+            communication.SendFile(clientSocket,game);
         }
 
         private void BuyGame(Socket clientSocket, Header header)
