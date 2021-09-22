@@ -12,6 +12,7 @@
       <ProjectReference Include="..\SettingsManagerImplementation\SettingsManagerImplementation.csproj" />
       <ProjectReference Include="..\SettingsManagerInterface\SettingsManagerInterface.csproj" />
       <ProjectReference Include="..\StringProtocol\StringProtocol.csproj" />
+      <ProjectReference Include="..\ValidationsImplementations\ValidationsImplementations.csproj" />
     </ItemGroup>
 
 </Project>

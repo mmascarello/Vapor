@@ -19,13 +19,15 @@ namespace VaporServer.Endpoint
         private readonly ISettingsManager settingsManager;
         private readonly ICommunication communication;
         private static string serverIpAddress; 
-        private static int serverPort; 
-        
+        private static int serverPort;
+        private readonly GameLogic gameLogic;
+
         public Server(Logic businessLogic,ISettingsManager settingsManager,ICommunication communication)
         {
             this.settingsManager = settingsManager;
             this.businessLogic = businessLogic;
             this.communication = communication;
+            this.gameLogic = this.businessLogic.gameLogic;
         }
 
         public void Start()
@@ -132,8 +134,14 @@ namespace VaporServer.Endpoint
                         case  CommandConstants.BuyGame:
                             BuyGame(clientSocket, header);
                             break;
+                        
                         case CommandConstants.SendImage:
                             SendImage(clientSocket, header);
+                            break;
+                        case CommandConstants.PublicGame:
+
+                            ProcessGame(clientSocket, header);
+                            
                             break;
                     }
                 }
@@ -141,6 +149,26 @@ namespace VaporServer.Endpoint
                 {
                     Console.WriteLine($"Server is closing, will not process more data -> Message {e.Message}..");    
                 }
+            }
+        }
+
+        private void ProcessGame(Socket clientSocket, Header header)
+        {
+            var gameBuffer = new byte[header.IDataLength];
+
+            communication.ReceiveData(clientSocket, header.IDataLength, gameBuffer);
+
+            try
+            {
+                this.gameLogic.PublicGame(gameBuffer);
+
+                var headerResponse = new Header(HeaderConstants.Response, CommandConstants.PublicGame, ResponseConstants.Ok.Length);
+                communication.SendData(clientSocket,headerResponse,ResponseConstants.Ok);
+                
+            }
+            catch(Exception e)
+            {
+                ErrorResponse(clientSocket,e,CommandConstants.PublicGame);
             }
         }
 
@@ -184,11 +212,7 @@ namespace VaporServer.Endpoint
             }
             catch (Exception e)
             {
-                var dataLength = (e.Message.Length + ResponseConstants.Error.Length);
-                var errorMessage = ResponseConstants.Error + e.Message;
-                headerResponse = new Header(HeaderConstants.Response, CommandConstants.BuyGame,
-                    dataLength);
-                communication.SendData(clientSocket, headerResponse, errorMessage);
+                ErrorResponse(clientSocket,e,CommandConstants.BuyGame);
             }
         }
 
@@ -201,6 +225,15 @@ namespace VaporServer.Endpoint
             var headerToSend = new Header(HeaderConstants.Response, CommandConstants.GetGames,
                 games.Length);
             communication.SendData(clientSocket, headerToSend, games);
+        }
+        
+        private void ErrorResponse(Socket clientSocket, Exception e,int command)
+        {
+            var dataLength = (e.Message.Length + ResponseConstants.Error.Length);
+            var errorMessage = ResponseConstants.Error + e.Message;
+            var headerResponse = new Header(HeaderConstants.Response, command,
+                dataLength);
+            communication.SendData(clientSocket, headerResponse, errorMessage);
         }
     }
 }

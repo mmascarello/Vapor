@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommunicationImplementation
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileProtocol", "FileProtocol\FileProtocol.csproj", "{F623CFCA-A5EA-4176-AF8F-76FD68F7C67D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValidationsImplementations", "ValidationsImplementations\ValidationsImplementations.csproj", "{BBB9D66B-CA15-43CA-8C8E-D242A5E2CDBB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,5 +62,9 @@ Global
 		{F623CFCA-A5EA-4176-AF8F-76FD68F7C67D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F623CFCA-A5EA-4176-AF8F-76FD68F7C67D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F623CFCA-A5EA-4176-AF8F-76FD68F7C67D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBB9D66B-CA15-43CA-8C8E-D242A5E2CDBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBB9D66B-CA15-43CA-8C8E-D242A5E2CDBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBB9D66B-CA15-43CA-8C8E-D242A5E2CDBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBB9D66B-CA15-43CA-8C8E-D242A5E2CDBB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,3 +1,5 @@
+using System;
+
 namespace StringProtocol
 {
     public static class CommandConstants
@@ -8,6 +10,7 @@ namespace StringProtocol
         public const int GetGames = 4;
         public const int BuyGame = 5;
         public const int SendImage = 6;
+        public const int PublicGame = 7;
 
     }
 }

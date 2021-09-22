@@ -8,7 +8,7 @@ namespace Domain
     {
         public string Title;
         public List<Guid> Reviews;
-        public int AverageReviewScore;
+        public int Score;
         public string Gender;
         public string Sinopsis;
         public string CoverPage;

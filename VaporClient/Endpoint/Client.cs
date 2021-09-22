@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using FileProtocol.Protocol;
 using StringProtocol;
+using ValidationsImplementations;
 using VaporServer;
 
 namespace VaporCliente.Endpoint
@@ -58,77 +59,23 @@ namespace VaporCliente.Endpoint
                         break;
                     case "obtener caratula":
                         
-                        var path = "C:/Vapor/yay.png";
-                        var headerToSendImg = new Header(HeaderConstants.Request, CommandConstants.SendImage, path.Length);
-                        
-                        communication.SendData(socket, headerToSendImg, path);//esto es para enviar el juego del que necesita la caratua
+                        GetCoverPage(socket);
 
-                        try
-                        {
-                            communication.ReceiveFile(socket); // esto recibe la imagen
-                            Console.WriteLine("Message received ");
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("explote");
-                        }
-                        
                         break;
-                    case "juegos":
+                    case "obtener juegos":
 
-                        var headerToSend = new Header(HeaderConstants.Request, CommandConstants.GetGames, 0);
-
-                        communication.SendData(socket, headerToSend, String.Empty);
-
-                        var headerLength = HeaderConstants.Request.Length + HeaderConstants.CommandLength +
-                                           HeaderConstants.DataLength;
-                        var buffer = new byte[headerLength];
-                        try
-                        {
-                            communication.ReceiveData(socket, headerLength, buffer);
-                            var header = new Header();
-                            header.DecodeData(buffer);
-
-                            //swtich
-
-                            var bufferData2 = new byte[header.IDataLength];
-                            communication.ReceiveData(socket, header.IDataLength, bufferData2);
-                            Console.WriteLine("Message received: " + Encoding.UTF8.GetString(bufferData2));
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("explote");
-                        }
+                        GetGames(socket);
 
                         break;
                     case "adquirir juego":
                         
-                        Console.WriteLine("Sugerencia: Imprimir listado de usuarios");
-                        Console.WriteLine("Ingrese un usuario");
-                        var userName = Console.ReadLine();
-                        Console.WriteLine("Sugerencia: Imprimir listado de juegos");
-                        Console.WriteLine("Ingrese un juego");
-                        var gameName = Console.ReadLine();
-                        var userAndGame = userName + "|" + gameName;
-                        
-                        communication.SendData(socket,new Header(HeaderConstants.Request,CommandConstants.BuyGame,userAndGame.Length),userAndGame);
-                        
-                        var newHeaderLength = HeaderConstants.Response.Length + HeaderConstants.CommandLength +
-                                           HeaderConstants.DataLength;
+                        BuyGame(socket);
 
-                        var newBuffer = new Byte[newHeaderLength];
-                        communication.ReceiveData(socket,newHeaderLength,newBuffer);
+                        break;
+                    case "publicar juego":
                         
-                        var newHeader = new Header();
-                        newHeader.DecodeData(newBuffer);
-                        
-                        var newBufferData = new byte[newHeader.IDataLength];
-                        communication.ReceiveData(socket,newHeader.IDataLength,newBufferData);
+                        PublicGame(socket);
 
-                        var message = Encoding.UTF8.GetString(newBufferData);
-                        
-                        Console.WriteLine(message);
-                        
                         break;
                         
                     default:
@@ -140,6 +87,107 @@ namespace VaporCliente.Endpoint
             Console.WriteLine("Exiting Application");
         }
 
+        private void PublicGame(Socket socket)
+        {
+            Console.WriteLine("Ingrese un titulo");
+            var title = GameValidation.ValidNotEmpty();
+
+            Console.WriteLine("Ingrese un genero de los siguientes:...");
+            var gender = GameValidation.ValidNotEmpty();
+
+            Console.WriteLine("Ingrese una calificacion del 1 al 5");
+            var score = GameValidation.ValidCalification();
+            
+            Console.WriteLine("Haga una breve descripcion del juego");
+            var sinopsis = GameValidation.ValidNotEmpty();
+
+            Console.WriteLine("Ingrese una caratula");
+            var coverPage = GameValidation.ValidNotEmpty();
+
+            var publicGame = title + "|" + gender + "|" + score + "|" + sinopsis + "|" + coverPage;
+
+            var header = new Header(HeaderConstants.Request, CommandConstants.PublicGame, publicGame.Length);
+
+            communication.SendData(socket, header, publicGame);
+            
+            //enviar el coverPage
+            
+            var response = GetResponse(socket);
+            
+            Console.WriteLine(response);
+            
+        }
+
+        private void BuyGame(Socket socket)
+        {
+            Console.WriteLine("Sugerencia: Imprimir listado de usuarios");
+            Console.WriteLine("Ingrese un usuario");
+            var userName = Console.ReadLine();
+            Console.WriteLine("Sugerencia: Imprimir listado de juegos");
+            Console.WriteLine("Ingrese un juego");
+            var gameName = Console.ReadLine();
+            var userAndGame = userName + "|" + gameName;
+
+            var header = new Header(HeaderConstants.Request, CommandConstants.BuyGame ,userAndGame.Length);
+            
+            communication.SendData(socket, header, userAndGame);
+            try
+            {
+                var response = GetResponse(socket);
+                Console.WriteLine(response);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("explote");
+            }
+        }
+        
+
+        private void GetGames(Socket socket)
+        {
+            var headerToSend = new Header(HeaderConstants.Request, CommandConstants.GetGames, 0);
+
+            communication.SendData(socket, headerToSend, String.Empty);
+
+            var headerLength = HeaderConstants.Request.Length + HeaderConstants.CommandLength +
+                               HeaderConstants.DataLength;
+            var buffer = new byte[headerLength];
+            try
+            {
+                communication.ReceiveData(socket, headerLength, buffer);
+                var header = new Header();
+                header.DecodeData(buffer);
+
+                //swtich
+
+                var bufferData2 = new byte[header.IDataLength];
+                communication.ReceiveData(socket, header.IDataLength, bufferData2);
+                Console.WriteLine("Message received: " + Encoding.UTF8.GetString(bufferData2));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("explote");
+            }
+        }
+
+        private void GetCoverPage(Socket socket)
+        {
+            var path = "C:/Vapor/yay.png";
+            var headerToSendImg = new Header(HeaderConstants.Request, CommandConstants.SendImage, path.Length);
+
+            communication.SendData(socket, headerToSendImg, path); //esto es para enviar el juego del que necesita la caratua
+
+            try
+            {
+                communication.ReceiveFile(socket); // esto recibe la imagen
+                Console.WriteLine("Message received ");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("explote");
+            }
+        }
+
         private static void ShowMenu()
         {
             Console.WriteLine("Bienvenido al Sistema Client");
@@ -147,6 +195,24 @@ namespace VaporCliente.Endpoint
             Console.WriteLine("juegos -> obtiene el listado de juegos en el sistema");
             Console.WriteLine("exit -> abandonar el programa");
             Console.WriteLine("Ingrese su opcion: ");
+        }
+        
+        private string GetResponse(Socket socket)
+        {
+            var newHeaderLength = HeaderConstants.Response.Length + HeaderConstants.CommandLength +
+                                  HeaderConstants.DataLength;
+
+            var newBuffer = new Byte[newHeaderLength];
+            communication.ReceiveData(socket, newHeaderLength, newBuffer);
+
+            var newHeader = new Header();
+            newHeader.DecodeData(newBuffer);
+
+            var newBufferData = new byte[newHeader.IDataLength];
+            communication.ReceiveData(socket, newHeader.IDataLength, newBufferData);
+
+            var message = Encoding.UTF8.GetString(newBufferData);
+            return message;
         }
     }
 }
