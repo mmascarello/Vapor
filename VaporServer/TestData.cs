@@ -17,7 +17,7 @@ namespace VaporServer
             Guid micaId = Guid.NewGuid();
             Guid maxiId = Guid.NewGuid();
 
-            gameDataBase.AddGames(new Game(){ Title = "Super Mario",Id = superMarioId}); 
+            gameDataBase.AddGames(new Game(){ Title = "Super Mario",Id = superMarioId, CoverPage = "Super Mario.png"}); 
             gameDataBase.AddGames(new Game(){ Title = "Bomberman",Id = bomermanId});
             gameDataBase.AddGames(new Game(){ Title = "Pokemon",Id = pokemonId});
             gameDataBase.AddGames(new Game(){ Title = "WarCraft",Id = warCraftId});

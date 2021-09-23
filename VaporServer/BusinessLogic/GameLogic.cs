@@ -31,9 +31,9 @@ namespace VaporServer.BusinessLogic
                 var sinopsis = gameToAdd[3];
                 var coverPage = gameToAdd[4];
                 var id = Guid.NewGuid();
-                var games = gameDb.GetGames();
+               
                 
-                ValidateGame(games, title);
+                gameDb.NotValidGame(title);
 
                 var receivedGame = new Game()
                     {Title = title, Gender = gender, Score = score, Sinopsis = sinopsis, CoverPage = coverPage, Id = id};
@@ -47,30 +47,11 @@ namespace VaporServer.BusinessLogic
 
         }
 
-        private void ValidateGame(List<Game> games, string title)
+        
+        public string GetCover(string game)
         {
-            var exists = games.Exists(g => g.Title.Equals(title));
-            if (exists)
-            {
-                throw new Exception();
-            }
-        }
-
-        /*private Guid ValidateId()
-        {
-            var games = gameDb.GetGames();
-
-            var invalidId = true;
-            var id = new Guid();
+            return gameDb.GetCover(game);
             
-            while (invalidId)
-            {
-                 id = Guid.NewGuid();
-
-                invalidId = games.Exists(g => g.Id == id);
-            }
-
-            return id;
-        }*/
+        }
     }
 }

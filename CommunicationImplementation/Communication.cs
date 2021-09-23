@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using Common.FileHandler;
@@ -101,7 +100,7 @@ namespace CommunicationImplementation
             }
         }
         
-        public void ReceiveFile(Socket ourSocket)
+        public void ReceiveFile(Socket ourSocket, string path)
         {
            
             FileStreamHandler fileStreamHandler = new FileStreamHandler();
@@ -133,7 +132,6 @@ namespace CommunicationImplementation
                     data = new byte[lastPartSize];
                     Console.WriteLine($"Will receive segment number {currentPart} with size {lastPartSize}");
                     ReceiveData(ourSocket,lastPartSize,data);
-                    //data = _networkStreamHandler.Read(lastPartSize);
                     offset += lastPartSize;
                 }
                 else
@@ -141,10 +139,9 @@ namespace CommunicationImplementation
                     data = new byte[Specification.MaxPacketSize];
                     Console.WriteLine($"Will receive segment number {currentPart} with size {Specification.MaxPacketSize}");
                     ReceiveData(ourSocket,Specification.MaxPacketSize,data);
-                    //data = _networkStreamHandler.Read(Specification.MaxPacketSize);
                     offset += Specification.MaxPacketSize;
                 }
-                fileStreamHandler.Write(fileName, data);
+                fileStreamHandler.Write((path + fileName), data);
                 currentPart++;
             }
         }

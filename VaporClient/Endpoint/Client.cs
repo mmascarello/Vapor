@@ -19,11 +19,14 @@ namespace VaporCliente.Endpoint
         private int clientPort;
         private  string serverIp;
         private int serverPort;
+        private string filesPathRecived;
+        private string filesPathToSend;
 
         public Client(ICommunication communication, ISettingsManager manager)
         {
             this.communication = communication;
             this.manager = manager;
+           
         }
 
         public void Start()
@@ -32,7 +35,9 @@ namespace VaporCliente.Endpoint
             clientPort = int.Parse(manager.ReadSetting((ClientConfig.ClientPortConfigKey)));
             serverIp = manager.ReadSetting((ClientConfig.ServerIpConfigKey));
             serverPort = int.Parse(manager.ReadSetting((ClientConfig.ServerPortConfigKey)));
-
+            this.filesPathRecived = manager.ReadSetting(ClientConfig.FilePathForRecive);
+            this.filesPathToSend = manager.ReadSetting(ClientConfig.FilePathToSend);
+            
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.Bind(new IPEndPoint(IPAddress.Parse(clientIpAddress), clientPort));
             socket.Connect(serverIp, serverPort);
@@ -59,7 +64,7 @@ namespace VaporCliente.Endpoint
                         break;
                     case "obtener caratula":
                         
-                        GetCoverPage(socket);
+                        GetCoverPage(socket,String.Empty);
 
                         break;
                     case "obtener juegos":
@@ -109,7 +114,10 @@ namespace VaporCliente.Endpoint
             var header = new Header(HeaderConstants.Request, CommandConstants.PublicGame, publicGame.Length);
 
             communication.SendData(socket, header, publicGame);
+
+            var fileToSend = filesPathToSend + coverPage;
             
+            communication.SendFile(socket,fileToSend);
             //enviar el coverPage
             
             var response = GetResponse(socket);
@@ -170,17 +178,22 @@ namespace VaporCliente.Endpoint
             }
         }
 
-        private void GetCoverPage(Socket socket)
+        private void GetCoverPage(Socket socket, string gameName)
         {
-            var path = "C:/Vapor/yay.png";
-            var headerToSendImg = new Header(HeaderConstants.Request, CommandConstants.SendImage, path.Length);
+            if (String.IsNullOrEmpty(gameName))
+            {
+                Console.WriteLine("Ingrese el nombre del juego: ");
+                gameName = GameValidation.ValidNotEmpty();
+            }; 
+            
+            var headerToSendImg = new Header(HeaderConstants.Request, CommandConstants.SendImage, gameName.Length);
 
-            communication.SendData(socket, headerToSendImg, path); //esto es para enviar el juego del que necesita la caratua
+            communication.SendData(socket, headerToSendImg, gameName); //esto es para enviar el juego del que necesita la caratua
 
             try
             {
-                communication.ReceiveFile(socket); // esto recibe la imagen
-                Console.WriteLine("Message received ");
+                communication.ReceiveFile(socket,filesPathRecived); // esto recibe la imagen
+                Console.WriteLine("Image received ");
             }
             catch (Exception e)
             {

@@ -9,6 +9,6 @@ namespace CommunicationInterface
         void ReceiveData(Socket clientSocket, int length, byte[] buffer);
         void SendData(Socket ourSocket, Header header, string data);
         void SendFile(Socket ourSocket, string path);
-        void ReceiveFile(Socket ourSocket);
+        void ReceiveFile(Socket ourSocket, string path);
     }
 }
