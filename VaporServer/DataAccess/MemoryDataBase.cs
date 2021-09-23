@@ -7,18 +7,17 @@ namespace VaporServer.DataAccess
     {
         private readonly List<User> users = new List<User>();
         private readonly List<Game> games = new List<Game>();
+        private readonly List<Review> reviews = new List<Review>();
+
         public readonly UserDataBase UserDataBase;
         public readonly GameDataBase GameDataBase;
+        public readonly ReviewDataBase ReviewDataBase;
 
         public MemoryDataBase()
         {
             this.UserDataBase = new UserDataBase(users);
             this.GameDataBase = new GameDataBase(games);
+            this.ReviewDataBase = new ReviewDataBase(reviews);
         }
-     
-
-      
-
-       
     }
 }

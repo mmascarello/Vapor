@@ -29,7 +29,7 @@ namespace VaporServer.Factory
 
         public void Start()
         {
-            TestData.Load(dataBase.GameDataBase, dataBase.UserDataBase);
+            TestData.Load(dataBase.GameDataBase, dataBase.UserDataBase, dataBase.ReviewDataBase);
             this.server.Start();
         }
 

@@ -4,7 +4,6 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using FileProtocol.Protocol;
 using StringProtocol;
 using ValidationsImplementations;
 using VaporServer;
@@ -57,27 +56,27 @@ namespace VaporCliente.Endpoint
                         socket.Close();
                         connected = false;
                         break;
+                    
                     case "obtener caratula":
-                        
                         GetCoverPage(socket);
-
                         break;
+                    
                     case "obtener juegos":
-
                         GetGames(socket);
-
                         break;
+                    
                     case "adquirir juego":
-                        
                         BuyGame(socket);
-
                         break;
+                    
                     case "publicar juego":
-                        
                         PublicGame(socket);
-
                         break;
                         
+                    case "ver detalle juego":
+                        GetGameDetails(socket);
+                        break;
+                    
                     default:
                         Console.WriteLine("Opcion invalida");
                         break;
@@ -87,12 +86,44 @@ namespace VaporCliente.Endpoint
             Console.WriteLine("Exiting Application");
         }
 
+        private void GetGameDetails(Socket socket)
+        {
+            Console.WriteLine("La lista de Juegos disponibles es:");
+            GetGames(socket);
+
+            Console.WriteLine("Ingrese el nombre de un Juego:");
+            var gameName = GameValidation.ValidNotEmpty();
+            
+            var header = new Header(HeaderConstants.Request, CommandConstants.GameDetail, gameName.Length);
+            
+            communication.SendData(socket, header, gameName);
+Console.WriteLine("Hola");
+            try
+            {
+                var response = GetResponse(socket);
+                var getInformation = response.Split('|');
+                var ratingAverage = getInformation[0];
+                var gameReviews = getInformation[1];
+                var gameInfo = getInformation[2];
+                
+                Console.Write(ratingAverage);
+                Console.Write(gameReviews);
+                Console.Write(gameInfo);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("explote");
+            }
+            
+            
+        }
+        
         private void PublicGame(Socket socket)
         {
             Console.WriteLine("Ingrese un titulo");
             var title = GameValidation.ValidNotEmpty();
 
-            Console.WriteLine("Ingrese un genero de los siguientes:...");
+            Console.WriteLine("Ingrese un genero de los siguientes:");
             var gender = GameValidation.ValidNotEmpty();
 
             Console.WriteLine("Ingrese una calificacion del 1 al 5");

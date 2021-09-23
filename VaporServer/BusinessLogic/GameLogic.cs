@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 using Domain;
 using VaporServer.DataAccess;
@@ -9,10 +10,11 @@ namespace VaporServer.BusinessLogic
     public class GameLogic
     {
         private readonly GameDataBase gameDb;
-
-        public GameLogic(GameDataBase gameDataBase)
+        private readonly ReviewLogic reviewLogic;
+        public GameLogic(GameDataBase gameDataBase, ReviewLogic reviewLogic)
         {
             this.gameDb = gameDataBase;
+            this.reviewLogic = reviewLogic;
         }
 
         public List<Game> GetGames()
@@ -56,6 +58,56 @@ namespace VaporServer.BusinessLogic
             }
         }
 
+        public List<string> GetReviews(Byte[] gameTitle)
+        {
+            try
+            {
+                var game = GetGame(gameTitle);
+
+                //obtener lista de reviews para ese juego
+                var reviewsInGame = reviewLogic.GetReviewsInGame(game);
+                return reviewsInGame;
+            }
+            catch (Exception e)
+            {
+                throw new Exception("El juego no existe");
+            }
+        }
+
+        public string GetRatingAverage(Byte[] gameTitle)
+        {
+            var game = GetGame(gameTitle);
+            
+            var average = reviewLogic.RatingAverage(game);
+            var avr = $"{average}";
+            return avr ;
+        }
+        
+        private Game GetGame(byte[] gameTitle)
+        {
+            var gameName = Encoding.UTF8.GetString(gameTitle);
+
+            var games = this.gameDb.GetGames();
+
+            var game = games.Find(g => g.Title.Equals(gameTitle));
+            return game;
+        }
+
+        public List<string> GetData(Byte[] gameTitle)
+        {
+            //detalle de los datos del juego
+            var game = GetGame(gameTitle);
+            
+            var data = new List<string>();
+            
+            data.Add(game.Gender);
+            data.Add(game.Sinopsis);
+            //data.Add(game.CoverPage);
+            
+            return data;
+        }
+        
+        
         /*private Guid ValidateId()
         {
             var games = gameDb.GetGames();

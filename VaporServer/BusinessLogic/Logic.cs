@@ -4,13 +4,15 @@ namespace VaporServer.BusinessLogic
 {
     public class Logic
     {
-        public readonly GameLogic gameLogic;
-        public readonly UserLogic userLogic;
+        public readonly GameLogic GameLogic;
+        public readonly UserLogic UserLogic;
+        public readonly ReviewLogic ReviewLogic;
 
         public Logic(MemoryDataBase memoryDataBase)
         {
-            this.gameLogic = new GameLogic(memoryDataBase.GameDataBase);
-            this.userLogic = new UserLogic(memoryDataBase.UserDataBase,gameLogic);
+            this.ReviewLogic = new ReviewLogic(memoryDataBase.ReviewDataBase);
+            this.GameLogic = new GameLogic(memoryDataBase.GameDataBase,ReviewLogic);
+            this.UserLogic = new UserLogic(memoryDataBase.UserDataBase,GameLogic);
         }
     }
 }

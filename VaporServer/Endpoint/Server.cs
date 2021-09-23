@@ -14,7 +14,7 @@ namespace VaporServer.Endpoint
     public class Server
     {
         static bool exit = false;
-        private static readonly List<Socket> clients = new List<Socket>();
+        private static readonly List<Socket> clients = new List<Socket>();//sacar el static.
         private readonly Logic businessLogic;
         private readonly ISettingsManager settingsManager;
         private readonly ICommunication communication;
@@ -27,7 +27,7 @@ namespace VaporServer.Endpoint
             this.settingsManager = settingsManager;
             this.businessLogic = businessLogic;
             this.communication = communication;
-            this.gameLogic = this.businessLogic.gameLogic;
+            this.gameLogic = this.businessLogic.GameLogic;
         }
 
         public void Start()
@@ -138,10 +138,13 @@ namespace VaporServer.Endpoint
                         case CommandConstants.SendImage:
                             SendImage(clientSocket, header);
                             break;
+                        
                         case CommandConstants.PublicGame:
-
                             ProcessGame(clientSocket, header);
-                            
+                            break;
+                        
+                        case CommandConstants.GameDetail:
+                            GetGameDetail(clientSocket, header);
                             break;
                     }
                 }
@@ -152,6 +155,32 @@ namespace VaporServer.Endpoint
             }
         }
 
+        private void GetGameDetail(Socket clientSocket, Header header)
+        {
+            
+            var receiveGameNameBuffer = new byte[header.IDataLength];
+
+            communication.ReceiveData(clientSocket, header.IDataLength, receiveGameNameBuffer);
+
+            try
+            {
+
+                var ratingAverage = this.gameLogic.GetRatingAverage(receiveGameNameBuffer);
+                var gameReviews = this.gameLogic.GetReviews(receiveGameNameBuffer);
+                var gameInfo = this.gameLogic.GetData(receiveGameNameBuffer);//aca va la imagen de portada del juego (ver como manejar el path).
+
+                var response = ratingAverage + "|" + gameReviews + "|" + gameInfo;
+                
+                var headerResponse = new Header(HeaderConstants.Response, CommandConstants.GameDetail, response.Length);
+                communication.SendData(clientSocket,headerResponse,response);
+
+            }
+            catch (Exception e)
+            {
+                ErrorResponse(clientSocket,e,CommandConstants.GameDetail);
+            }
+        }
+        
         private void ProcessGame(Socket clientSocket, Header header)
         {
             var gameBuffer = new byte[header.IDataLength];
@@ -202,7 +231,7 @@ namespace VaporServer.Endpoint
             Header headerResponse;
             try
             {
-                businessLogic.userLogic.BuyGame(user, game);
+                businessLogic.UserLogic.BuyGame(user, game);
                     headerResponse = new Header(HeaderConstants.Response, CommandConstants.BuyGame,
                     ResponseConstants.Ok.Length);
                 
@@ -218,7 +247,7 @@ namespace VaporServer.Endpoint
 
         private void GetGames(Socket clientSocket)
         {
-            var gameList = businessLogic.gameLogic.GetGames();
+            var gameList = businessLogic.GameLogic.GetGames();
             String games = String.Empty;
             gameList.ForEach(g => games += g.Title + "-");
 
