@@ -15,10 +15,10 @@ namespace VaporCliente.Endpoint
     {
         private readonly ICommunication communication;
         private readonly ISettingsManager manager;
-        private static string clientIpAddress;
-        private static int clientPort;
-        private static string serverIp;
-        private static int serverPort;
+        private string clientIpAddress;
+        private int clientPort;
+        private  string serverIp;
+        private int serverPort;
 
         public Client(ICommunication communication, ISettingsManager manager)
         {
@@ -188,7 +188,7 @@ namespace VaporCliente.Endpoint
             }
         }
 
-        private static void ShowMenu()
+        private void ShowMenu()
         {
             Console.WriteLine("Bienvenido al Sistema Client");
             Console.WriteLine("Opciones validas: ");

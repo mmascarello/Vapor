@@ -6,20 +6,30 @@ namespace VaporServer.DataAccess
     public class GameDataBase
     {
         private List<Game> games;
+        private object locker = new object();
         
         public GameDataBase(List<Game> games)
         {
-            this.games = games;
+            lock (locker)
+            {
+                this.games = games;
+            }
         }
         
         public void AddGames(Game game)
         {
-            this.games.Add(game);
+            lock (locker)
+            {
+                this.games.Add(game);
+            }
         }
 
         public List<Game> GetGames()
         {
-            return games;
+            lock (locker)
+            {
+                return games;
+            }
         }
     }
 }

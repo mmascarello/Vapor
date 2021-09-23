@@ -13,13 +13,14 @@ namespace VaporServer.Endpoint
 {
     public class Server
     {
-        static bool exit = false;
-        private static readonly List<Socket> clients = new List<Socket>();
+        private bool exit;
+        private readonly List<Socket> clients = new List<Socket>();
         private readonly Logic businessLogic;
         private readonly ISettingsManager settingsManager;
         private readonly ICommunication communication;
-        private static string serverIpAddress; 
-        private static int serverPort;
+        private string serverIpAddress; 
+        private int serverPort;
+        private int backLog;
         private readonly GameLogic gameLogic;
 
         public Server(Logic businessLogic,ISettingsManager settingsManager,ICommunication communication)
@@ -28,20 +29,24 @@ namespace VaporServer.Endpoint
             this.businessLogic = businessLogic;
             this.communication = communication;
             this.gameLogic = this.businessLogic.gameLogic;
+            this.serverIpAddress = this.settingsManager.ReadSetting(ServerConfig.ServerIpConfigKey);
+            this.serverPort = int.Parse(this.settingsManager.ReadSetting(ServerConfig.SeverPortConfigKey));
+            this.backLog = int.Parse(this.settingsManager.ReadSetting(ServerConfig.MaxConnectionConfigKey));
         }
 
         public void Start()
         {
-            serverIpAddress = settingsManager.ReadSetting(ServerConfig.ServerIpConfigKey);
-            serverPort = int.Parse(settingsManager.ReadSetting(ServerConfig.SeverPortConfigKey));
-            var backlog = int.Parse(settingsManager.ReadSetting(ServerConfig.MaxConnectionConfigKey));
             
-            Console.WriteLine($"ip: {serverIpAddress} - puerto {serverPort} - backlog {backlog}");
+            //serverIpAddress = settingsManager.ReadSetting(ServerConfig.ServerIpConfigKey);
+            //serverPort = int.Parse(settingsManager.ReadSetting(ServerConfig.SeverPortConfigKey));
+            //var backlog = int.Parse(settingsManager.ReadSetting(ServerConfig.MaxConnectionConfigKey));
+            
+            Console.WriteLine($"ip: {serverIpAddress} - puerto {serverPort} - backlog {backLog}");
             
             var socketServer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             
             socketServer.Bind(new IPEndPoint(IPAddress.Parse(serverIpAddress),serverPort));
-            socketServer.Listen(backlog);
+            socketServer.Listen(backLog);
            
             var threadServer = new Thread(()=> ListenForConnections(socketServer));
             threadServer.Start();
@@ -51,7 +56,7 @@ namespace VaporServer.Endpoint
             HandleServer(socketServer);
         }
 
-        private static void HandleServer(Socket socketServer)
+        private void HandleServer(Socket socketServer)
         {
             while (!exit)
             {
