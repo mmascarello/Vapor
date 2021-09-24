@@ -49,6 +49,7 @@ namespace VaporCliente.Endpoint
             while (connected)
             {
                 var opcion = Console.ReadLine();
+                
                 switch (opcion)
                 {
                     case "exit":
@@ -97,25 +98,34 @@ namespace VaporCliente.Endpoint
             var header = new Header(HeaderConstants.Request, CommandConstants.GameDetail, gameName.Length);
             
             communication.SendData(socket, header, gameName);
-Console.WriteLine("Hola");
+
             try
             {
                 var response = GetResponse(socket);
+
+                //Console.WriteLine(response);
+
                 var getInformation = response.Split('|');
                 var ratingAverage = getInformation[0];
                 var gameReviews = getInformation[1];
-                var gameInfo = getInformation[2];
+                var gameGender = getInformation[2];
+                var gameSinopsis = getInformation[3];
+                var gameESRB = getInformation[4];
+
+                //ToDo: Obtener Imagen
+
+                Console.Write("Mi rating es: "+ratingAverage+"\n");
+                Console.Write("Mis reviews: "+gameReviews+"\n");
+                Console.Write("Soy un juego de: "+gameGender+"\n");
+                Console.Write("Sinopsis: "+gameSinopsis+"\n");
+                Console.Write("Esrb edad permitida : "+gameESRB);
+
                 
-                Console.Write(ratingAverage);
-                Console.Write(gameReviews);
-                Console.Write(gameInfo);
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                Console.WriteLine("explote");
+                Console.WriteLine(e.Message);
             }
-            
-            
         }
         
         private void PublicGame(Socket socket)
@@ -126,8 +136,8 @@ Console.WriteLine("Hola");
             Console.WriteLine("Ingrese un genero de los siguientes:");
             var gender = GameValidation.ValidNotEmpty();
 
-            Console.WriteLine("Ingrese una calificacion del 1 al 5");
-            var score = GameValidation.ValidCalification();
+            Console.WriteLine("Ingrese una calificacion del 0 al 5");
+            var esbr = GameValidation.ValidCalification();
             
             Console.WriteLine("Haga una breve descripcion del juego");
             var sinopsis = GameValidation.ValidNotEmpty();
@@ -135,7 +145,7 @@ Console.WriteLine("Hola");
             Console.WriteLine("Ingrese una caratula");
             var coverPage = GameValidation.ValidNotEmpty();
 
-            var publicGame = title + "|" + gender + "|" + score + "|" + sinopsis + "|" + coverPage;
+            var publicGame = title + "|" + gender + "|" + esbr + "|" + sinopsis + "|" + coverPage;
 
             var header = new Header(HeaderConstants.Request, CommandConstants.PublicGame, publicGame.Length);
 
@@ -167,7 +177,7 @@ Console.WriteLine("Hola");
                 var response = GetResponse(socket);
                 Console.WriteLine(response);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Console.WriteLine("explote");
             }
@@ -195,7 +205,7 @@ Console.WriteLine("Hola");
                 communication.ReceiveData(socket, header.IDataLength, bufferData2);
                 Console.WriteLine("Message received: " + Encoding.UTF8.GetString(bufferData2));
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Console.WriteLine("explote");
             }
@@ -213,7 +223,7 @@ Console.WriteLine("Hola");
                 communication.ReceiveFile(socket); // esto recibe la imagen
                 Console.WriteLine("Message received ");
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Console.WriteLine("explote");
             }

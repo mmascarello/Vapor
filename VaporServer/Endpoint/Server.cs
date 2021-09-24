@@ -164,14 +164,23 @@ namespace VaporServer.Endpoint
 
             try
             {
-
+                
                 var ratingAverage = this.gameLogic.GetRatingAverage(receiveGameNameBuffer);
+                
+                //Console.WriteLine($"Obtuve el average {ratingAverage}");
+                
                 var gameReviews = this.gameLogic.GetReviews(receiveGameNameBuffer);
+                
                 var gameInfo = this.gameLogic.GetData(receiveGameNameBuffer);//aca va la imagen de portada del juego (ver como manejar el path).
 
                 var response = ratingAverage + "|" + gameReviews + "|" + gameInfo;
+
                 
+               
+                Console.WriteLine($"{response}");
+
                 var headerResponse = new Header(HeaderConstants.Response, CommandConstants.GameDetail, response.Length);
+                
                 communication.SendData(clientSocket,headerResponse,response);
 
             }
@@ -248,7 +257,7 @@ namespace VaporServer.Endpoint
         private void GetGames(Socket clientSocket)
         {
             var gameList = businessLogic.GameLogic.GetGames();
-            String games = String.Empty;
+            var games = String.Empty;
             gameList.ForEach(g => games += g.Title + "-");
 
             var headerToSend = new Header(HeaderConstants.Response, CommandConstants.GetGames,

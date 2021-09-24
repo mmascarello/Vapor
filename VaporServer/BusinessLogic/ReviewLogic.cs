@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Domain;
+﻿using Domain;
 using VaporServer.DataAccess;
 
 namespace VaporServer.BusinessLogic
@@ -14,25 +12,24 @@ namespace VaporServer.BusinessLogic
             this.reviewDataBase = reviewDataBase;
         }
 
-        public List<string> GetReviewsInGame(Game game)
+        public string GetReviewsInGame(Game game)
         {
             var reviews = reviewDataBase.GetReviews();
             var reviewsIdInGame = game.Reviews;
-            var reviewsInGame = new List<string>();
+            var reviewsInGame ="";
             
             //ToDo: Validar que hay descripciones en el sistema. 
             
-                foreach (var r in reviews)
-                {
+            foreach (var r in reviews)
+            {
                     foreach (var rId in reviewsIdInGame)
                     {
                         if (r.Id == rId)
                         {
-                            reviewsInGame.Add(r.Description);
+                            reviewsInGame += r.Description + ",";
                         }
-
                     }
-                }
+            }
          
             return reviewsInGame;
         }
@@ -41,7 +38,8 @@ namespace VaporServer.BusinessLogic
         {
             var reviews = reviewDataBase.GetReviews();
             var reviewsIdInGame = game.Reviews;
-            var avr = 0;
+            
+            
             var cant = 0;
             var sumRating = 0;
             
@@ -58,7 +56,8 @@ namespace VaporServer.BusinessLogic
 
                 }
             }
-
+            
+            var avr = 0;
             avr = sumRating / cant;
             
             return avr;

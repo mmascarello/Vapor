@@ -6,13 +6,13 @@ namespace Domain
 {
     public class Game
     {
+        public Guid Id;
         public string Title;
         public List<Guid> Reviews;
-        public int Score;
         public string Gender;
         public string Sinopsis;
         public string CoverPage;
-        public Guid Id;
+        public ESRB ageAllowed;
 
         public Game()
         {

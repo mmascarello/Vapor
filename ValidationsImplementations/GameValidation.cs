@@ -29,7 +29,8 @@ namespace ValidationsImplementations
         {
             var isOk = false;
             var input = "";
-            var message = "El campo debe ser un numero entre 1 y 5 entero";
+            var message ="Ingrese un numero entre 0 y 5 para darle permisos a: \n" +
+                              "todos\n" + "mayores a 10\n" + "adolecentes\n" + "+ 17\n" + "+ 18\n " + "Pending";;
             
             while(!isOk)
             {
@@ -37,7 +38,7 @@ namespace ValidationsImplementations
                 try
                 {
                     var num = Convert.ToInt32(input);
-                    if (num <1 || num > 5 )
+                    if (num < 0 || num > 5)
                     {
                         Console.WriteLine(message);
                     }
@@ -45,9 +46,8 @@ namespace ValidationsImplementations
                     {
                         isOk = true;
                     }
-
                 }
-                catch (Exception e)
+                catch(Exception)
                 {
                     Console.WriteLine(message);
                 }

@@ -25,18 +25,18 @@ namespace VaporServer
             
             reviewDataBase.AddReview(new Review()
             {
-                Id = reviewMica, Description = "Este juego es muy bueno", Rating = 4, UserId = micaId
+                Id = reviewMica, Description = "Este juego es muy bueno ", Rating = 4, UserId = micaId
             });
             
             reviewDataBase.AddReview(new Review()
             {
-                Id = reviewMaxi, Description = "Este juego es muy malo", Rating = 2, UserId = maxiId
+                Id = reviewMaxi, Description = "Este juego es muy malo ", Rating = 2, UserId = maxiId
             });
             
             
             gameDataBase.AddGames(new Game(){ Title = "Super Mario",Id = superMarioId}); 
             
-            gameDataBase.AddGames(new Game(){ Title = "Bomberman",Id = bomermanId, Reviews = new List<Guid>()
+            gameDataBase.AddGames(new Game(){ Title = "Bomberman",ageAllowed = ESRB.Teen ,Id = bomermanId, Gender = "Accion", Sinopsis = "Este es un juego para personas habilidosas", Reviews = new List<Guid>()
             {
                 reviewMaxi,reviewMica
             }});
