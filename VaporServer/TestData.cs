@@ -17,17 +17,20 @@ namespace VaporServer
             Guid micaId = Guid.NewGuid();
             Guid maxiId = Guid.NewGuid();
 
-            gameDataBase.AddGames(new Game(){ Title = "Super Mario",Id = superMarioId, CoverPage = "Super Mario.png"}); 
-            gameDataBase.AddGames(new Game(){ Title = "Bomberman",Id = bomermanId});
-            gameDataBase.AddGames(new Game(){ Title = "Pokemon",Id = pokemonId});
-            gameDataBase.AddGames(new Game(){ Title = "WarCraft",Id = warCraftId});
+            gameDataBase.AddGames(new Game(){ Title = "super mario",Id = superMarioId, Gender = "plataforma", 
+                Sinopsis = "juego mitico de plataforma", CoverPage = "super mario.png"}); 
             
-            userDataBase.AddUser(new User(){UserLogin = "Mica", Id = micaId, MyOwnedGames= new List<Guid>()
+            
+            gameDataBase.AddGames(new Game(){ Title = "bomberman",Id = bomermanId});
+            gameDataBase.AddGames(new Game(){ Title = "pokemon",Id = pokemonId});
+            gameDataBase.AddGames(new Game(){ Title = "warcraft",Id = warCraftId});
+            
+            userDataBase.AddUser(new User(){UserLogin = "mica", Id = micaId, MyOwnedGames= new List<Guid>()
             {
                 superMarioId,bomermanId
             }});
             
-            userDataBase.AddUser(new User(){UserLogin = "Maxi", Id = maxiId, MyOwnedGames= new List<Guid>()
+            userDataBase.AddUser(new User(){UserLogin = "maxi", Id = maxiId, MyOwnedGames= new List<Guid>()
             {
                 pokemonId,warCraftId
             }});

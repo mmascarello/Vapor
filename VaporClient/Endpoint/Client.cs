@@ -82,6 +82,11 @@ namespace VaporCliente.Endpoint
                         PublicGame(socket);
 
                         break;
+                    case "modificar juego":
+                        
+                        ModifyGame(socket);
+
+                        break;
                         
                     default:
                         Console.WriteLine("Opcion invalida");
@@ -92,8 +97,50 @@ namespace VaporCliente.Endpoint
             Console.WriteLine("Exiting Application");
         }
 
+        private void ModifyGame(Socket socket)
+        {
+            Console.WriteLine("Ingrese el título del juego a modificar");
+            var gameToModify = GameValidation.ValidNotEmpty();
+            
+            Console.WriteLine("Si no desea modificar la información del campo, dejelo vacio y presione enter ");
+            
+            Console.WriteLine("Ingrese un título");
+            var title = Console.ReadLine();
+
+            Console.WriteLine("Ingrese un genero:");
+            var gender = Console.ReadLine();
+
+            Console.WriteLine("Ingrese una calificación del 1 al 5");
+            var score = GameValidation.ModifyCalification();
+            
+            Console.WriteLine("Haga una breve descripción del juego");
+            var sinopsis = Console.ReadLine();;
+
+            Console.WriteLine("Ingrese una carátula");
+            var coverPage = Console.ReadLine();;
+            
+            var publicGame = gameToModify +  "|" + title + "|" + gender + "|" + score + "|" + sinopsis + "|" + coverPage;
+            
+            var header = new Header(HeaderConstants.Request, CommandConstants.ModifyGame, publicGame.Length);
+
+            communication.SendData(socket, header, publicGame);
+
+            if (!string.IsNullOrEmpty(coverPage))
+            {
+                var fileToSend = filesPathToSend + coverPage;
+
+                communication.SendFile(socket, fileToSend);
+            }
+            
+            var response = GetResponse(socket);
+            
+            Console.WriteLine(response);
+        }
+
         private void PublicGame(Socket socket)
         {
+            Console.WriteLine("Todos los campos son obligatorios");
+            
             Console.WriteLine("Ingrese un titulo");
             var title = GameValidation.ValidNotEmpty();
 
@@ -128,12 +175,11 @@ namespace VaporCliente.Endpoint
 
         private void BuyGame(Socket socket)
         {
-            Console.WriteLine("Sugerencia: Imprimir listado de usuarios");
             Console.WriteLine("Ingrese un usuario");
-            var userName = Console.ReadLine();
-            Console.WriteLine("Sugerencia: Imprimir listado de juegos");
+            var userName = GameValidation.ValidNotEmpty();
+            
             Console.WriteLine("Ingrese un juego");
-            var gameName = Console.ReadLine();
+            var gameName = GameValidation.ValidNotEmpty();
             var userAndGame = userName + "|" + gameName;
 
             var header = new Header(HeaderConstants.Request, CommandConstants.BuyGame ,userAndGame.Length);

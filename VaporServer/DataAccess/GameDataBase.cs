@@ -11,10 +11,9 @@ namespace VaporServer.DataAccess
         
         public GameDataBase(List<Game> games)
         {
-            lock (locker)
-            {
-                this.games = games;
-            }
+            
+            this.games = games;
+            
         }
         
         public void AddGames(Game game)
@@ -32,19 +31,51 @@ namespace VaporServer.DataAccess
                 return games;
             }
         }
+
+        public Game GetGame(string title)
+        {
+            var game=new Game();
+            
+            lock (locker)
+            {
+                game = games.Find(g => g.Title.Equals(title));
+            }
+
+            return game;
+        }
         
         public void NotValidGame(string title)
         {
-            lock (locker)
+            var exists = Exists(title);
+            if (exists)
             {
-                var exists = games.Exists(g => g.Title.Equals(title));
-                if (exists)
-                {
-                    throw new Exception();
-                }
+                throw new Exception();
             }
         }
 
+        public bool Exists(string title)
+        {
+            var exists = false;
+            lock (locker)
+            {
+                 exists = games.Exists(g => g.Title.Equals(title));
+               
+            }
+
+            return exists;
+        }
+
+
+        public void ModifyGame(Game gameModified)
+        {
+            lock (locker)
+            {
+                var index = games.FindIndex(g => g.Id == gameModified.Id);
+                games[index] = gameModified;
+
+            }
+        }
+        
         public string GetCover(string game)
         {
             try

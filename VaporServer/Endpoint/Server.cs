@@ -141,12 +141,44 @@ namespace VaporServer.Endpoint
                             PublicGame(clientSocket, header);
                             
                             break;
+                        case CommandConstants.ModifyGame:
+
+                            ModifyGame(clientSocket, header);
+                            
+                            break;
                     }
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine($"Server is closing, will not process more data -> Message {e.Message}..");    
                 }
+            }
+        }
+
+        private void ModifyGame(Socket clientSocket, Header header)
+        {
+            var gameBuffer = new byte[header.IDataLength];
+
+            communication.ReceiveData(clientSocket, header.IDataLength, gameBuffer);
+
+            try
+            {
+                this.gameLogic.ModifyGame(gameBuffer);
+                
+                var cover = Encoding.UTF8.GetString(gameBuffer).Split('|')[5];
+                
+                if (!string.IsNullOrEmpty(cover))
+                {
+                    communication.ReceiveFile(clientSocket,serverFilesPath);
+                }
+                
+                var headerResponse = new Header(HeaderConstants.Response, CommandConstants.ModifyGame, ResponseConstants.Ok.Length);
+                communication.SendData(clientSocket,headerResponse,ResponseConstants.Ok);
+                
+            }
+            catch(Exception e)
+            {
+                ErrorResponse(clientSocket,e,CommandConstants.ModifyGame);
             }
         }
 

@@ -22,7 +22,7 @@ namespace ValidationsImplementations
                 }
             }
 
-            return input;
+            return input.ToLower();
         }
         
         public static string ValidCalification()
@@ -54,7 +54,46 @@ namespace ValidationsImplementations
                 
             }
 
-            return input;
+            return input.ToLower();
+        }
+        
+        public static string ModifyCalification()
+        {
+            var isOk = false;
+            var input = "";
+            var message = "Si ingresa un número debe ser entero entre 1 y 5 ";
+            
+            while(!isOk)
+            {
+                input = Console.ReadLine();
+                try
+                {
+                    if (!String.IsNullOrEmpty(input))
+                    {
+                        var num = Convert.ToInt32(input);
+                        if (num < 1 || num > 5)
+                        {
+                            Console.WriteLine(message);
+                        }
+                        else
+                        {
+                            isOk = true;
+                        }
+                    }
+                    else
+                    {
+                        isOk = true;
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(message);
+                }
+                
+            }
+
+            return input.ToLower();
         }
         
         

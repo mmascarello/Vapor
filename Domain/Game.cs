@@ -8,7 +8,7 @@ namespace Domain
     {
         public string Title;
         public List<Guid> Reviews;
-        public int Score;
+        public int Esrb;
         public string Gender;
         public string Sinopsis;
         public string CoverPage;
@@ -18,5 +18,6 @@ namespace Domain
         {
             Reviews = new List<Guid>();
         }
+        
     }
 }
