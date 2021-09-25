@@ -1,4 +1,5 @@
-﻿using Domain;
+﻿using System;
+using Domain;
 using VaporServer.DataAccess;
 
 namespace VaporServer.BusinessLogic
@@ -43,7 +44,7 @@ namespace VaporServer.BusinessLogic
             var cant = 0;
             var sumRating = 0;
             
-            
+            Console.WriteLine("antes de recorrer las listas");
             foreach (var r in reviews)
             {
                 foreach (var rId in reviewsIdInGame)
@@ -56,9 +57,13 @@ namespace VaporServer.BusinessLogic
 
                 }
             }
+            Console.WriteLine("antes de recorrer las listas");
             
             var avr = 0;
-            avr = sumRating / cant;
+            if (cant > 0)
+            {
+                avr = sumRating / cant;
+            }
             
             return avr;
         }

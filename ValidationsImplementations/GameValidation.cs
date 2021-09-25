@@ -22,7 +22,7 @@ namespace ValidationsImplementations
                 }
             }
 
-            return input;
+            return input.ToLower();
         }
         
         public static string ValidCalification()
@@ -30,7 +30,7 @@ namespace ValidationsImplementations
             var isOk = false;
             var input = "";
             var message ="Ingrese un numero entre 0 y 5 para darle permisos a: \n" +
-                              "todos\n" + "mayores a 10\n" + "adolecentes\n" + "+ 17\n" + "+ 18\n " + "Pending";;
+                              "todos\n" + "mayores a 10\n" + "adolecentes\n" + "+ 17\n" + "+ 18\n " + "Pending";
             
             while(!isOk)
             {
@@ -47,14 +47,54 @@ namespace ValidationsImplementations
                         isOk = true;
                     }
                 }
-                catch(Exception)
+                catch (Exception e)
                 {
                     Console.WriteLine(message);
                 }
                 
             }
 
-            return input;
+            return input.ToLower();
+        }
+        
+        public static string ModifyCalification()
+        {
+            var isOk = false;
+            var input = "";
+            var message ="Ingrese un numero entre 0 y 5 para darle permisos a: \n" +
+                         "todos\n" + "mayores a 10\n" + "adolecentes\n" + "+ 17\n" + "+ 18\n " + "Pending";
+            
+            while(!isOk)
+            {
+                input = Console.ReadLine();
+                try
+                {
+                    if (!String.IsNullOrEmpty(input))
+                    {
+                        var num = Convert.ToInt32(input);
+                        if (num < 0 || num > 5)
+                        {
+                            Console.WriteLine(message);
+                        }
+                        else
+                        {
+                            isOk = true;
+                        }
+                    }
+                    else
+                    {
+                        isOk = true;
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(message);
+                }
+                
+            }
+
+            return input.ToLower();
         }
         
         

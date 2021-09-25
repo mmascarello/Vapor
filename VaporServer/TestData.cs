@@ -25,38 +25,36 @@ namespace VaporServer
             
             reviewDataBase.AddReview(new Review()
             {
-                Id = reviewMica, Description = "Este juego es muy bueno ", Rating = 4, UserId = micaId
+                Id = reviewMica, Description = "este juego es muy bueno ", Rating = 4, UserId = micaId
             });
             
             reviewDataBase.AddReview(new Review()
             {
-                Id = reviewMaxi, Description = "Este juego es muy malo ", Rating = 2, UserId = maxiId
+                Id = reviewMaxi, Description = "este juego es muy malo ", Rating = 2, UserId = maxiId
             });
             
             
-            gameDataBase.AddGames(new Game(){ Title = "Super Mario",Id = superMarioId}); 
+            gameDataBase.AddGames(new Game(){ Title = "super mario",Id = superMarioId, Gender = "plataforma", 
+                Sinopsis = "juego mitico de plataforma", CoverPage = "super mario.png"}); 
             
-            gameDataBase.AddGames(new Game(){ Title = "Bomberman",ageAllowed = ESRB.Teen ,Id = bomermanId, Gender = "Accion", Sinopsis = "Este es un juego para personas habilidosas", Reviews = new List<Guid>()
+            gameDataBase.AddGames(new Game(){ Title = "bomberman",ageAllowed = ESRB.Teen ,Id = bomermanId, Gender = "accion", Sinopsis = "este es un juego para personas habilidosas", Reviews = new List<Guid>()
             {
                 reviewMaxi,reviewMica
             }});
             
-            gameDataBase.AddGames(new Game(){ Title = "Pokemon",Id = pokemonId});
-            gameDataBase.AddGames(new Game(){ Title = "WarCraft",Id = warCraftId});
+            gameDataBase.AddGames(new Game(){ Title = "pokemon",Id = pokemonId});
+            gameDataBase.AddGames(new Game(){ Title = "warcraft",Id = warCraftId});
             
-            userDataBase.AddUser(new User(){UserLogin = "Mica", Id = micaId, MyOwnedGames= new List<Guid>()
+            userDataBase.AddUser(new User(){UserLogin = "mica", Id = micaId, MyOwnedGames= new List<Guid>()
             {
                 superMarioId,bomermanId,warCraftId
             }});
             
-            userDataBase.AddUser(new User(){UserLogin = "Maxi", Id = maxiId, MyOwnedGames= new List<Guid>()
+            userDataBase.AddUser(new User(){UserLogin = "maxi", Id = maxiId, MyOwnedGames= new List<Guid>()
             {
                 pokemonId,bomermanId
             }});
             
-            
-
-
         }
 
     }

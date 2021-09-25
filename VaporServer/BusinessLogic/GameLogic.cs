@@ -51,7 +51,48 @@ namespace VaporServer.BusinessLogic
             }
 
         }
-
+        public void ModifyGame(Byte[] game)
+        {
+            try
+            {
+                var gameToModify = Encoding.UTF8.GetString(game).Split('|');
+                var gameTitle = gameToModify[0];
+                
+                var title = gameToModify[1];
+                var gender = gameToModify[2];
+                var esrb = gameToModify[3];
+                var sinopsis = gameToModify[4];
+                var coverPage = gameToModify[5];
+                
+                var actualGame = gameDb.GetGame(gameTitle);
+                
+                if (!string.IsNullOrEmpty(title))
+                {
+                    actualGame.Title = title;
+                }
+                if (!string.IsNullOrEmpty(gender))
+                {
+                    actualGame.Gender = gender;
+                }
+                if (!string.IsNullOrEmpty(esrb))
+                {
+                    actualGame.ageAllowed = GetEsbr(Convert.ToInt32(esrb));
+                }
+                if (!string.IsNullOrEmpty(sinopsis))
+                {
+                    actualGame.Sinopsis = sinopsis;
+                }
+                if (!string.IsNullOrEmpty(coverPage))
+                {
+                    actualGame.CoverPage = coverPage;
+                }
+                gameDb.ModifyGame(actualGame); 
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
 //Todo: cambiar de lugar este metodo. 
         private ESRB GetEsbr(int num)
         {
@@ -130,10 +171,8 @@ namespace VaporServer.BusinessLogic
         {
             var gameName = Encoding.UTF8.GetString(gameTitle);
 
-            var games = this.gameDb.GetGames();
+            var game = this.gameDb.GetGame(gameName);
 
-            var game = games.Find(g => g.Title.Equals(gameName));
-           
             return game;
         }
 
@@ -153,23 +192,11 @@ namespace VaporServer.BusinessLogic
             
             return data;
         }
-        
-        
-        /*private Guid ValidateId()
+       
+        public string GetCover(string game)
         {
-            var games = gameDb.GetGames();
-
-            var invalidId = true;
-            var id = new Guid();
+            return gameDb.GetCover(game);
             
-            while (invalidId)
-            {
-                 id = Guid.NewGuid();
-
-                invalidId = games.Exists(g => g.Id == id);
-            }
-
-            return id;
-        }*/
+        }
     }
 }

@@ -5,6 +5,7 @@ namespace VaporServer
         public static string ServerIpConfigKey = "ServerIpAddress";
         public static string SeverPortConfigKey = "ServerPort";
         public static string MaxConnectionConfigKey = "MaxConnections";
+        public static string ServerFilePath = "ServerFilePath";
 
     }
 }

@@ -6,6 +6,7 @@ namespace VaporServer.DataAccess
     public class ReviewDataBase
     {
         private List<Review> reviews;
+        private readonly object locker = new object();
         
         public ReviewDataBase(List<Review> reviews)
         {
@@ -14,12 +15,19 @@ namespace VaporServer.DataAccess
   
         public void AddReview(Review review)
         {
-            this.reviews.Add(review);
+            lock (locker)
+            { 
+                this.reviews.Add(review); 
+            }
+            
         }
 
         public List<Review> GetReviews()
         {
-            return this.reviews;
+            lock (locker)
+            {
+                return this.reviews;
+            }
         }
         
 

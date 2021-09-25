@@ -13,13 +13,15 @@ namespace VaporServer.Endpoint
 {
     public class Server
     {
-        static bool exit = false;
-        private static readonly List<Socket> clients = new List<Socket>();//sacar el static.
+        private bool exit;
+        private readonly List<Socket> clients = new List<Socket>();
         private readonly Logic businessLogic;
         private readonly ISettingsManager settingsManager;
         private readonly ICommunication communication;
-        private static string serverIpAddress; 
-        private static int serverPort;
+        private string serverIpAddress; 
+        private int serverPort;
+        private int backLog;
+        private string serverFilesPath;
         private readonly GameLogic gameLogic;
 
         public Server(Logic businessLogic,ISettingsManager settingsManager,ICommunication communication)
@@ -28,20 +30,20 @@ namespace VaporServer.Endpoint
             this.businessLogic = businessLogic;
             this.communication = communication;
             this.gameLogic = this.businessLogic.GameLogic;
+            this.serverIpAddress = this.settingsManager.ReadSetting(ServerConfig.ServerIpConfigKey);
+            this.serverPort = int.Parse(this.settingsManager.ReadSetting(ServerConfig.SeverPortConfigKey));
+            this.backLog = int.Parse(this.settingsManager.ReadSetting(ServerConfig.MaxConnectionConfigKey));
+            this.serverFilesPath = this.settingsManager.ReadSetting(ServerConfig.ServerFilePath);
         }
 
         public void Start()
         {
-            serverIpAddress = settingsManager.ReadSetting(ServerConfig.ServerIpConfigKey);
-            serverPort = int.Parse(settingsManager.ReadSetting(ServerConfig.SeverPortConfigKey));
-            var backlog = int.Parse(settingsManager.ReadSetting(ServerConfig.MaxConnectionConfigKey));
-            
-            Console.WriteLine($"ip: {serverIpAddress} - puerto {serverPort} - backlog {backlog}");
+            Console.WriteLine($"ip: {serverIpAddress} - puerto {serverPort} - backlog {backLog}");
             
             var socketServer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             
             socketServer.Bind(new IPEndPoint(IPAddress.Parse(serverIpAddress),serverPort));
-            socketServer.Listen(backlog);
+            socketServer.Listen(backLog);
            
             var threadServer = new Thread(()=> ListenForConnections(socketServer));
             threadServer.Start();
@@ -51,7 +53,7 @@ namespace VaporServer.Endpoint
             HandleServer(socketServer);
         }
 
-        private static void HandleServer(Socket socketServer)
+        private void HandleServer(Socket socketServer)
         {
             while (!exit)
             {
@@ -121,10 +123,6 @@ namespace VaporServer.Endpoint
                     var header = new Header();
                     header.DecodeData(buffer);
                     
-                    //recibir primero los datos 
-                    // crear la instancia del factory
-                    // enviar por parametro lo que necesita
-                    
                     switch (header.ICommand)
                     {
                         case CommandConstants.GetGames:
@@ -142,7 +140,9 @@ namespace VaporServer.Endpoint
                         case CommandConstants.PublicGame:
                             ProcessGame(clientSocket, header);
                             break;
-                        
+                        case CommandConstants.ModifyGame:
+                            ModifyGame(clientSocket, header);
+                            break;
                         case CommandConstants.GameDetail:
                             GetGameDetail(clientSocket, header);
                             break;
@@ -159,9 +159,9 @@ namespace VaporServer.Endpoint
         {
             
             var receiveGameNameBuffer = new byte[header.IDataLength];
-
+            
             communication.ReceiveData(clientSocket, header.IDataLength, receiveGameNameBuffer);
-
+            
             try
             {
                 
@@ -190,6 +190,33 @@ namespace VaporServer.Endpoint
             }
         }
         
+        private void ModifyGame(Socket clientSocket, Header header)
+        {
+            var gameBuffer = new byte[header.IDataLength];
+
+            communication.ReceiveData(clientSocket, header.IDataLength, gameBuffer);
+
+            try
+            {
+                this.gameLogic.ModifyGame(gameBuffer);
+                
+                var cover = Encoding.UTF8.GetString(gameBuffer).Split('|')[5];
+                
+                if (!string.IsNullOrEmpty(cover))
+                {
+                    communication.ReceiveFile(clientSocket,serverFilesPath);
+                }
+                
+                var headerResponse = new Header(HeaderConstants.Response, CommandConstants.ModifyGame, ResponseConstants.Ok.Length);
+                communication.SendData(clientSocket,headerResponse,ResponseConstants.Ok);
+                
+            }
+            catch(Exception e)
+            {
+                ErrorResponse(clientSocket,e,CommandConstants.ModifyGame);
+            }
+        }
+        
         private void ProcessGame(Socket clientSocket, Header header)
         {
             var gameBuffer = new byte[header.IDataLength];
@@ -199,7 +226,9 @@ namespace VaporServer.Endpoint
             try
             {
                 this.gameLogic.PublicGame(gameBuffer);
-
+                
+                communication.ReceiveFile(clientSocket,serverFilesPath);
+                
                 var headerResponse = new Header(HeaderConstants.Response, CommandConstants.PublicGame, ResponseConstants.Ok.Length);
                 communication.SendData(clientSocket,headerResponse,ResponseConstants.Ok);
                 
@@ -221,8 +250,17 @@ namespace VaporServer.Endpoint
             //buscar la ruta de la imagen con el nombre del juego en la bl
             
             Console.WriteLine(game);
-            
-            communication.SendFile(clientSocket,game);
+            try
+            {
+                var cover = this.serverFilesPath + this.gameLogic.GetCover(game);
+                Console.WriteLine(cover);
+                
+                communication.SendFile(clientSocket, cover);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         private void BuyGame(Socket clientSocket, Header header)
@@ -275,23 +313,3 @@ namespace VaporServer.Endpoint
         }
     }
 }
-
-/*
-                        case CommandConstants.Login:
-                            Console.WriteLine("Llegue a login");
-                            var bufferDataLogin = new byte[header.IDataLength];
-                            ReceiveData(clientSocket,header.IDataLength,bufferDataLogin);
-                            var dataInString = Encoding.UTF8.GetString(bufferDataLogin);
-                            this.AddUser(dataInString);
-                            Console.WriteLine(this.businessLogic.GetUsers().Count);
-                            break;
-                        
-                        case CommandConstants.Message:
-                            Console.WriteLine("Will receive message to display...");
-                            var bufferData = new byte[header.IDataLength];  
-                            ReceiveData(clientSocket,header.IDataLength,bufferData);
-                            Console.WriteLine("Message received: " + Encoding.UTF8.GetString(bufferData));
-                            break;
- */
-
-// tenemos que ver donode usamos los mecanimos de mutua exclusion para evitar deadlocks o que 2 usuarios diferentes alteren el mismo recurso
