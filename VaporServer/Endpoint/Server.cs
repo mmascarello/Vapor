@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -140,11 +141,17 @@ namespace VaporServer.Endpoint
                         case CommandConstants.PublicGame:
                             ProcessGame(clientSocket, header);
                             break;
+                        
                         case CommandConstants.ModifyGame:
                             ModifyGame(clientSocket, header);
                             break;
+                        
                         case CommandConstants.GameDetail:
                             GetGameDetail(clientSocket, header);
+                            break;
+                        
+                        case CommandConstants.DeleteGame:
+                            DeleteGame(clientSocket, header);
                             break;
                     }
                 }
@@ -155,6 +162,30 @@ namespace VaporServer.Endpoint
             }
         }
 
+        private void DeleteGame(Socket clientSocket, Header header)
+        {
+            var receiveGameNameBuffer = new byte[header.IDataLength];
+            
+            communication.ReceiveData(clientSocket, header.IDataLength, receiveGameNameBuffer);
+
+            try
+            {
+                this.gameLogic.DeleteGame(receiveGameNameBuffer);
+                
+                OkResponse(clientSocket,CommandConstants.DeleteGame);
+                
+                /*var mensaje = "El juego fue borrado correctamente";
+                var headerResponse = new Header(HeaderConstants.Response, CommandConstants.DeleteGame, mensaje.Length);
+                
+                communication.SendData(clientSocket,headerResponse,mensaje);*/
+                
+            }
+            catch (Exception e)
+            {
+                ErrorResponse(clientSocket,e.Message,CommandConstants.DeleteGame);
+            }
+
+        }
         private void GetGameDetail(Socket clientSocket, Header header)
         {
             
@@ -186,7 +217,7 @@ namespace VaporServer.Endpoint
             }
             catch (Exception e)
             {
-                ErrorResponse(clientSocket,e,CommandConstants.GameDetail);
+                ErrorResponse(clientSocket,e.Message,CommandConstants.GameDetail);
             }
         }
         
@@ -206,14 +237,14 @@ namespace VaporServer.Endpoint
                 {
                     communication.ReceiveFile(clientSocket,serverFilesPath);
                 }
-                
-                var headerResponse = new Header(HeaderConstants.Response, CommandConstants.ModifyGame, ResponseConstants.Ok.Length);
-                communication.SendData(clientSocket,headerResponse,ResponseConstants.Ok);
+                OkResponse(clientSocket,CommandConstants.ModifyGame);
+                /*var headerResponse = new Header(HeaderConstants.Response, CommandConstants.ModifyGame, ResponseConstants.Ok.Length);
+                communication.SendData(clientSocket,headerResponse,ResponseConstants.Ok);*/
                 
             }
             catch(Exception e)
             {
-                ErrorResponse(clientSocket,e,CommandConstants.ModifyGame);
+                ErrorResponse(clientSocket,e.Message,CommandConstants.ModifyGame);
             }
         }
         
@@ -227,15 +258,21 @@ namespace VaporServer.Endpoint
             {
                 this.gameLogic.PublicGame(gameBuffer);
                 
-                communication.ReceiveFile(clientSocket,serverFilesPath);
+                var cover = Encoding.UTF8.GetString(gameBuffer).Split('|')[5];
                 
-                var headerResponse = new Header(HeaderConstants.Response, CommandConstants.PublicGame, ResponseConstants.Ok.Length);
-                communication.SendData(clientSocket,headerResponse,ResponseConstants.Ok);
+                if (!string.IsNullOrEmpty(cover))
+                {
+                    communication.ReceiveFile(clientSocket,serverFilesPath);
+                }
+                
+                OkResponse(clientSocket,CommandConstants.PublicGame);
+                /*var headerResponse = new Header(HeaderConstants.Response, CommandConstants.PublicGame, ResponseConstants.Ok.Length);
+                communication.SendData(clientSocket,headerResponse,ResponseConstants.Ok);*/
                 
             }
             catch(Exception e)
             {
-                ErrorResponse(clientSocket,e,CommandConstants.PublicGame);
+                ErrorResponse(clientSocket,e.Message,CommandConstants.PublicGame);
             }
         }
 
@@ -247,19 +284,24 @@ namespace VaporServer.Endpoint
             
             var game = Encoding.UTF8.GetString(dataBuffer);
             
-            //buscar la ruta de la imagen con el nombre del juego en la bl
-            
-            Console.WriteLine(game);
             try
             {
-                var cover = this.serverFilesPath + this.gameLogic.GetCover(game);
-                Console.WriteLine(cover);
                 
-                communication.SendFile(clientSocket, cover);
+                var cover = this.serverFilesPath + this.gameLogic.GetCover(game);
+                var exists = File.Exists(cover);
+                if (exists)
+                {
+                    OkResponse(clientSocket,CommandConstants.SendImage);
+                    communication.SendFile(clientSocket, cover);
+                }
+                else
+                {
+                    ErrorResponse(clientSocket,"No existe la imagen",CommandConstants.SendImage);
+                }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                ErrorResponse(clientSocket,e.Message,CommandConstants.SendImage);
             }
         }
 
@@ -279,16 +321,15 @@ namespace VaporServer.Endpoint
             try
             {
                 businessLogic.UserLogic.BuyGame(user, game);
-                    headerResponse = new Header(HeaderConstants.Response, CommandConstants.BuyGame,
-                    ResponseConstants.Ok.Length);
-                
-                communication.SendData(clientSocket, headerResponse, ResponseConstants.Ok);
+
+                OkResponse(clientSocket, CommandConstants.BuyGame);
+                   
 
                 // ToDo:validar porque no funciona adquirir 2 juegos seguidos / adquirir un juego y error.
             }
             catch (Exception e)
             {
-                ErrorResponse(clientSocket,e,CommandConstants.BuyGame);
+                ErrorResponse(clientSocket,e.Message,CommandConstants.BuyGame);
             }
         }
 
@@ -303,13 +344,22 @@ namespace VaporServer.Endpoint
             communication.SendData(clientSocket, headerToSend, games);
         }
         
-        private void ErrorResponse(Socket clientSocket, Exception e,int command)
+        private void ErrorResponse(Socket clientSocket, string error,int command)
         {
-            var dataLength = (e.Message.Length + ResponseConstants.Error.Length);
-            var errorMessage = ResponseConstants.Error + e.Message;
+            var dataLength = (error.Length + ResponseConstants.Error.Length);
+            var errorMessage = ResponseConstants.Error + error;
             var headerResponse = new Header(HeaderConstants.Response, command,
                 dataLength);
             communication.SendData(clientSocket, headerResponse, errorMessage);
+        }
+        
+        private void OkResponse(Socket clientSocket,int command)
+        {
+            var dataLength = ResponseConstants.Ok.Length;
+            var message = ResponseConstants.Ok;
+            var headerResponse = new Header(HeaderConstants.Response, command,
+                dataLength);
+            communication.SendData(clientSocket, headerResponse, message);
         }
     }
 }

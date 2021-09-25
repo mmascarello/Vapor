@@ -32,24 +32,38 @@ namespace VaporServer.DataAccess
 
         public Game GetGame(string title)
         {
-            var game=new Game();
-            
-            lock (locker)
+            Game game;
+            try
             {
-                game = games.Find(g => g.Title.Equals(title));
+                lock (locker)
+                {
+                     game = games.Find(g => g.Title.Equals(title));
+                }
             }
-
+            catch (ArgumentNullException e)
+            {
+                throw new Exception("El juego no existe");
+            }
             return game;
+            
         }
         
         public void ModifyGame(Game gameModified)
         {
-            lock (locker)
+            try
             {
-                var index = games.FindIndex(g => g.Id == gameModified.Id);
-                games[index] = gameModified;
+                lock (locker)
+                {
+                    var index = games.FindIndex(g => g.Id == gameModified.Id);
+                    games[index] = gameModified;
 
+                }
             }
+            catch (Exception e)
+            {
+                throw new Exception("Error al actualizar el juego");
+            }
+            
         }
 
         public string GetCover(string game)
@@ -58,14 +72,31 @@ namespace VaporServer.DataAccess
             {
                 lock (locker)
                 {
-                    var gameObject = games.Find(g => g.Title.Equals(game));
+                    var gameObject = GetGame(game);
                     return gameObject.CoverPage;
                 }
             }
             catch (Exception e)
             {
-                throw new Exception("El juego no existe");
+                throw new Exception("No existe el juego");
             }
         }
+
+        public void DeleteGame(string game)
+        {
+            try
+            {
+                lock (locker)
+                {
+                    var gameToRemove = GetGame(game);
+                    games.Remove(gameToRemove);
+                }
+            }catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+
+        }
+
     }
 }

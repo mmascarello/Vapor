@@ -51,6 +51,20 @@ namespace VaporServer.BusinessLogic
             }
 
         }
+
+        public void DeleteGame(Byte[] game)
+        {
+            try
+            {
+                var gameToDelete = Encoding.UTF8.GetString(game);
+                gameDb.DeleteGame(gameToDelete);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+        
         public void ModifyGame(Byte[] game)
         {
             try

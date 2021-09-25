@@ -18,7 +18,7 @@ namespace FileProtocol.FileHandler
                 return new FileInfo(path).Name;
             }
 
-            throw new Exception("File does not exist");
+            throw new Exception("El archivo no existe");
         }
 
         public long GetFileSize(string path)
@@ -28,7 +28,7 @@ namespace FileProtocol.FileHandler
                 return new FileInfo(path).Length;
             }
 
-            throw new Exception("File does not exist");
+            throw new Exception("El archivo no existe");
         }
     }
 }
