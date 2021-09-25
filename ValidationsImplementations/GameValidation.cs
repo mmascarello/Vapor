@@ -96,7 +96,29 @@ namespace ValidationsImplementations
 
             return input.ToLower();
         }
-        
-        
+
+
+        public static string ValidateValue()
+        {
+            var isOk = false;
+            var value = "";
+            var message = "Se espera que ingrese: titulo / genero / clasificacion";
+            
+            while (!isOk)
+            {
+                value = Console.ReadLine();
+
+                if (value == "titulo" || value == "genero" || value == "clasificacion")
+                {
+                    isOk = true;
+                }
+                else
+                {
+                   Console.WriteLine(message);
+                }
+            }
+
+            return value.ToLower();
+        }
     }
 }

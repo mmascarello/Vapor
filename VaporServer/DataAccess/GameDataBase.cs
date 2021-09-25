@@ -67,5 +67,56 @@ namespace VaporServer.DataAccess
                 throw new Exception("El juego no existe");
             }
         }
+        
+        public List<Game> GetGameByGender(string gender)
+        {
+            try
+            {
+                lock (locker)
+                {
+                    var gameObject = games.FindAll(g => g.Gender.Equals(gender));
+                    return gameObject;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw new Exception("El juego no existe");
+            }
+        }
+        
+        public List<Game> GetGameByEsrb(ESRB esrb)
+        {
+            try
+            {
+                lock (locker)
+                {
+                    var gameObject = games.FindAll(g => g.ageAllowed.Equals(esrb));
+                    return gameObject;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw new Exception("El juego no existe");
+            }
+        }
+        
+        public List<Game> GetGamesByTitle(string title)
+        {
+            try
+            {
+                lock (locker)
+                {
+                    var gameObject = games.FindAll(g => g.Title.Contains(title));
+                    return gameObject;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw new Exception("El juego no existe");
+            }
+        }
     }
 }

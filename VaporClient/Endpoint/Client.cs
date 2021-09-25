@@ -90,6 +90,9 @@ namespace VaporCliente.Endpoint
                         GetGameDetails(socket);
                         break;
                     
+                    case "buscar juegos":
+                        LookUpForGame(socket);
+                        break;
                     default:
                         Console.WriteLine("Opcion invalida");
                         break;
@@ -97,6 +100,32 @@ namespace VaporCliente.Endpoint
             }
 
             Console.WriteLine("Exiting Application");
+        }
+
+        private void LookUpForGame(Socket socket)
+        {
+            Console.WriteLine("Ingresar atributo a buscar: titulo / genero / clasificacion");
+            var lookupAtribute = GameValidation.ValidateValue() ;
+            
+            Console.WriteLine($"Ingrese {lookupAtribute}:");
+
+            var lookupValue = GameValidation.ValidNotEmpty();
+
+            var lookup = lookupAtribute + "|" + lookupValue + "|";
+            
+            var header = new Header(HeaderConstants.Request, CommandConstants.LookupGame, lookup.Length);
+            
+            communication.SendData(socket, header, lookup);
+
+            var gameTitle = GetResponse(socket);
+            if (gameTitle.Contains(ResponseConstants.Error))
+            {
+                Console.WriteLine(gameTitle);
+            }
+            else
+            {
+                Console.WriteLine($"Se encontro el juego:{gameTitle}");
+            }
         }
 
         private void GetGameDetails(Socket socket)
@@ -131,8 +160,6 @@ namespace VaporCliente.Endpoint
                 Console.Write("Soy un juego de: "+gameGender+"\n");
                 Console.Write("Sinopsis: "+gameSinopsis+"\n");
                 Console.Write("Esrb edad permitida : "+gameESRB);
-
-                
             }
             catch(Exception e)
             {

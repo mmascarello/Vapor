@@ -33,7 +33,7 @@ namespace VaporServer.BusinessLogic
                 var coverPage = gameToAdd[4];
                 var id = Guid.NewGuid();
                 var games = gameDb.GetGames();
-                var esbr = GetEsbr(num);
+                var esbr = GetEsrb(num);
 
                 ValidateGame(games, title);
 
@@ -76,7 +76,7 @@ namespace VaporServer.BusinessLogic
                 }
                 if (!string.IsNullOrEmpty(esrb))
                 {
-                    actualGame.ageAllowed = GetEsbr(Convert.ToInt32(esrb));
+                    actualGame.ageAllowed = GetEsrb(Convert.ToInt32(esrb));
                 }
                 if (!string.IsNullOrEmpty(sinopsis))
                 {
@@ -94,7 +94,7 @@ namespace VaporServer.BusinessLogic
             }
         }
 //Todo: cambiar de lugar este metodo. 
-        private ESRB GetEsbr(int num)
+        private ESRB GetEsrb(int num)
         {
             var ageEsrb = new ESRB();
             
@@ -188,7 +188,6 @@ namespace VaporServer.BusinessLogic
             data+="|"+game.ageAllowed;
             
             //ToDo: Agregar la imagen
-            //data.Add(game.CoverPage);
             
             return data;
         }
@@ -197,6 +196,62 @@ namespace VaporServer.BusinessLogic
         {
             return gameDb.GetCover(game);
             
+        }
+
+        public string LookupGame(byte[] receiveGameAttributeBuffer)
+        {
+            var value = Encoding.UTF8.GetString(receiveGameAttributeBuffer).Split("|");
+            var attribute = value[0];
+            var attributeValue = value[1];
+            var games = new List<Game>();
+            var gamesTitles = "";
+            
+            Console.WriteLine(attribute+" "+attributeValue);
+            
+            try
+            {
+                if(attribute =="genero")
+                {
+                    Console.WriteLine("entre al if genero");
+
+                    games = this.gameDb.GetGameByGender(attributeValue);
+                    
+                    Console.WriteLine("pase por la bdd");
+
+                    gamesTitles = GetTitles(games);
+
+                } else if (attribute.Equals("clasificacion"))
+                {
+                    var num = Convert.ToInt32(attributeValue);
+                    var esrb = this.GetEsrb(num);
+                    games = this.gameDb.GetGameByEsrb(esrb);
+                    gamesTitles = GetTitles(games);
+                }
+                else
+                {
+                    games = this.gameDb.GetGamesByTitle(attributeValue);
+                    gamesTitles = GetTitles(games);
+                }
+
+                return gamesTitles;
+            }
+            catch (Exception e)
+            {
+                throw new Exception("No existe un juego con ese atributo");
+            }
+            
+        }
+
+        private string GetTitles(List<Game> games)
+        {
+            var gamesToReturn = "";
+            
+            foreach (var g in games)
+            {
+                gamesToReturn += g.Title + "-";
+            }
+
+            return gamesToReturn;
         }
     }
 }

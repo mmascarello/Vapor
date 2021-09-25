@@ -110,7 +110,8 @@ namespace VaporServer.Endpoint
         
         private void HandleClient(Socket clientSocket)
         {
-            while (!exit)
+            var remoteConnectionClosed = false;  
+            while (!exit && !remoteConnectionClosed)
             {
                 var headerLength = HeaderConstants.Request.Length + HeaderConstants.CommandLength +
                                    HeaderConstants.DataLength;
@@ -146,18 +147,42 @@ namespace VaporServer.Endpoint
                         case CommandConstants.GameDetail:
                             GetGameDetail(clientSocket, header);
                             break;
+                        case CommandConstants.LookupGame:
+                            LookupGame(clientSocket, header);
+                            break;
                     }
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Server is closing, will not process more data -> Message {e.Message}..");    
+                    Console.WriteLine($"Thread is closing, will not process more data...");
+                    remoteConnectionClosed = true;
                 }
+            }
+        }
+
+        private void LookupGame(Socket clientSocket, Header header)
+        {
+            var receiveGameAttributeBuffer = new byte[header.IDataLength];
+            
+            communication.ReceiveData(clientSocket, header.IDataLength, receiveGameAttributeBuffer);
+
+            try
+            {
+                var gameTitle = this.gameLogic.LookupGame(receiveGameAttributeBuffer);
+                
+                var headerResponse = new Header(HeaderConstants.Response, CommandConstants.GameDetail, gameTitle.Length);
+                
+                communication.SendData(clientSocket,headerResponse,gameTitle);
+
+            }catch (Exception e)
+            {
+                ErrorResponse(clientSocket,e,CommandConstants.LookupGame);
             }
         }
 
         private void GetGameDetail(Socket clientSocket, Header header)
         {
-            
+
             var receiveGameNameBuffer = new byte[header.IDataLength];
             
             communication.ReceiveData(clientSocket, header.IDataLength, receiveGameNameBuffer);
@@ -167,16 +192,15 @@ namespace VaporServer.Endpoint
                 
                 var ratingAverage = this.gameLogic.GetRatingAverage(receiveGameNameBuffer);
                 
-                //Console.WriteLine($"Obtuve el average {ratingAverage}");
-                
                 var gameReviews = this.gameLogic.GetReviews(receiveGameNameBuffer);
                 
-                var gameInfo = this.gameLogic.GetData(receiveGameNameBuffer);//aca va la imagen de portada del juego (ver como manejar el path).
+                var gameInfo = this.gameLogic.GetData(receiveGameNameBuffer);
 
+                //ToDo: ReceiveFile 
+                
                 var response = ratingAverage + "|" + gameReviews + "|" + gameInfo;
 
-                
-               
+
                 Console.WriteLine($"{response}");
 
                 var headerResponse = new Header(HeaderConstants.Response, CommandConstants.GameDetail, response.Length);

@@ -13,7 +13,9 @@ namespace VaporServer
             Guid bomermanId = Guid.NewGuid();
             Guid pokemonId = Guid.NewGuid();
             Guid warCraftId = Guid.NewGuid();
+            Guid superIcyTowerId = Guid.NewGuid();
 
+            
             Guid micaId = Guid.NewGuid();
             Guid maxiId = Guid.NewGuid();
 
@@ -37,13 +39,15 @@ namespace VaporServer
             gameDataBase.AddGames(new Game(){ Title = "super mario",Id = superMarioId, Gender = "plataforma", 
                 Sinopsis = "juego mitico de plataforma", CoverPage = "super mario.png"}); 
             
-            gameDataBase.AddGames(new Game(){ Title = "bomberman",ageAllowed = ESRB.Teen ,Id = bomermanId, Gender = "accion", Sinopsis = "este es un juego para personas habilidosas", Reviews = new List<Guid>()
+            gameDataBase.AddGames(new Game(){ Title = "bomberman",ageAllowed = ESRB.Teen ,Id = bomermanId, Gender = "diversion", Sinopsis = "este es un juego para personas habilidosas", Reviews = new List<Guid>()
             {
                 reviewMaxi,reviewMica
             }});
             
-            gameDataBase.AddGames(new Game(){ Title = "pokemon",Id = pokemonId});
-            gameDataBase.AddGames(new Game(){ Title = "warcraft",Id = warCraftId});
+            gameDataBase.AddGames(new Game(){ Title = "super icy tower", ageAllowed = ESRB.SeventeenPlus ,Id =superIcyTowerId, Gender = "diversion", Sinopsis = "este es un juego para personas habilidosas"});
+            
+            gameDataBase.AddGames(new Game(){ Title = "pokemon",Id = pokemonId, Gender = ""});
+            gameDataBase.AddGames(new Game(){ Title = "warcraft",Id = warCraftId, Gender = ""});
             
             userDataBase.AddUser(new User(){UserLogin = "mica", Id = micaId, MyOwnedGames= new List<Guid>()
             {

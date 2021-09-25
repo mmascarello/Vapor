@@ -102,7 +102,6 @@ namespace CommunicationImplementation
         
         public void ReceiveFile(Socket ourSocket, string path)
         {
-           
             FileStreamHandler fileStreamHandler = new FileStreamHandler();
             
             var header = new byte[FileHeader.GetLength()];
