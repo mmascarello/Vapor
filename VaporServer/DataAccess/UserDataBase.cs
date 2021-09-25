@@ -6,26 +6,36 @@ namespace VaporServer.DataAccess
 {
     public class UserDataBase
     {
+        private object locker = new Object();
         private List<User> users;
             
         public UserDataBase(List<User> usersDb)
         {
-            this.users = usersDb;
+            this.users = usersDb; 
         }
         
         public void AddUser(User user){
-            this.users.Add(user);
+            lock (locker)
+            {
+                this.users.Add(user);
+            }
         }
 
         public List<User> GetUsers()
         {
-            return users;
+            lock (locker)
+            {
+                return users;
+            }
         }
-        
-        public void BuyGame(Guid userId , Guid gameId)
+
+        public void BuyGame(Guid userId, Guid gameId)
         {
-            var index =  users.FindIndex(u => u.Id == userId);
-            users[index].MyOwnedGames.Add(gameId);
+            lock (locker)
+            {
+                var index = users.FindIndex(u => u.Id == userId);
+                users[index].MyOwnedGames.Add(gameId);
+            }
         }
     }
 }
