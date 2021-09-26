@@ -90,9 +90,14 @@ namespace VaporCliente.Endpoint
                         GetGameDetails(socket);
                         break;
                     
+                    case "borrar juego":
+                        DeleteGame(socket);
+                        break;
+                    
                     case "buscar juegos":
                         LookUpForGame(socket);
                         break;
+                    
                     default:
                         Console.WriteLine("Opcion invalida");
                         break;
@@ -102,6 +107,21 @@ namespace VaporCliente.Endpoint
             Console.WriteLine("Exiting Application");
         }
 
+        private void DeleteGame(Socket socket)
+        {
+            Console.WriteLine("Ingrese el título del juego a borrar");
+            var game = GameValidation.ValidNotEmpty();
+           
+            var header = new Header(HeaderConstants.Request, CommandConstants.DeleteGame, game.Length);
+
+            communication.SendData(socket, header, game);
+            
+            var response = GetResponse(socket);
+            
+            Console.WriteLine(response);
+            
+        }
+        
         private void LookUpForGame(Socket socket)
         {
             Console.WriteLine("Ingresar atributo a buscar: titulo / genero / clasificacion");
@@ -143,23 +163,35 @@ namespace VaporCliente.Endpoint
             try
             {
                 var response = GetResponse(socket);
+                if(!response.Contains(ResponseConstants.Error)){
 
-                //Console.WriteLine(response);
+                    var getInformation = response.Split('|');
+                    var ratingAverage = getInformation[0];
+                    var gameReviews = getInformation[1];
+                    var gameGender = getInformation[2];
+                    var gameSinopsis = getInformation[3];
+                    var gameESRB = getInformation[4];
 
-                var getInformation = response.Split('|');
-                var ratingAverage = getInformation[0];
-                var gameReviews = getInformation[1];
-                var gameGender = getInformation[2];
-                var gameSinopsis = getInformation[3];
-                var gameESRB = getInformation[4];
+                    //ToDo: Obtener Imagen
 
-                //ToDo: Obtener Imagen
-
-                Console.Write("Mi rating es: "+ratingAverage+"\n");
-                Console.Write("Mis reviews: "+gameReviews+"\n");
-                Console.Write("Soy un juego de: "+gameGender+"\n");
-                Console.Write("Sinopsis: "+gameSinopsis+"\n");
-                Console.Write("Esrb edad permitida : "+gameESRB);
+                    Console.WriteLine("Mi rating es: "+ratingAverage);
+                    Console.WriteLine("Mis reviews: "+gameReviews);
+                    Console.WriteLine("Soy un juego de: "+gameGender);
+                    Console.WriteLine("Sinopsis: "+gameSinopsis);
+                    Console.WriteLine("Esrb edad permitida : "+gameESRB);
+                    
+                    Console.WriteLine("");
+                    Console.WriteLine("Desea descargar la imagen?: si/no");
+                    var answer = GameValidation.YesNoValidation();
+                    if (answer.Equals("si"))
+                    {
+                        GetCoverPage(socket,gameName);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("El titulo ingresado no es correcto");
+                }
             }
             catch(Exception e)
             {
@@ -188,9 +220,9 @@ namespace VaporCliente.Endpoint
             var sinopsis = Console.ReadLine();
 
             Console.WriteLine("Ingrese una carátula");
-            var coverPage = Console.ReadLine();
+            var coverPage = ImageValidation.ValidCover(filesPathToSend);
             
-            var publicGame = gameToModify +  "|" + title + "|" + gender + "|" + esbr + "|" + sinopsis + "|" + coverPage;
+            var publicGame = gameToModify +  "|" + title + "|" + gender + "|" + esbr + "|" + sinopsis + "|" + coverPage +'|';
             
             var header = new Header(HeaderConstants.Request, CommandConstants.ModifyGame, publicGame.Length);
 
@@ -221,18 +253,20 @@ namespace VaporCliente.Endpoint
             Console.WriteLine("Haga una breve descripcion del juego");
             var sinopsis = GameValidation.ValidNotEmpty();
 
-            Console.WriteLine("Ingrese una caratula");
-            var coverPage = GameValidation.ValidNotEmpty();
+            Console.WriteLine("Ingrese una carátula, en caso de no querer agregar una, presione enter");
+            var coverPage = ImageValidation.ValidCover(filesPathToSend);
 
-            var publicGame = title + "|" + gender + "|" + esbr + "|" + sinopsis + "|" + coverPage;
+            var publicGame = title + "|" + gender + "|" + esbr + "|" + sinopsis + "|" + coverPage +'|';
 
             var header = new Header(HeaderConstants.Request, CommandConstants.PublicGame, publicGame.Length);
 
             communication.SendData(socket, header, publicGame);
 
-            var fileToSend = filesPathToSend + coverPage;
-            
-            communication.SendFile(socket,fileToSend);
+            if (!string.IsNullOrEmpty(coverPage))
+            {
+                var fileToSend = filesPathToSend + coverPage;
+                communication.SendFile(socket, fileToSend);
+            }
             
             var response = GetResponse(socket);
             
@@ -247,7 +281,7 @@ namespace VaporCliente.Endpoint
             
             Console.WriteLine("Ingrese un juego");
             var gameName = GameValidation.ValidNotEmpty();
-            var userAndGame = userName + "|" + gameName;
+            var userAndGame = userName + "|" + gameName + "|";
 
             var header = new Header(HeaderConstants.Request, CommandConstants.BuyGame ,userAndGame.Length);
             
@@ -303,15 +337,24 @@ namespace VaporCliente.Endpoint
 
             communication.SendData(socket, headerToSendImg, gameName); 
             
-            try//se queda trancado recibiendo la imagen
+            var response = GetResponse(socket);
+            if (response.Equals(ResponseConstants.Ok))
             {
-                communication.ReceiveFile(socket,filesPathRecived); // esto recibe la imagen
-                Console.WriteLine("Imagen recibida ");
+                try
+                {
+                    communication.ReceiveFile(socket,filesPathRecived);
+                    Console.WriteLine("Imagen recibida ");
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("explote");
+                }
             }
-            catch (Exception)
+            else
             {
-                Console.WriteLine("explote");
+                Console.WriteLine(response);
             }
+           
         }
 
         private void ShowMenu()

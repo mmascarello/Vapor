@@ -11,5 +11,6 @@ namespace StringProtocol
         public const int GameDetail = 5;
         public const int  ModifyGame= 6;
         public const int LookupGame = 7;
+        public const int  DeleteGame= 8;
     }
 }
