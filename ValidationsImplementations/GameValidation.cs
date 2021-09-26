@@ -25,6 +25,27 @@ namespace ValidationsImplementations
             return input.ToLower();
         }
         
+        public static string YesNoValidation()
+        {
+            var isOk = false;
+            var input = "";
+            
+            while(!isOk)
+            {
+                input = Console.ReadLine();
+                if (input == String.Empty && !input.Equals("si") && !input.Equals("no"))
+                {
+                    Console.WriteLine("El campo debe ser si o no");
+                }
+                else
+                {
+                    isOk = true;
+                }
+            }
+
+            return input.ToLower();
+        }
+        
         public static string ValidCalification()
         {
             var isOk = false;

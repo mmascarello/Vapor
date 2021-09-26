@@ -60,48 +60,58 @@ namespace CommunicationImplementation
         public void SendFile(Socket ourSocket, string path)
         {
 
-            FileHandler fileHandler = new FileHandler();
-            FileStreamHandler fileStreamHandler = new FileStreamHandler();
-
-            //Construimos la info :
-            var fileName = fileHandler.GetFileName(path); // nombre del archivo -> XXXX
-            Console.WriteLine(fileName);
-            var fileSize = fileHandler.GetFileSize(path); // tamaño del archivo -> YYYYYYYY
-            Console.WriteLine(fileSize);
-            
-            var header = new FileHeader().Create(fileName, fileSize);
-            ourSocket.Send(header, header.Length, SocketFlags.None);
-            
-            var fileNameBytes = Encoding.UTF8.GetBytes(fileName);
-            ourSocket.Send(fileNameBytes, fileNameBytes.Length, SocketFlags.None);
-
-            long parts = SpecificationHelper.GetParts(fileSize);
-            Console.WriteLine("Will Send {0} parts", parts);
-            long offset = 0;
-            long currentPart = 1;
-
-            while (fileSize > offset)
+            try
             {
-                Console.WriteLine($"current part: {currentPart}");
-                byte[] data;
-                if (currentPart == parts)
+                FileHandler fileHandler = new FileHandler();
+                FileStreamHandler fileStreamHandler = new FileStreamHandler();
+
+                //Construimos la info :
+                var fileName = fileHandler.GetFileName(path); // nombre del archivo -> XXXX
+                Console.WriteLine(fileName);
+                var fileSize = fileHandler.GetFileSize(path); // tamaño del archivo -> YYYYYYYY
+                Console.WriteLine(fileSize);
+
+                var header = new FileHeader().Create(fileName, fileSize);
+                ourSocket.Send(header, header.Length, SocketFlags.None);
+
+                var fileNameBytes = Encoding.UTF8.GetBytes(fileName);
+                ourSocket.Send(fileNameBytes, fileNameBytes.Length, SocketFlags.None);
+
+                long parts = SpecificationHelper.GetParts(fileSize);
+                Console.WriteLine("Will Send {0} parts", parts);
+                long offset = 0;
+                long currentPart = 1;
+
+                while (fileSize > offset)
                 {
-                    var lastPartSize = (int) (fileSize - offset);
-                    data = fileStreamHandler.Read(path, offset, lastPartSize);
-                    offset += lastPartSize;
+                    Console.WriteLine($"current part: {currentPart}");
+                    byte[] data;
+                    if (currentPart == parts)
+                    {
+                        var lastPartSize = (int) (fileSize - offset);
+                        data = fileStreamHandler.Read(path, offset, lastPartSize);
+                        offset += lastPartSize;
+                    }
+                    else
+                    {
+                        data = fileStreamHandler.Read(path, offset, Specification.MaxPacketSize);
+                        offset += Specification.MaxPacketSize;
+                    }
+
+                    ourSocket.Send(data, data.Length, SocketFlags.None);
+                    currentPart++;
                 }
-                else
-                {
-                    data = fileStreamHandler.Read(path, offset, Specification.MaxPacketSize);
-                    offset += Specification.MaxPacketSize;
-                }
-                ourSocket.Send(data,data.Length,SocketFlags.None);
-                currentPart++;
             }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+            
         }
         
         public void ReceiveFile(Socket ourSocket, string path)
         {
+           
             FileStreamHandler fileStreamHandler = new FileStreamHandler();
             
             var header = new byte[FileHeader.GetLength()];
