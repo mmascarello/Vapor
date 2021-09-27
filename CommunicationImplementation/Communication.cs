@@ -12,14 +12,14 @@ namespace CommunicationImplementation
     {
         public void ReceiveData(Socket clientSocket, int length, byte[] buffer)
         {
+            Console.WriteLine("ENTRO al RECIVE DATA");
             var iRecv = 0;
             while (iRecv < length)
             {
                 try
                 {
                     var localRecv = clientSocket.Receive(buffer, iRecv, length - iRecv, SocketFlags.None);
-                    
-                    Console.WriteLine($"local recive : {localRecv}");
+                    Console.WriteLine($"Buffer en ReciveData: {Encoding.UTF8.GetString(buffer)}");
                     
                     if (localRecv == 0)
                     {
@@ -38,11 +38,18 @@ namespace CommunicationImplementation
                 }
 
             }
+            Console.WriteLine("SALGO del RECIVE DATA");
         }
 
         public void SendData(Socket ourSocket, Header header, string data)
         {
-            Console.WriteLine($"Comando en Send Data: {header.ICommand} - {header.IDataLength}");
+            Console.WriteLine("ENTRO al SEND DATA");
+            var headercopy = header.BuildRequest();
+            var headercopydecode = new Header();
+            headercopydecode.DecodeData(headercopy);
+            
+            Console.WriteLine($"Comando SendData: comando: {headercopydecode.ICommand} - tamaño: {headercopydecode.IDataLength} - direccion: {headercopydecode.SDirection}");
+            Console.WriteLine($"Para el buffer en SendData: {data}");
             
             var dataToSend = header.BuildRequest();
             
@@ -56,13 +63,12 @@ namespace CommunicationImplementation
 
             var bytesMessage = Encoding.UTF8.GetBytes(data);
             
-            Console.WriteLine($"data del send: {data.Length}");
-            
             while (sentBytes < bytesMessage.Length)
             {
                 sentBytes += ourSocket.Send(bytesMessage, sentBytes, bytesMessage.Length - sentBytes,
                     SocketFlags.None);
             }
+            Console.WriteLine("SALGO del SEND DATA");
         }
 
         public void SendFile(Socket ourSocket, string path)

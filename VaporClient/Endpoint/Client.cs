@@ -323,9 +323,7 @@ namespace VaporCliente.Endpoint
                 communication.ReceiveData(socket, headerLength, buffer);
                 var header = new Header();
                 header.DecodeData(buffer);
-
-                //swtich
-
+                
                 var bufferData2 = new byte[header.IDataLength];
                 communication.ReceiveData(socket, header.IDataLength, bufferData2);
                 Console.WriteLine("Message received: " + Encoding.UTF8.GetString(bufferData2));
@@ -388,10 +386,39 @@ namespace VaporCliente.Endpoint
             var newHeader = new Header();
             newHeader.DecodeData(newBuffer);
 
+            Console.WriteLine($"Comando en recibido en cliente: comando: {newHeader.ICommand} - tamaño: {newHeader.IDataLength} - direccion: {newHeader.SDirection}");
+            
             var newBufferData = new byte[newHeader.IDataLength];
             communication.ReceiveData(socket, newHeader.IDataLength, newBufferData);
 
             var message = Encoding.UTF8.GetString(newBufferData);
+            
+            Console.WriteLine($"datos del mensaje: {message}");
+            
+            
+            
+            
+            //------------------------------------------------------------------
+            
+            var headerLength = HeaderConstants.Request.Length + HeaderConstants.CommandLength +
+                               HeaderConstants.DataLength;
+            var buffer = new byte[headerLength];
+            try
+            {
+                communication.ReceiveData(socket, headerLength, buffer);
+                
+                var header = new Header();
+                header.DecodeData(buffer);
+
+                var bufferData2 = new byte[header.IDataLength];
+                communication.ReceiveData(socket, header.IDataLength, bufferData2);
+                Console.WriteLine("Message received: " + Encoding.UTF8.GetString(bufferData2));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("a");
+            }
+
             return message;
         }
     }

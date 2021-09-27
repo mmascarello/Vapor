@@ -125,7 +125,8 @@ namespace VaporServer.Endpoint
                     var header = new Header();
                     header.DecodeData(buffer);
                     
-                    Console.WriteLine($"commando {header.ICommand}");
+                    Console.WriteLine($"Comando en recibido en server: comando: {header.ICommand} - tamaño: {header.IDataLength} - direccion: {header.SDirection}");
+                    
                     
                     switch (header.ICommand)
                     {
@@ -329,21 +330,22 @@ namespace VaporServer.Endpoint
             var user = userAndGame[0];
             var game = userAndGame[1];
 
-            Console.WriteLine($"Message received: {user} and {game}");
-            
-            Header headerResponse;
             try
             {
                 businessLogic.UserLogic.BuyGame(user, game);
 
                 OkResponse(clientSocket, CommandConstants.BuyGame);
-                   
+
 
                 // ToDo:validar porque no funciona adquirir 2 juegos seguidos / adquirir un juego y error.
             }
             catch (Exception e)
             {
-                ErrorResponse(clientSocket,e.Message,CommandConstants.BuyGame);
+                ErrorResponse(clientSocket, e.Message, CommandConstants.BuyGame);
+            }
+            finally
+            {
+                Console.WriteLine("volviendo la menu");
             }
         }
 
