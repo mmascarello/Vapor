@@ -97,6 +97,10 @@ namespace VaporCliente.Endpoint
                     case "buscar juegos":
                         LookUpForGame(socket);
                         break;
+                        
+                    case "publicar review":
+                        PublicReview(socket);
+                        break;
                     
                     default:
                         Console.WriteLine("Opcion invalida");
@@ -107,6 +111,13 @@ namespace VaporCliente.Endpoint
             Console.WriteLine("Exiting Application");
         }
 
+        private void PublicReview(Socket socket)
+        {
+            Console.WriteLine("Ingrese el título del juego a borrar");
+            var game = GameValidation.ValidNotEmpty();
+            
+        }
+        
         private void DeleteGame(Socket socket)
         {
             Console.WriteLine("Ingrese el título del juego a borrar");

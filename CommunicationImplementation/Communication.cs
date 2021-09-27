@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Text;
-using Common.FileHandler;
 using CommunicationInterface;
 using FileProtocol.FileHandler;
 using FileProtocol.Protocol;
@@ -19,8 +18,12 @@ namespace CommunicationImplementation
                 try
                 {
                     var localRecv = clientSocket.Receive(buffer, iRecv, length - iRecv, SocketFlags.None);
+                    
+                    Console.WriteLine($"local recive : {localRecv}");
+                    
                     if (localRecv == 0)
                     {
+                        Console.WriteLine("se cerro la conexion porque local rec = 0");
                         clientSocket.Shutdown(SocketShutdown.Both);
                         clientSocket.Close();
                         return;
@@ -39,8 +42,10 @@ namespace CommunicationImplementation
 
         public void SendData(Socket ourSocket, Header header, string data)
         {
+            Console.WriteLine($"Comando en Send Data: {header.ICommand} - {header.IDataLength}");
+            
             var dataToSend = header.BuildRequest();
-
+            
             var sentBytes = 0;
             while (sentBytes < dataToSend.Length)
             {
@@ -50,6 +55,9 @@ namespace CommunicationImplementation
             sentBytes = 0;
 
             var bytesMessage = Encoding.UTF8.GetBytes(data);
+            
+            Console.WriteLine($"data del send: {data.Length}");
+            
             while (sentBytes < bytesMessage.Length)
             {
                 sentBytes += ourSocket.Send(bytesMessage, sentBytes, bytesMessage.Length - sentBytes,

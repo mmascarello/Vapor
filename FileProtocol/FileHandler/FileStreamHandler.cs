@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Common.FileHandler.Interfaces;
 
-namespace Common.FileHandler
+namespace FileProtocol.FileHandler
 {
     public class FileStreamHandler : IFileStreamHandler
     {

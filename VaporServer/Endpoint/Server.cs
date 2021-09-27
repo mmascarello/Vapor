@@ -125,10 +125,12 @@ namespace VaporServer.Endpoint
                     var header = new Header();
                     header.DecodeData(buffer);
                     
+                    Console.WriteLine($"commando {header.ICommand}");
+                    
                     switch (header.ICommand)
                     {
                         case CommandConstants.GetGames:
-                            GetGames(clientSocket);
+                            GetGames(clientSocket, header);
                             break;
                         
                         case  CommandConstants.BuyGame:
@@ -179,11 +181,6 @@ namespace VaporServer.Endpoint
                 this.gameLogic.DeleteGame(receiveGameNameBuffer);
                 
                 OkResponse(clientSocket,CommandConstants.DeleteGame);
-                
-                /*var mensaje = "El juego fue borrado correctamente";
-                var headerResponse = new Header(HeaderConstants.Response, CommandConstants.DeleteGame, mensaje.Length);
-                
-                communication.SendData(clientSocket,headerResponse,mensaje);*/
                 
             }
             catch (Exception e)
@@ -350,8 +347,11 @@ namespace VaporServer.Endpoint
             }
         }
 
-        private void GetGames(Socket clientSocket)
+        private void GetGames(Socket clientSocket, Header header)
         {
+            Console.WriteLine($"Data legth {header.IDataLength}");
+            
+            
             var gameList = businessLogic.GameLogic.GetGames();
             var games = String.Empty;
             gameList.ForEach(g => games += g.Title + "-");
