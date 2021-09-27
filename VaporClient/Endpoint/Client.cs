@@ -98,6 +98,10 @@ namespace VaporCliente.Endpoint
                         LookUpForGame(socket);
                         break;
                     
+                    case "help":
+                        Help();
+                        break;
+                    
                     default:
                         Console.WriteLine("Opcion invalida");
                         break;
@@ -105,6 +109,25 @@ namespace VaporCliente.Endpoint
             }
 
             Console.WriteLine("Exiting Application");
+        }
+
+        private void Help()
+        {
+            Console.WriteLine("\n");
+            Console.WriteLine("Los posibles comandos son:\n");
+            Console.WriteLine(" 'obtener juegos' ");
+            Console.WriteLine(" 'adquirir juego' ");
+            Console.WriteLine(" 'publicar juego' ");
+            Console.WriteLine(" 'modificar juego' ");
+            Console.WriteLine(" 'ver detalle juego' ");
+            Console.WriteLine(" 'borrar juego'  ");
+            Console.WriteLine(" 'buscar juegos' ");
+            Console.WriteLine(" 'obtener caractula'");
+            Console.WriteLine(" 'exit' (si desea desconectarse del servidor)\n");
+            Console.WriteLine("Ingrese su opcion  de preferencia.");
+            Console.WriteLine("Recomendacion: simepre tenga desactivado las mayusculas");
+
+            //ToDo: Poner recomendacion--> todo en minuscula?
         }
 
         private void DeleteGame(Socket socket)
