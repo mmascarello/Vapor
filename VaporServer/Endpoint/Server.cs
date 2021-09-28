@@ -355,21 +355,15 @@ namespace VaporServer.Endpoint
             var user = userAndGame[0];
             var game = userAndGame[1];
 
-            Console.WriteLine($"Message received: {user} and {game}");
-            
-            Header headerResponse;
             try
             {
                 businessLogic.UserLogic.BuyGame(user, game);
 
                 OkResponse(clientSocket, CommandConstants.BuyGame);
-                   
-
-                // ToDo:validar porque no funciona adquirir 2 juegos seguidos / adquirir un juego y error.
             }
             catch (Exception e)
             {
-                ErrorResponse(clientSocket,e.Message,CommandConstants.BuyGame);
+                ErrorResponse(clientSocket, e.Message, CommandConstants.BuyGame);
             }
         }
 
@@ -386,8 +380,8 @@ namespace VaporServer.Endpoint
         
         private void ErrorResponse(Socket clientSocket, string error,int command)
         {
-            var dataLength = (error.Length + ResponseConstants.Error.Length);
             var errorMessage = ResponseConstants.Error + error;
+            var dataLength = errorMessage.Length;
             var headerResponse = new Header(HeaderConstants.Response, command,
                 dataLength);
             communication.SendData(clientSocket, headerResponse, errorMessage);
@@ -395,11 +389,9 @@ namespace VaporServer.Endpoint
         
         private void OkResponse(Socket clientSocket,int command)
         {
-            var dataLength = ResponseConstants.Ok.Length;
-            var message = ResponseConstants.Ok;
             var headerResponse = new Header(HeaderConstants.Response, command,
-                dataLength);
-            communication.SendData(clientSocket, headerResponse, message);
+                ResponseConstants.Ok.Length);
+            communication.SendData(clientSocket, headerResponse, ResponseConstants.Ok);
         }
     }
 }

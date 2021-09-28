@@ -9,7 +9,7 @@ namespace ValidationsImplementations
         {
             var isOk = false;
             var input = "";
-            var message = "No existe la imagen, verifique que el nombre del archivo este todo en minúscula";
+            var message = "No existe la imagen, verifique que el nombre del archivo este todo en minuscula";
             
             while(!isOk)
             {

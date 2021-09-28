@@ -1,4 +1,4 @@
-namespace Common.FileHandler.Interfaces
+namespace FileProtocol.FileHandler.Interfaces
 {
     public interface IFileStreamHandler
     {
