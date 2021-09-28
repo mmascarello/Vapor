@@ -72,9 +72,10 @@ namespace StringProtocol
                 _sDirection = Encoding.UTF8.GetString(data, 0, HeaderConstants.Request.Length);
                 var command =
                     Encoding.UTF8.GetString(data, HeaderConstants.Request.Length, HeaderConstants.CommandLength);
+                //Console.WriteLine($"DECODE: COMMAND: {command}");
                 _iCommand = int.Parse(command);
-                var dataLength = Encoding.UTF8.GetString(data,
-                    HeaderConstants.Request.Length + HeaderConstants.CommandLength, HeaderConstants.DataLength);
+                var dataLength = Encoding.UTF8.GetString(data,HeaderConstants.Request.Length + HeaderConstants.CommandLength, HeaderConstants.DataLength);
+                //Console.WriteLine($"DECODE: dataLength: {dataLength}");
                 _iDataLength = int.Parse(dataLength);
             }
             catch (Exception e)

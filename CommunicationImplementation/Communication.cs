@@ -12,14 +12,15 @@ namespace CommunicationImplementation
     {
         public void ReceiveData(Socket clientSocket, int length, byte[] buffer)
         {
-            Console.WriteLine("ENTRO al RECIVE DATA");
+            //Console.WriteLine("ENTRO al RECIVE DATA");
             var iRecv = 0;
             while (iRecv < length)
             {
                 try
                 {
+                    //Console.WriteLine($"DATA EN BUFFER ANTES: {Encoding.UTF8.GetString(buffer)}");
                     var localRecv = clientSocket.Receive(buffer, iRecv, length - iRecv, SocketFlags.None);
-                    Console.WriteLine($"Buffer en ReciveData: {Encoding.UTF8.GetString(buffer)}");
+                    //Console.WriteLine($"DATA EN BUFFER DESPUES: {Encoding.UTF8.GetString(buffer)}");
                     
                     if (localRecv == 0)
                     {
@@ -38,37 +39,41 @@ namespace CommunicationImplementation
                 }
 
             }
-            Console.WriteLine("SALGO del RECIVE DATA");
+            //Console.WriteLine("SALGO del RECIVE DATA");
         }
 
         public void SendData(Socket ourSocket, Header header, string data)
         {
-            Console.WriteLine("ENTRO al SEND DATA");
-            var headercopy = header.BuildRequest();
-            var headercopydecode = new Header();
-            headercopydecode.DecodeData(headercopy);
+            //Console.WriteLine("ENTRO al SEND DATA");
+            //var headercopy = header.BuildRequest();
+            //var headercopydecode = new Header();
+            //headercopydecode.DecodeData(headercopy);
             
-            Console.WriteLine($"Comando SendData: comando: {headercopydecode.ICommand} - tamaño: {headercopydecode.IDataLength} - direccion: {headercopydecode.SDirection}");
-            Console.WriteLine($"Para el buffer en SendData: {data}");
+            //Console.WriteLine($"Comando SendData: comando: {headercopydecode.ICommand} - tamano: {headercopydecode.IDataLength} - direccion: {headercopydecode.SDirection}");
+            //Console.WriteLine($"Para el buffer en SendData: {data}");
             
             var dataToSend = header.BuildRequest();
             
             var sentBytes = 0;
+            //Console.WriteLine($"Primer DataLength: {dataToSend.Length}");
             while (sentBytes < dataToSend.Length)
             {
                 sentBytes += ourSocket.Send(dataToSend, sentBytes, dataToSend.Length - sentBytes, SocketFlags.None);
+                //Console.WriteLine($"Primer SEND: {sentBytes}");
             }
 
-            sentBytes = 0;
-
+            var sentDataBytes = 0;
+            //Console.WriteLine($"LENGT {data.Length}");
+            //Console.WriteLine($"DATA {data}");
             var bytesMessage = Encoding.UTF8.GetBytes(data);
-            
-            while (sentBytes < bytesMessage.Length)
+            //Console.WriteLine($"Segundo DataLength: {bytesMessage.Length}");
+            while (sentDataBytes < bytesMessage.Length)
             {
-                sentBytes += ourSocket.Send(bytesMessage, sentBytes, bytesMessage.Length - sentBytes,
+                sentDataBytes += ourSocket.Send(bytesMessage, sentDataBytes, bytesMessage.Length - sentDataBytes,
                     SocketFlags.None);
+                //Console.WriteLine($"Segundo SEND: {sentDataBytes}");
             }
-            Console.WriteLine("SALGO del SEND DATA");
+            //Console.WriteLine("SALGO del SEND DATA");
         }
 
         public void SendFile(Socket ourSocket, string path)
@@ -92,13 +97,13 @@ namespace CommunicationImplementation
                 ourSocket.Send(fileNameBytes, fileNameBytes.Length, SocketFlags.None);
 
                 long parts = SpecificationHelper.GetParts(fileSize);
-                Console.WriteLine("Will Send {0} parts", parts);
+                //Console.WriteLine("Will Send {0} parts", parts);
                 long offset = 0;
                 long currentPart = 1;
 
                 while (fileSize > offset)
                 {
-                    Console.WriteLine($"current part: {currentPart}");
+                    //Console.WriteLine($"current part: {currentPart}");
                     byte[] data;
                     if (currentPart == parts)
                     {

@@ -181,11 +181,18 @@ namespace VaporServer.BusinessLogic
             return avr ;
         }
         
-        private Game GetGame(byte[] gameTitle)
+        public Game GetGame(byte[] gameTitle)
         {
             var gameName = Encoding.UTF8.GetString(gameTitle);
 
             var game = this.gameDb.GetGame(gameName);
+
+            return game;
+        }
+        
+        public Game GetGame(string gameTitle)
+        {
+            var game = this.gameDb.GetGame(gameTitle);
 
             return game;
         }

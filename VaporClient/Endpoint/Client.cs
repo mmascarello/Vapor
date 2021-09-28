@@ -4,6 +4,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using StringProtocol;
 using ValidationsImplementations;
 using VaporServer;
@@ -213,24 +214,24 @@ namespace VaporCliente.Endpoint
         
         private void ModifyGame(Socket socket)
         {
-            Console.WriteLine("Ingrese el título del juego a modificar");
+            Console.WriteLine("Ingrese el titulo del juego a modificar");
             var gameToModify = GameValidation.ValidNotEmpty();
             
-            Console.WriteLine("Si no desea modificar la información del campo, dejelo vacio y presione enter ");
+            Console.WriteLine("Si no desea modificar la informacion del campo, dejelo vacio y presione enter");
             
-            Console.WriteLine("Ingrese un título");
+            Console.WriteLine("Ingrese un titulo");
             var title = Console.ReadLine();
 
             Console.WriteLine("Ingrese un genero:");
             var gender = Console.ReadLine();
 
-            Console.WriteLine("Ingrese una calificación del 0 a 5");
+            Console.WriteLine("Ingrese una calificacion del 0 a 5");
             var esbr = GameValidation.ModifyCalification();
             
-            Console.WriteLine("Haga una breve descripción del juego");
+            Console.WriteLine("Haga una breve descripcion del juego");
             var sinopsis = Console.ReadLine();
 
-            Console.WriteLine("Ingrese una carátula");
+            Console.WriteLine("Ingrese una caratula");
             var coverPage = ImageValidation.ValidCover(filesPathToSend);
             
             var publicGame = gameToModify +  "|" + title + "|" + gender + "|" + esbr + "|" + sinopsis + "|" + coverPage +'|';
@@ -264,7 +265,7 @@ namespace VaporCliente.Endpoint
             Console.WriteLine("Haga una breve descripcion del juego");
             var sinopsis = GameValidation.ValidNotEmpty();
 
-            Console.WriteLine("Ingrese una carátula, en caso de no querer agregar una, presione enter");
+            Console.WriteLine("Ingrese una caratula, en caso de no querer agregar una, presione enter");
             var coverPage = ImageValidation.ValidCover(filesPathToSend);
 
             var publicGame = title + "|" + gender + "|" + esbr + "|" + sinopsis + "|" + coverPage +'|';
@@ -297,6 +298,7 @@ namespace VaporCliente.Endpoint
             var header = new Header(HeaderConstants.Request, CommandConstants.BuyGame ,userAndGame.Length);
             
             communication.SendData(socket, header, userAndGame);
+            
             try
             {
                 var response = GetResponse(socket);
@@ -315,30 +317,16 @@ namespace VaporCliente.Endpoint
 
             communication.SendData(socket, headerToSend, String.Empty);
 
-            var headerLength = HeaderConstants.Request.Length + HeaderConstants.CommandLength +
-                               HeaderConstants.DataLength;
-            var buffer = new byte[headerLength];
-            try
-            {
-                communication.ReceiveData(socket, headerLength, buffer);
-                var header = new Header();
-                header.DecodeData(buffer);
-                
-                var bufferData2 = new byte[header.IDataLength];
-                communication.ReceiveData(socket, header.IDataLength, bufferData2);
-                Console.WriteLine("Message received: " + Encoding.UTF8.GetString(bufferData2));
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("explote");
-            }
+            var respuesta = GetResponse(socket);
+            Console.WriteLine(respuesta);
+            
         }
 
         private void GetCoverPage(Socket socket, string gameName)
         {
             if (String.IsNullOrEmpty(gameName))
             {
-                Console.WriteLine("Ingrese el nombre del juego: ");
+                Console.WriteLine("Ingrese el nombre del juego:");
                 gameName = GameValidation.ValidNotEmpty();
             }; 
             
@@ -352,7 +340,7 @@ namespace VaporCliente.Endpoint
                 try
                 {
                     communication.ReceiveFile(socket,filesPathRecived);
-                    Console.WriteLine("Imagen recibida ");
+                    Console.WriteLine("Imagen recibida");
                 }
                 catch (Exception)
                 {
@@ -377,49 +365,21 @@ namespace VaporCliente.Endpoint
         
         private string GetResponse(Socket socket)
         {
-            var newHeaderLength = HeaderConstants.Response.Length + HeaderConstants.CommandLength +
-                                  HeaderConstants.DataLength;
-
-            var newBuffer = new Byte[newHeaderLength];
-            communication.ReceiveData(socket, newHeaderLength, newBuffer);
-
-            var newHeader = new Header();
-            newHeader.DecodeData(newBuffer);
-
-            Console.WriteLine($"Comando en recibido en cliente: comando: {newHeader.ICommand} - tamaño: {newHeader.IDataLength} - direccion: {newHeader.SDirection}");
-            
-            var newBufferData = new byte[newHeader.IDataLength];
-            communication.ReceiveData(socket, newHeader.IDataLength, newBufferData);
-
-            var message = Encoding.UTF8.GetString(newBufferData);
-            
-            Console.WriteLine($"datos del mensaje: {message}");
-            
-            
-            
-            
-            //------------------------------------------------------------------
-            
-            var headerLength = HeaderConstants.Request.Length + HeaderConstants.CommandLength +
+            var headerLength = HeaderConstants.Response.Length + HeaderConstants.CommandLength +
                                HeaderConstants.DataLength;
+           
             var buffer = new byte[headerLength];
-            try
-            {
-                communication.ReceiveData(socket, headerLength, buffer);
-                
-                var header = new Header();
-                header.DecodeData(buffer);
-
-                var bufferData2 = new byte[header.IDataLength];
-                communication.ReceiveData(socket, header.IDataLength, bufferData2);
-                Console.WriteLine("Message received: " + Encoding.UTF8.GetString(bufferData2));
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("a");
-            }
-
-            return message;
+            
+            communication.ReceiveData(socket, headerLength, buffer);
+            var header = new Header();
+            header.DecodeData(buffer);
+            
+            var bufferData2 = new byte[header.IDataLength];
+            
+            communication.ReceiveData(socket, header.IDataLength, bufferData2);
+            
+            return Encoding.UTF8.GetString(bufferData2);
+           
         }
     }
 }

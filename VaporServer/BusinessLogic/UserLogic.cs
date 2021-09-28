@@ -31,15 +31,15 @@ namespace VaporServer.BusinessLogic
         
         public void BuyGame(string user , string game)
         {
-            var errorMessage = "El usuario o el juego no existen ";
+            var errorMessage = "El usuario o el juego no existen";
             try
             {
-                var users = userDb.GetUsers();
-                var games = gameLogic.GetGames();
+                var getUser = userDb.GetUser(user);
+                var getGame = gameLogic.GetGame(game);
                
                 //si no encuentra el usuario o juego tira excepcion. 
-                var getUser = users.Find(u => u.UserLogin.Equals(user));
-                var getGame = games.Find(g => g.Title.Equals(game));
+                //var getUser = users.Find(u => u.UserLogin.Equals(user));
+                //var getGame = games.Find(g => g.Title.Equals(game));
 
                 var userId = getUser.Id;
                 var gameId = getGame.Id;
@@ -50,7 +50,7 @@ namespace VaporServer.BusinessLogic
                 }
                 else
                 {
-                    errorMessage = "El usuario ya compró este juego ";
+                    errorMessage = "El usuario ya compro este juego";
                     throw new Exception(errorMessage);
                 }
             }

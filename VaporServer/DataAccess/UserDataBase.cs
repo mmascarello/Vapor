@@ -28,6 +28,14 @@ namespace VaporServer.DataAccess
                 return users;
             }
         }
+        
+        public User GetUser(string login)
+        {
+            lock (locker)
+            {
+                return users.Find(u => u.UserLogin==login);
+            }
+        }
 
         public void BuyGame(Guid userId, Guid gameId)
         {
