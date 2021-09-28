@@ -35,12 +35,17 @@ namespace VaporCliente.Endpoint
             serverPort = int.Parse(manager.ReadSetting((ClientConfig.ServerPortConfigKey)));
             this.filesPathRecived = manager.ReadSetting(ClientConfig.FilePathForRecive);
             this.filesPathToSend = manager.ReadSetting(ClientConfig.FilePathToSend);
-            
+            System.IO.Directory.CreateDirectory(filesPathRecived);
+            System.IO.Directory.CreateDirectory(filesPathToSend);
+                
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.Bind(new IPEndPoint(IPAddress.Parse(clientIpAddress), clientPort));
             socket.Connect(serverIp, serverPort);
             
-            ShowMenu();
+            Console.WriteLine("Bienvenido al sistema cliente");
+            Console.WriteLine("");
+            
+            Help();
             
             HandleClient(socket);
             
@@ -51,7 +56,9 @@ namespace VaporCliente.Endpoint
             var connected = true;
 
             while (connected)
-            {
+            {   
+                Console.WriteLine("");
+                Console.WriteLine("Esperando comando... (help para ver menu)");
                 var opcion = Console.ReadLine();
                 
                 switch (opcion)
@@ -117,7 +124,6 @@ namespace VaporCliente.Endpoint
 
         private void Help()
         {
-            Console.WriteLine("\n");
             Console.WriteLine("Los posibles comandos son:\n");
             Console.WriteLine(" 'obtener juegos' ");
             Console.WriteLine(" 'adquirir juego' ");
@@ -158,7 +164,7 @@ namespace VaporCliente.Endpoint
             }
             catch (Exception)
             {
-                Console.WriteLine("explote");
+                Console.WriteLine("Error intentelo nuevamente");
             }
 
         }
@@ -258,24 +264,24 @@ namespace VaporCliente.Endpoint
         
         private void ModifyGame(Socket socket)
         {
-            Console.WriteLine("Ingrese el título del juego a modificar");
+            Console.WriteLine("Ingrese el titulo del juego a modificar");
             var gameToModify = GameValidation.ValidNotEmpty();
             
-            Console.WriteLine("Si no desea modificar la información del campo, dejelo vacio y presione enter ");
+            Console.WriteLine("Si no desea modificar la informacion del campo, dejelo vacio y presione enter");
             
-            Console.WriteLine("Ingrese un título");
+            Console.WriteLine("Ingrese un titulo");
             var title = Console.ReadLine();
 
             Console.WriteLine("Ingrese un genero:");
             var gender = Console.ReadLine();
 
-            Console.WriteLine("Ingrese una calificación del 0 a 5");
+            Console.WriteLine("Ingrese una calificacion del 0 a 5");
             var esbr = GameValidation.ModifyESRB();
             
-            Console.WriteLine("Haga una breve descripción del juego");
+            Console.WriteLine("Haga una breve descripcion del juego");
             var sinopsis = Console.ReadLine();
 
-            Console.WriteLine("Ingrese una carátula");
+            Console.WriteLine("Ingrese una caratula");
             var coverPage = ImageValidation.ValidCover(filesPathToSend);
             
             var publicGame = gameToModify +  "|" + title + "|" + gender + "|" + esbr + "|" + sinopsis + "|" + coverPage +'|';
@@ -309,7 +315,7 @@ namespace VaporCliente.Endpoint
             Console.WriteLine("Haga una breve descripcion del juego");
             var sinopsis = GameValidation.ValidNotEmpty();
 
-            Console.WriteLine("Ingrese una carátula, en caso de no querer agregar una, presione enter");
+            Console.WriteLine("Ingrese una caratula, en caso de no querer agregar una, presione enter");
             var coverPage = ImageValidation.ValidCover(filesPathToSend);
 
             var publicGame = title + "|" + gender + "|" + esbr + "|" + sinopsis + "|" + coverPage +'|';
@@ -350,7 +356,7 @@ namespace VaporCliente.Endpoint
             }
             catch (Exception)
             {
-                Console.WriteLine("explote");
+                Console.WriteLine("Error intentelo nuevamente");
             }
         }
         
@@ -361,32 +367,16 @@ namespace VaporCliente.Endpoint
 
             communication.SendData(socket, headerToSend, String.Empty);
 
-            var headerLength = HeaderConstants.Request.Length + HeaderConstants.CommandLength +
-                               HeaderConstants.DataLength;
-            var buffer = new byte[headerLength];
-            try
-            {
-                communication.ReceiveData(socket, headerLength, buffer);
-                var header = new Header();
-                header.DecodeData(buffer);
-
-                //swtich
-
-                var bufferData2 = new byte[header.IDataLength];
-                communication.ReceiveData(socket, header.IDataLength, bufferData2);
-                Console.WriteLine("Message received: " + Encoding.UTF8.GetString(bufferData2));
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("explote");
-            }
+            var respuesta = GetResponse(socket);
+            Console.WriteLine(respuesta);
+            
         }
 
         private void GetCoverPage(Socket socket, string gameName)
         {
             if (String.IsNullOrEmpty(gameName))
             {
-                Console.WriteLine("Ingrese el nombre del juego: ");
+                Console.WriteLine("Ingrese el nombre del juego:");
                 gameName = GameValidation.ValidNotEmpty();
             }; 
             
@@ -400,11 +390,11 @@ namespace VaporCliente.Endpoint
                 try
                 {
                     communication.ReceiveFile(socket,filesPathRecived);
-                    Console.WriteLine("Imagen recibida ");
+                    Console.WriteLine("Imagen recibida");
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine("explote");
+                    Console.WriteLine("Error intentelo nuevamente");
                 }
             }
             else
@@ -414,15 +404,6 @@ namespace VaporCliente.Endpoint
            
         }
 
-        private void ShowMenu()
-        {
-            Console.WriteLine("Bienvenido al Sistema Client");
-            Console.WriteLine("Opciones validas: ");
-            Console.WriteLine("juegos -> obtiene el listado de juegos en el sistema");
-            Console.WriteLine("exit -> abandonar el programa");
-            Console.WriteLine("Ingrese su opcion: ");
-        }
-        
         private string GetResponse(Socket socket)
         {
             var newHeaderLength = HeaderConstants.Response.Length + HeaderConstants.CommandLength +

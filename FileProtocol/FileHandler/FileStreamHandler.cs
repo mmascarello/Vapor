@@ -1,8 +1,8 @@
 using System;
 using System.IO;
-using Common.FileHandler.Interfaces;
+using FileProtocol.FileHandler.Interfaces;
 
-namespace Common.FileHandler
+namespace FileProtocol.FileHandler
 {
     public class FileStreamHandler : IFileStreamHandler
     {

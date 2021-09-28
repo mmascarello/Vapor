@@ -31,7 +31,7 @@ namespace VaporServer.BusinessLogic
         
         public void BuyGame(string user , string game)
         {
-            var errorMessage = "El usuario o el juego no existen ";
+            var errorMessage = "El usuario o el juego no existen";
             try
             {
                 var users = userDb.GetUsers();
@@ -50,7 +50,7 @@ namespace VaporServer.BusinessLogic
                 }
                 else
                 {
-                    errorMessage = "El usuario ya compró este juego ";
+                    errorMessage = "El usuario ya compro este juego";
                     throw new Exception(errorMessage);
                 }
             }
