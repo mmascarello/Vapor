@@ -35,6 +35,7 @@ namespace VaporServer.Endpoint
             this.serverPort = int.Parse(this.settingsManager.ReadSetting(ServerConfig.SeverPortConfigKey));
             this.backLog = int.Parse(this.settingsManager.ReadSetting(ServerConfig.MaxConnectionConfigKey));
             this.serverFilesPath = this.settingsManager.ReadSetting(ServerConfig.ServerFilePath);
+            System.IO.Directory.CreateDirectory(serverFilesPath);
         }
 
         public void Start()

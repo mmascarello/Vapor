@@ -35,7 +35,9 @@ namespace VaporCliente.Endpoint
             serverPort = int.Parse(manager.ReadSetting((ClientConfig.ServerPortConfigKey)));
             this.filesPathRecived = manager.ReadSetting(ClientConfig.FilePathForRecive);
             this.filesPathToSend = manager.ReadSetting(ClientConfig.FilePathToSend);
-            
+            System.IO.Directory.CreateDirectory(filesPathRecived);
+            System.IO.Directory.CreateDirectory(filesPathToSend);
+                
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.Bind(new IPEndPoint(IPAddress.Parse(clientIpAddress), clientPort));
             socket.Connect(serverIp, serverPort);
