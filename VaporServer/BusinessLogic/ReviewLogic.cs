@@ -67,5 +67,20 @@ namespace VaporServer.BusinessLogic
             
             return avr;
         }
+        
+        public Guid PublicReviewInGame(string description, int rating)
+        {
+            var review = new Review();
+
+            var reviewId = Guid.NewGuid();
+
+            review.Description = description;
+            review.Rating = rating;
+            review.Id = reviewId;
+            
+            reviewDataBase.AddReview(review);
+            
+            return reviewId;
+        }
     }
 }

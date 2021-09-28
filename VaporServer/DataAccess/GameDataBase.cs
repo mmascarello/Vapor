@@ -147,5 +147,21 @@ namespace VaporServer.DataAccess
                 throw new Exception("El juego no existe");
             }
         }
+        
+        public void AddReviewToGame(string gameTitle, Guid reviewId)
+        {
+            try
+            {
+                lock (locker)
+                {
+                    var game = games.Find(g => g.Title.Equals(gameTitle));
+                    game.Reviews.Add(reviewId);
+                }
+            }
+            catch (ArgumentNullException e)
+            {
+                throw new Exception("El juego no existe");
+            }
+        }
     }
 }

@@ -98,6 +98,10 @@ namespace VaporCliente.Endpoint
                         LookUpForGame(socket);
                         break;
                     
+                    case "publicar calificacion":
+                        PublicCalification(socket);
+                        break;
+                    
                     case "help":
                         Help();
                         break;
@@ -123,13 +127,42 @@ namespace VaporCliente.Endpoint
             Console.WriteLine(" 'borrar juego'  ");
             Console.WriteLine(" 'buscar juegos' ");
             Console.WriteLine(" 'obtener caractula'");
+            Console.WriteLine(" 'publicar calificacion'");
             Console.WriteLine(" 'exit' (si desea desconectarse del servidor)\n");
             Console.WriteLine("Ingrese su opcion  de preferencia.");
             Console.WriteLine("Recomendacion: simepre tenga desactivado las mayusculas");
-
-            //ToDo: Poner recomendacion--> todo en minuscula?
         }
 
+        private void PublicCalification(Socket socket)
+        {
+            Console.WriteLine("Ingrese un juego de los siguientes:");
+            GetGames(socket);
+            var game = ValidationsImplementations.GameValidation.ValidNotEmpty();
+            
+            Console.WriteLine("Ingrese un rating entre 1 al 5");
+            var rating = ValidationsImplementations.GameValidation.ValidateRating();
+            
+            Console.WriteLine("Ingrese una review (opinion del juego)");
+            var review = ValidationsImplementations.GameValidation.ValidNotEmpty();
+            
+            var data = game+"|"+rating+"|"+review+"|";
+            
+            var header = new Header(HeaderConstants.Request, CommandConstants.PublicCalification ,data.Length);
+            
+            communication.SendData(socket, header, data);
+            
+            try
+            {
+                var response = GetResponse(socket);
+                Console.WriteLine(response);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("explote");
+            }
+
+        }
+        
         private void DeleteGame(Socket socket)
         {
             Console.WriteLine("Ingrese el título del juego a borrar");
@@ -185,7 +218,9 @@ namespace VaporCliente.Endpoint
 
             try
             {
+
                 var response = GetResponse(socket);
+                
                 if(!response.Contains(ResponseConstants.Error)){
 
                     var getInformation = response.Split('|');
@@ -194,8 +229,6 @@ namespace VaporCliente.Endpoint
                     var gameGender = getInformation[2];
                     var gameSinopsis = getInformation[3];
                     var gameESRB = getInformation[4];
-
-                    //ToDo: Obtener Imagen
 
                     Console.WriteLine("Mi rating es: "+ratingAverage);
                     Console.WriteLine("Mis reviews: "+gameReviews);
@@ -237,7 +270,7 @@ namespace VaporCliente.Endpoint
             var gender = Console.ReadLine();
 
             Console.WriteLine("Ingrese una calificación del 0 a 5");
-            var esbr = GameValidation.ModifyCalification();
+            var esbr = GameValidation.ModifyESRB();
             
             Console.WriteLine("Haga una breve descripción del juego");
             var sinopsis = Console.ReadLine();
@@ -271,7 +304,7 @@ namespace VaporCliente.Endpoint
             var gender = GameValidation.ValidNotEmpty();
 
             Console.WriteLine("Ingrese una calificacion del 0 al 5");
-            var esbr = GameValidation.ValidCalification();
+            var esbr = GameValidation.ValidESBR();
             
             Console.WriteLine("Haga una breve descripcion del juego");
             var sinopsis = GameValidation.ValidNotEmpty();
@@ -309,6 +342,7 @@ namespace VaporCliente.Endpoint
             var header = new Header(HeaderConstants.Request, CommandConstants.BuyGame ,userAndGame.Length);
             
             communication.SendData(socket, header, userAndGame);
+           
             try
             {
                 var response = GetResponse(socket);

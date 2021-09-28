@@ -46,7 +46,7 @@ namespace ValidationsImplementations
             return input.ToLower();
         }
         
-        public static string ValidCalification()
+        public static string ValidESBR()
         {
             var isOk = false;
             var input = "";
@@ -78,7 +78,7 @@ namespace ValidationsImplementations
             return input.ToLower();
         }
         
-        public static string ModifyCalification()
+        public static string ModifyESRB()
         {
             var isOk = false;
             var input = "";
@@ -140,6 +140,38 @@ namespace ValidationsImplementations
             }
 
             return value.ToLower();
+        }
+        
+        
+        public static string ValidateRating()
+        {
+            var isOk = false;
+            var input = "";
+            var message ="Ingrese un numero entre 1 y 5";
+            
+            while(!isOk)
+            {
+                input = Console.ReadLine();
+                try
+                {
+                    var num = Convert.ToInt32(input);
+                    if (num < 1 || num > 5)
+                    {
+                        Console.WriteLine(message);
+                    }
+                    else
+                    {
+                        isOk = true;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(message);
+                }
+                
+            }
+
+            return input.ToLower();
         }
     }
 }

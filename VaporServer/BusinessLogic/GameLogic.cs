@@ -259,7 +259,7 @@ namespace VaporServer.BusinessLogic
         private string GetTitles(List<Game> games)
         {
             var gamesToReturn = "";
-            
+
             foreach (var g in games)
             {
                 gamesToReturn += g.Title + "-";
@@ -267,5 +267,19 @@ namespace VaporServer.BusinessLogic
 
             return gamesToReturn;
         }
+
+        public void PublicReviewInGame(Byte[] calificationAndGame)
+        {
+            var value = Encoding.UTF8.GetString(calificationAndGame).Split("|");
+            var gameTitle = value[0];
+            var rating = Convert.ToInt32(value[1]);
+            var description = value[2];
+
+            var reviewId = reviewLogic.PublicReviewInGame(description, rating);
+            
+            this.gameDb.AddReviewToGame(gameTitle,reviewId);
+
+        }
+        
     }
 }

@@ -27,12 +27,12 @@ namespace VaporServer
             
             reviewDataBase.AddReview(new Review()
             {
-                Id = reviewMica, Description = "este juego es muy bueno ", Rating = 4, UserId = micaId
+                Id = reviewMica, Description = "este juego es muy bueno ", Rating = 4   /*, UserId = micaId*/
             });
             
             reviewDataBase.AddReview(new Review()
             {
-                Id = reviewMaxi, Description = "este juego es muy malo ", Rating = 2, UserId = maxiId
+                Id = reviewMaxi, Description = "este juego es muy malo ", Rating = 2 /*, UserId = maxiId*/
             });
             
             

@@ -158,6 +158,11 @@ namespace VaporServer.Endpoint
                         case CommandConstants.LookupGame:
                             LookupGame(clientSocket, header);
                             break;
+                        
+                        case CommandConstants.PublicCalification:
+                            PublicCalification(clientSocket, header);
+                            break;
+                        
                     }
                 }
                 catch (Exception e)
@@ -165,6 +170,24 @@ namespace VaporServer.Endpoint
                     Console.WriteLine($"Thread is closing, will not process more data...");
                     remoteConnectionClosed = true;
                 }
+            }
+        }
+
+        private void PublicCalification(Socket clientSocket, Header header)
+        {
+
+            var receiveGameAndReview = new Byte[header.IDataLength];
+            
+            communication.ReceiveData(clientSocket, header.IDataLength, receiveGameAndReview);
+            try
+            {
+                this.gameLogic.PublicReviewInGame(receiveGameAndReview);
+                
+                OkResponse(clientSocket,CommandConstants.PublicCalification);
+            }
+            catch (Exception e)
+            {
+                ErrorResponse(clientSocket,e.Message,CommandConstants.PublicCalification);
             }
         }
 
