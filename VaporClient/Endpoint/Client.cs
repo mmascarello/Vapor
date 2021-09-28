@@ -40,7 +40,10 @@ namespace VaporCliente.Endpoint
             socket.Bind(new IPEndPoint(IPAddress.Parse(clientIpAddress), clientPort));
             socket.Connect(serverIp, serverPort);
             
-            ShowMenu();
+            Console.WriteLine("Bienvenido al sistema cliente");
+            Console.WriteLine("");
+            
+            Help();
             
             HandleClient(socket);
             
@@ -51,7 +54,9 @@ namespace VaporCliente.Endpoint
             var connected = true;
 
             while (connected)
-            {
+            {   
+                Console.WriteLine("");
+                Console.WriteLine("Esperando comando... (help para ver menu)");
                 var opcion = Console.ReadLine();
                 
                 switch (opcion)
@@ -117,7 +122,6 @@ namespace VaporCliente.Endpoint
 
         private void Help()
         {
-            Console.WriteLine("\n");
             Console.WriteLine("Los posibles comandos son:\n");
             Console.WriteLine(" 'obtener juegos' ");
             Console.WriteLine(" 'adquirir juego' ");
@@ -158,7 +162,7 @@ namespace VaporCliente.Endpoint
             }
             catch (Exception)
             {
-                Console.WriteLine("explote");
+                Console.WriteLine("Error intentelo nuevamente");
             }
 
         }
@@ -350,7 +354,7 @@ namespace VaporCliente.Endpoint
             }
             catch (Exception)
             {
-                Console.WriteLine("explote");
+                Console.WriteLine("Error intentelo nuevamente");
             }
         }
         
@@ -388,7 +392,7 @@ namespace VaporCliente.Endpoint
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine("explote");
+                    Console.WriteLine("Error intentelo nuevamente");
                 }
             }
             else
@@ -398,15 +402,6 @@ namespace VaporCliente.Endpoint
            
         }
 
-        private void ShowMenu()
-        {
-            Console.WriteLine("Bienvenido al Sistema Client");
-            Console.WriteLine("Opciones validas: ");
-            Console.WriteLine("juegos -> obtiene el listado de juegos en el sistema");
-            Console.WriteLine("exit -> abandonar el programa");
-            Console.WriteLine("Ingrese su opcion: ");
-        }
-        
         private string GetResponse(Socket socket)
         {
             var newHeaderLength = HeaderConstants.Response.Length + HeaderConstants.CommandLength +
