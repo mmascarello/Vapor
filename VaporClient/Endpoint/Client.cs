@@ -314,7 +314,7 @@ namespace VaporCliente.Endpoint
             Console.WriteLine("Ingrese un titulo");
             var title = GameValidation.ValidNotEmpty();
 
-            Console.WriteLine("Ingrese un genero de los siguientes:");
+            Console.WriteLine("Ingrese un genero:");
             var gender = GameValidation.ValidNotEmpty();
 
             Console.WriteLine("Ingrese una calificacion del 0 al 5");
@@ -327,7 +327,7 @@ namespace VaporCliente.Endpoint
             var coverPage = ImageValidation.ValidCover(filesPathToSend);
 
             var publicGame = title + "|" + gender + "|" + esbr + "|" + sinopsis + "|" + coverPage +'|';
-
+            
             var header = new Header(HeaderConstants.Request, CommandConstants.PublicGame, publicGame.Length);
 
             communication.SendData(socket, header, publicGame);
@@ -335,6 +335,7 @@ namespace VaporCliente.Endpoint
             if (!string.IsNullOrEmpty(coverPage))
             {
                 var fileToSend = filesPathToSend + coverPage;
+                
                 communication.SendFile(socket, fileToSend);
             }
             

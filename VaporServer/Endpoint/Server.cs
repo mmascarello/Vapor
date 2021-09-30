@@ -40,7 +40,7 @@ namespace VaporServer.Endpoint
 
         public void Start()
         {
-            Console.WriteLine($"ip: {serverIpAddress} - puerto {serverPort} - backlog {backLog}");
+            //Console.WriteLine($"ip: {serverIpAddress} - puerto {serverPort} - backlog {backLog}");
             
             var socketServer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             
@@ -64,8 +64,7 @@ namespace VaporServer.Endpoint
                 {
                     case "exit":
                         exit = true;
-                        try
-                        {
+                        
                             socketServer.Close(0);
                             foreach (var client in clients)
                             {
@@ -76,16 +75,7 @@ namespace VaporServer.Endpoint
                             var fakeSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream,
                                 ProtocolType.Tcp);
                             fakeSocket.Connect(serverIpAddress, serverPort);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("");
-                        }
-                        finally
-                        {
-                            Console.WriteLine("Servidor desconectado, presione una tecla para continuar...");
-                        }
-                        break;
+                            break;
                     default:
                         Console.WriteLine("Opcion incorrecta ingresada");
                         break;
@@ -180,7 +170,7 @@ namespace VaporServer.Endpoint
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Thread is closing, will not process more data...");
+                    //Console.WriteLine($"Thread is closing, will not process more data...");
                     remoteConnectionClosed = true;
                 }
             }
@@ -215,11 +205,6 @@ namespace VaporServer.Endpoint
                 this.gameLogic.DeleteGame(receiveGameNameBuffer);
                 
                 OkResponse(clientSocket,CommandConstants.DeleteGame);
-                
-                /*var mensaje = "El juego fue borrado correctamente";
-                var headerResponse = new Header(HeaderConstants.Response, CommandConstants.DeleteGame, mensaje.Length);
-                
-                communication.SendData(clientSocket,headerResponse,mensaje);*/
                 
             }
             catch (Exception e)
@@ -309,12 +294,12 @@ namespace VaporServer.Endpoint
             var gameBuffer = new byte[header.IDataLength];
 
             communication.ReceiveData(clientSocket, header.IDataLength, gameBuffer);
-
+            
             try
             {
                 this.gameLogic.PublicGame(gameBuffer);
                 
-                var cover = Encoding.UTF8.GetString(gameBuffer).Split('|')[5];
+                var cover = Encoding.UTF8.GetString(gameBuffer).Split('|')[4];
                 
                 if (!string.IsNullOrEmpty(cover))
                 {
