@@ -327,7 +327,7 @@ namespace VaporCliente.Endpoint
             var coverPage = ImageValidation.ValidCover(filesPathToSend);
 
             var publicGame = title + "|" + gender + "|" + esbr + "|" + sinopsis + "|" + coverPage +'|';
-
+            
             var header = new Header(HeaderConstants.Request, CommandConstants.PublicGame, publicGame.Length);
 
             communication.SendData(socket, header, publicGame);
@@ -335,7 +335,7 @@ namespace VaporCliente.Endpoint
             if (!string.IsNullOrEmpty(coverPage))
             {
                 var fileToSend = filesPathToSend + coverPage;
-                Console.WriteLine(fileToSend);
+                
                 communication.SendFile(socket, fileToSend);
             }
             

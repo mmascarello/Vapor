@@ -12,6 +12,7 @@ namespace CommunicationImplementation
     {
         public void ReceiveData(Socket clientSocket, int length, byte[] buffer)
         {
+            //Console.WriteLine("ENTRE A RECIVE DATA");
             var iRecv = 0;
             while (iRecv < length)
             {
@@ -34,10 +35,13 @@ namespace CommunicationImplementation
                 }
 
             }
+            
+            //Console.WriteLine("SALI DE RECIVE DATA");
         }
 
         public void SendData(Socket ourSocket, Header header, string data)
         {
+            //Console.WriteLine("ENTRE A SEND DATA");
             var dataToSend = header.BuildRequest();
 
             var sentBytes = 0;
@@ -54,22 +58,22 @@ namespace CommunicationImplementation
                 sentBytes += ourSocket.Send(bytesMessage, sentBytes, bytesMessage.Length - sentBytes,
                     SocketFlags.None);
             }
+            //Console.WriteLine("SALI DE SEND DATA");
         }
 
         public void SendFile(Socket ourSocket, string path)
         {
-
+            //Console.WriteLine("ENTRE A SEND FILE");
             try
             {
+                
                 FileHandler fileHandler = new FileHandler();
                 FileStreamHandler fileStreamHandler = new FileStreamHandler();
 
                 //Construimos la info :
                 var fileName = fileHandler.GetFileName(path); // nombre del archivo -> XXXX
-                Console.WriteLine(fileName);
                 var fileSize = fileHandler.GetFileSize(path); // tamaño del archivo -> YYYYYYYY
-                Console.WriteLine(fileSize);
-
+                
                 var header = new FileHeader().Create(fileName, fileSize);
                 ourSocket.Send(header, header.Length, SocketFlags.None);
 
@@ -77,13 +81,13 @@ namespace CommunicationImplementation
                 ourSocket.Send(fileNameBytes, fileNameBytes.Length, SocketFlags.None);
 
                 long parts = SpecificationHelper.GetParts(fileSize);
-                Console.WriteLine("Will Send {0} parts", parts);
+                //Console.WriteLine("Will Send {0} parts", parts);
                 long offset = 0;
                 long currentPart = 1;
 
                 while (fileSize > offset)
                 {
-                    Console.WriteLine($"current part: {currentPart}");
+                    //Console.WriteLine($"current part: {currentPart}");
                     byte[] data;
                     if (currentPart == parts)
                     {
@@ -100,6 +104,7 @@ namespace CommunicationImplementation
                     ourSocket.Send(data, data.Length, SocketFlags.None);
                     currentPart++;
                 }
+                //Console.WriteLine("SALI DE SEND FILE");
             }
             catch (Exception e)
             {
@@ -110,7 +115,7 @@ namespace CommunicationImplementation
         
         public void ReceiveFile(Socket ourSocket, string path)
         {
-           
+            //Console.WriteLine("ENTRE A RECIVE FILE");
             FileStreamHandler fileStreamHandler = new FileStreamHandler();
             
             var header = new byte[FileHeader.GetLength()];
@@ -128,8 +133,8 @@ namespace CommunicationImplementation
             long parts = SpecificationHelper.GetParts(fileSize);
             long offset = 0; // el archivo armandose desde 0
             long currentPart = 1;
-            Console.WriteLine(path + fileName);
-            Console.WriteLine($"Will receive file {fileName} with size {fileSize} that will be received in {parts} segments");
+            //Console.WriteLine(path + fileName);
+            //Console.WriteLine($"Will receive file {fileName} with size {fileSize} that will be received in {parts} segments");
             while (fileSize > offset)
             {
                 byte[] data;
@@ -138,20 +143,21 @@ namespace CommunicationImplementation
                     var lastPartSize = (int)(fileSize - offset);
                     
                     data = new byte[lastPartSize];
-                    Console.WriteLine($"Will receive segment number {currentPart} with size {lastPartSize}");
+                    //Console.WriteLine($"Will receive segment number {currentPart} with size {lastPartSize}");
                     ReceiveData(ourSocket,lastPartSize,data);
                     offset += lastPartSize;
                 }
                 else
                 {
                     data = new byte[Specification.MaxPacketSize];
-                    Console.WriteLine($"Will receive segment number {currentPart} with size {Specification.MaxPacketSize}");
+                    //Console.WriteLine($"Will receive segment number {currentPart} with size {Specification.MaxPacketSize}");
                     ReceiveData(ourSocket,Specification.MaxPacketSize,data);
                     offset += Specification.MaxPacketSize;
                 }
                 fileStreamHandler.Write((path + fileName), data);
                 currentPart++;
             }
+            //Console.WriteLine("SALI DE RECIVE FILE");
         }
     }
 }
