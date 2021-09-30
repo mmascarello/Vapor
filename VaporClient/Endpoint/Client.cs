@@ -314,7 +314,7 @@ namespace VaporCliente.Endpoint
             Console.WriteLine("Ingrese un titulo");
             var title = GameValidation.ValidNotEmpty();
 
-            Console.WriteLine("Ingrese un genero de los siguientes:");
+            Console.WriteLine("Ingrese un genero:");
             var gender = GameValidation.ValidNotEmpty();
 
             Console.WriteLine("Ingrese una calificacion del 0 al 5");
@@ -335,6 +335,7 @@ namespace VaporCliente.Endpoint
             if (!string.IsNullOrEmpty(coverPage))
             {
                 var fileToSend = filesPathToSend + coverPage;
+                Console.WriteLine(fileToSend);
                 communication.SendFile(socket, fileToSend);
             }
             

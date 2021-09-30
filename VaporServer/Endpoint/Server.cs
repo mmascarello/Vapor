@@ -64,8 +64,7 @@ namespace VaporServer.Endpoint
                 {
                     case "exit":
                         exit = true;
-                        try
-                        {
+                        
                             socketServer.Close(0);
                             foreach (var client in clients)
                             {
@@ -76,16 +75,7 @@ namespace VaporServer.Endpoint
                             var fakeSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream,
                                 ProtocolType.Tcp);
                             fakeSocket.Connect(serverIpAddress, serverPort);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("");
-                        }
-                        finally
-                        {
-                            Console.WriteLine("Servidor desconectado, presione una tecla para continuar...");
-                        }
-                        break;
+                            break;
                     default:
                         Console.WriteLine("Opcion incorrecta ingresada");
                         break;

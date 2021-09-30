@@ -128,7 +128,7 @@ namespace CommunicationImplementation
             long parts = SpecificationHelper.GetParts(fileSize);
             long offset = 0; // el archivo armandose desde 0
             long currentPart = 1;
-
+            Console.WriteLine(path + fileName);
             Console.WriteLine($"Will receive file {fileName} with size {fileSize} that will be received in {parts} segments");
             while (fileSize > offset)
             {
