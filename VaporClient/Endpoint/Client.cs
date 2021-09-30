@@ -39,15 +39,23 @@ namespace VaporCliente.Endpoint
             System.IO.Directory.CreateDirectory(filesPathToSend);
                 
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            socket.Bind(new IPEndPoint(IPAddress.Parse(clientIpAddress), clientPort));
-            socket.Connect(serverIp, serverPort);
+            try
+            {
+                socket.Bind(new IPEndPoint(IPAddress.Parse(clientIpAddress), clientPort));
+                socket.Connect(serverIp, serverPort);
+                Console.WriteLine("Bienvenido al sistema cliente");
+                Console.WriteLine("");
             
-            Console.WriteLine("Bienvenido al sistema cliente");
-            Console.WriteLine("");
+                Help();
             
-            Help();
+                HandleClient(socket);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error al conectarse al servidor, intentelo mas tarde");
+                Console.ReadLine();
+            }
             
-            HandleClient(socket);
             
         }
 

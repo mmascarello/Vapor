@@ -46,12 +46,12 @@ namespace VaporServer
             
             gameDataBase.AddGames(new Game(){ Title = "super icy tower", ageAllowed = ESRB.SeventeenPlus ,Id =superIcyTowerId, Gender = "diversion", Sinopsis = "este es un juego para personas habilidosas"});
             
-            gameDataBase.AddGames(new Game(){ Title = "pokemon",Id = pokemonId, Gender = ""});
-            gameDataBase.AddGames(new Game(){ Title = "warcraft",Id = warCraftId, Gender = ""});
+            gameDataBase.AddGames(new Game(){ Title = "pokemon",Id = pokemonId, Gender = "aventura"});
+            gameDataBase.AddGames(new Game(){ Title = "warcraft",Id = warCraftId, Gender = "estrategia"});
             
             userDataBase.AddUser(new User(){UserLogin = "mica", Id = micaId, MyOwnedGames= new List<Guid>()
             {
-                superMarioId,bomermanId,warCraftId
+                superMarioId,bomermanId
             }});
             
             userDataBase.AddUser(new User(){UserLogin = "maxi", Id = maxiId, MyOwnedGames= new List<Guid>()
