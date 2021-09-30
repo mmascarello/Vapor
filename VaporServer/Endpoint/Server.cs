@@ -64,15 +64,27 @@ namespace VaporServer.Endpoint
                 {
                     case "exit":
                         exit = true;
-                        socketServer.Close(0);
-                        foreach (var client in clients)
+                        try
                         {
-                            client.Shutdown(SocketShutdown.Both);
-                            client.Close();
-                        }
+                            socketServer.Close(0);
+                            foreach (var client in clients)
+                            {
+                                client.Shutdown(SocketShutdown.Both);
+                                client.Close();
+                            }
 
-                        var fakeSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                        fakeSocket.Connect(serverIpAddress, serverPort);
+                            var fakeSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream,
+                                ProtocolType.Tcp);
+                            fakeSocket.Connect(serverIpAddress, serverPort);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("");
+                        }
+                        finally
+                        {
+                            Console.WriteLine("Servidor desconectado, presione una tecla para continuar...");
+                        }
                         break;
                     default:
                         Console.WriteLine("Opcion incorrecta ingresada");
@@ -103,7 +115,7 @@ namespace VaporServer.Endpoint
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    //Console.WriteLine(e);
                     exit = true;
                 }
             }
