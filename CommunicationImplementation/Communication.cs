@@ -10,19 +10,23 @@ namespace CommunicationImplementation
 {
     public class Communication : ICommunication
     {
-        public void ReceiveData(Socket clientSocket, int length, byte[] buffer)
+        public void ReadData(TcpClient tcpClient, int length, byte[] buffer)
         {
             //Console.WriteLine("ENTRE A RECIVE DATA");
+            var networkstream = tcpClient.GetStream();
+            
             var iRecv = 0;
             while (iRecv < length)
             {
                 try
                 {
-                    var localRecv = clientSocket.Receive(buffer, iRecv, length - iRecv, SocketFlags.None);
+                    var localRecv = networkstream.Read(buffer, iRecv, length - iRecv);
                     if (localRecv == 0)
                     {
-                        clientSocket.Shutdown(SocketShutdown.Both);
-                        clientSocket.Close();
+                        /*socket.Shutdown(SocketShutdown.Both);
+                        socket.Close();*/
+                        networkstream.Close();
+                        tcpClient.Close();
                         return;
                     }
 
@@ -39,34 +43,27 @@ namespace CommunicationImplementation
             //Console.WriteLine("SALI DE RECIVE DATA");
         }
 
-        public void SendData(Socket ourSocket, Header header, string data)
+        public void WriteData(TcpClient tcpClient, Header header, string data)
         {
             //Console.WriteLine("ENTRE A SEND DATA");
+            var networkstream = tcpClient.GetStream();
             var dataToSend = header.BuildRequest();
-
             var sentBytes = 0;
-            while (sentBytes < dataToSend.Length)
-            {
-                sentBytes += ourSocket.Send(dataToSend, sentBytes, dataToSend.Length - sentBytes, SocketFlags.None);
-            }
-
-            sentBytes = 0;
+            
+            networkstream.Write(dataToSend, sentBytes, dataToSend.Length);
 
             var bytesMessage = Encoding.UTF8.GetBytes(data);
-            while (sentBytes < bytesMessage.Length)
-            {
-                sentBytes += ourSocket.Send(bytesMessage, sentBytes, bytesMessage.Length - sentBytes,
-                    SocketFlags.None);
-            }
+            networkstream.Write(bytesMessage, sentBytes, bytesMessage.Length);
+
             //Console.WriteLine("SALI DE SEND DATA");
         }
 
-        public void SendFile(Socket ourSocket, string path)
+        public void WriteFile(TcpClient tcpClient, string path)
         {
             //Console.WriteLine("ENTRE A SEND FILE");
             try
             {
-                
+                var networkstream = tcpClient.GetStream();
                 FileHandler fileHandler = new FileHandler();
                 FileStreamHandler fileStreamHandler = new FileStreamHandler();
 
@@ -75,10 +72,10 @@ namespace CommunicationImplementation
                 var fileSize = fileHandler.GetFileSize(path); // tamaño del archivo -> YYYYYYYY
                 
                 var header = new FileHeader().Create(fileName, fileSize);
-                ourSocket.Send(header, header.Length, SocketFlags.None);
+                networkstream.Write(header,0, header.Length);
 
                 var fileNameBytes = Encoding.UTF8.GetBytes(fileName);
-                ourSocket.Send(fileNameBytes, fileNameBytes.Length, SocketFlags.None);
+                networkstream.Write(fileNameBytes, 0,fileNameBytes.Length);
 
                 long parts = SpecificationHelper.GetParts(fileSize);
                 //Console.WriteLine("Will Send {0} parts", parts);
@@ -101,7 +98,7 @@ namespace CommunicationImplementation
                         offset += Specification.MaxPacketSize;
                     }
 
-                    ourSocket.Send(data, data.Length, SocketFlags.None);
+                    networkstream.Write(data,0, data.Length);
                     currentPart++;
                 }
                 //Console.WriteLine("SALI DE SEND FILE");
@@ -113,20 +110,20 @@ namespace CommunicationImplementation
             
         }
         
-        public void ReceiveFile(Socket ourSocket, string path)
+        public void ReadFile(TcpClient tcpClient, string path)
         {
             //Console.WriteLine("ENTRE A RECIVE FILE");
             FileStreamHandler fileStreamHandler = new FileStreamHandler();
-            
+
             var header = new byte[FileHeader.GetLength()];
             
-            ReceiveData(ourSocket,FileHeader.GetLength(),header);
+            ReadData(tcpClient,FileHeader.GetLength(),header);
             
             var fileNameSize = BitConverter.ToInt32(header, 0);//int
             var fileSize = BitConverter.ToInt64(header, Specification.FixedFileNameLength);//long
 
             var fileNameByte = new byte[fileNameSize];
-            ReceiveData(ourSocket,fileNameSize,fileNameByte);
+            ReadData(tcpClient,fileNameSize,fileNameByte);
             
             var fileName = Encoding.UTF8.GetString(fileNameByte);
 
@@ -144,14 +141,14 @@ namespace CommunicationImplementation
                     
                     data = new byte[lastPartSize];
                     //Console.WriteLine($"Will receive segment number {currentPart} with size {lastPartSize}");
-                    ReceiveData(ourSocket,lastPartSize,data);
+                    ReadData(tcpClient,lastPartSize,data);
                     offset += lastPartSize;
                 }
                 else
                 {
                     data = new byte[Specification.MaxPacketSize];
                     //Console.WriteLine($"Will receive segment number {currentPart} with size {Specification.MaxPacketSize}");
-                    ReceiveData(ourSocket,Specification.MaxPacketSize,data);
+                    ReadData(tcpClient,Specification.MaxPacketSize,data);
                     offset += Specification.MaxPacketSize;
                 }
                 fileStreamHandler.Write((path + fileName), data);

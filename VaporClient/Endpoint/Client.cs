@@ -14,52 +14,55 @@ namespace VaporCliente.Endpoint
     {
         private readonly ICommunication communication;
         private readonly ISettingsManager manager;
-        private string clientIpAddress;
+        private readonly TcpClient tcpClient;
+        private IPEndPoint clientIpAddress;
         private int clientPort;
-        private  string serverIp;
+        private IPEndPoint severIpAddress;
         private int serverPort;
         private string filesPathRecived;
         private string filesPathToSend;
+        private string clientIP;
+        private string serverIP;
 
         public Client(ICommunication communication, ISettingsManager manager)
         {
             this.communication = communication;
             this.manager = manager;
+            clientPort = int.Parse(manager.ReadSetting((ClientConfig.ClientPortConfigKey)));
+            //clientIP = manager.ReadSetting(ClientConfig.ClientIpConfigKey);
+            clientIpAddress = new IPEndPoint(IPAddress.Loopback,clientPort);
+            tcpClient = new TcpClient(clientIpAddress);
+            //serverIP = manager.ReadSetting((ClientConfig.ServerIpConfigKey));
+            serverPort = int.Parse(manager.ReadSetting((ClientConfig.ServerPortConfigKey)));
+            severIpAddress = new IPEndPoint(IPAddress.Loopback, serverPort);
         }
 
         public void Start()
         {
-            clientIpAddress = manager.ReadSetting(ClientConfig.ClientIpConfigKey);
-            clientPort = int.Parse(manager.ReadSetting((ClientConfig.ClientPortConfigKey)));
-            serverIp = manager.ReadSetting((ClientConfig.ServerIpConfigKey));
-            serverPort = int.Parse(manager.ReadSetting((ClientConfig.ServerPortConfigKey)));
+            /*serverPort = int.Parse(manager.ReadSetting((ClientConfig.ServerPortConfigKey)));*/
             this.filesPathRecived = manager.ReadSetting(ClientConfig.FilePathForRecive);
             this.filesPathToSend = manager.ReadSetting(ClientConfig.FilePathToSend);
             System.IO.Directory.CreateDirectory(filesPathRecived);
             System.IO.Directory.CreateDirectory(filesPathToSend);
-                
-            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
             try
             {
-                socket.Bind(new IPEndPoint(IPAddress.Parse(clientIpAddress), clientPort));
-                socket.Connect(serverIp, serverPort);
+                tcpClient.Connect(severIpAddress);
                 Console.WriteLine("Bienvenido al sistema cliente");
                 Console.WriteLine("");
-            
+
                 Help();
-            
-                HandleClient(socket);
+
+                HandleClient(tcpClient);
             }
             catch (Exception e)
             {
                 Console.WriteLine("Error al conectarse al servidor, intentelo mas tarde");
                 Console.ReadLine();
             }
-            
-            
         }
 
-        private void HandleClient(Socket socket)
+        private void HandleClient(TcpClient tcpClient)
         {
             var connected = true;
 
@@ -72,49 +75,49 @@ namespace VaporCliente.Endpoint
                 switch (opcion)
                 {
                     case "exit":
-                        socket.Shutdown(SocketShutdown.Both);
-                        socket.Close();
+                        tcpClient.GetStream().Close();
+                        tcpClient.Close();
                         connected = false;
                         break;
                     
                     case "obtener caratula":
                         
-                        GetCoverPage(socket,String.Empty);
+                        GetCoverPage(tcpClient,String.Empty);
 
                         break;
                     
                     case "obtener juegos":
-                        GetGames(socket);
+                        GetGames(tcpClient);
                         break;
                     
                     case "adquirir juego":
-                        BuyGame(socket);
+                        BuyGame(tcpClient);
                         break;
                     
                     case "publicar juego":
-                        PublicGame(socket);
+                        PublicGame(tcpClient);
                         break;
                     
                     case "modificar juego":
                         
-                        ModifyGame(socket);
+                        ModifyGame(tcpClient);
 
                         break;
                     
                     case "ver detalle juego":
-                        GetGameDetails(socket);
+                        GetGameDetails(tcpClient);
                         break;
                     
                     case "borrar juego":
-                        DeleteGame(socket);
+                        DeleteGame(tcpClient);
                         break;
                     
                     case "buscar juegos":
-                        LookUpForGame(socket);
+                        LookUpForGame(tcpClient);
                         break;
                     
                     case "publicar calificacion":
-                        PublicCalification(socket);
+                        PublicCalification(tcpClient);
                         break;
                     
                     case "help":
@@ -147,10 +150,10 @@ namespace VaporCliente.Endpoint
             Console.WriteLine("Recomendacion: simepre tenga desactivado las mayusculas");
         }
 
-        private void PublicCalification(Socket socket)
+        private void PublicCalification(TcpClient tcpClient)
         {
             Console.WriteLine("Ingrese un juego de los siguientes:");
-            GetGames(socket);
+            GetGames(tcpClient);
             var game = ValidationsImplementations.GameValidation.ValidNotEmpty();
             
             Console.WriteLine("Ingrese un rating entre 1 al 5");
@@ -163,11 +166,11 @@ namespace VaporCliente.Endpoint
             
             var header = new Header(HeaderConstants.Request, CommandConstants.PublicCalification ,data.Length);
             
-            communication.SendData(socket, header, data);
+            communication.WriteData(tcpClient, header, data);
             
             try
             {
-                var response = GetResponse(socket);
+                var response = GetResponse(tcpClient);
                 Console.WriteLine(response);
             }
             catch (Exception)
@@ -177,22 +180,22 @@ namespace VaporCliente.Endpoint
 
         }
         
-        private void DeleteGame(Socket socket)
+        private void DeleteGame(TcpClient tcpClient)
         {
             Console.WriteLine("Ingrese el título del juego a borrar");
             var game = GameValidation.ValidNotEmpty();
            
             var header = new Header(HeaderConstants.Request, CommandConstants.DeleteGame, game.Length);
 
-            communication.SendData(socket, header, game);
+            communication.WriteData(tcpClient, header, game);
             
-            var response = GetResponse(socket);
+            var response = GetResponse(tcpClient);
             
             Console.WriteLine(response);
             
         }
         
-        private void LookUpForGame(Socket socket)
+        private void LookUpForGame(TcpClient tcpClient)
         {
             Console.WriteLine("Ingresar atributo a buscar: titulo / genero / clasificacion");
             var lookupAtribute = GameValidation.ValidateValue() ;
@@ -205,9 +208,9 @@ namespace VaporCliente.Endpoint
             
             var header = new Header(HeaderConstants.Request, CommandConstants.LookupGame, lookup.Length);
             
-            communication.SendData(socket, header, lookup);
+            communication.WriteData(tcpClient, header, lookup);
 
-            var gameTitle = GetResponse(socket);
+            var gameTitle = GetResponse(tcpClient);
             if (gameTitle.Contains(ResponseConstants.Error))
             {
                 Console.WriteLine(gameTitle);
@@ -218,22 +221,22 @@ namespace VaporCliente.Endpoint
             }
         }
 
-        private void GetGameDetails(Socket socket)
+        private void GetGameDetails(TcpClient tcpClient)
         {
             Console.WriteLine("La lista de Juegos disponibles es:");
-            GetGames(socket);
+            GetGames(tcpClient);
 
             Console.WriteLine("Ingrese el nombre de un Juego:");
             var gameName = GameValidation.ValidNotEmpty();
             
             var header = new Header(HeaderConstants.Request, CommandConstants.GameDetail, gameName.Length);
             
-            communication.SendData(socket, header, gameName);
+            communication.WriteData(tcpClient, header, gameName);
 
             try
             {
 
-                var response = GetResponse(socket);
+                var response = GetResponse(tcpClient);
                 
                 if(!response.Contains(ResponseConstants.Error)){
 
@@ -255,7 +258,7 @@ namespace VaporCliente.Endpoint
                     var answer = GameValidation.YesNoValidation();
                     if (answer.Equals("si"))
                     {
-                        GetCoverPage(socket,gameName);
+                        GetCoverPage(tcpClient,gameName);
                     }
                 }
                 else
@@ -270,7 +273,7 @@ namespace VaporCliente.Endpoint
         }
         
         
-        private void ModifyGame(Socket socket)
+        private void ModifyGame(TcpClient tcpClient)
         {
             Console.WriteLine("Ingrese el titulo del juego a modificar");
             var gameToModify = GameValidation.ValidNotEmpty();
@@ -296,20 +299,20 @@ namespace VaporCliente.Endpoint
             
             var header = new Header(HeaderConstants.Request, CommandConstants.ModifyGame, publicGame.Length);
 
-            communication.SendData(socket, header, publicGame);
+            communication.WriteData(tcpClient, header, publicGame);
 
             if (!string.IsNullOrEmpty(coverPage))
             {
                 var fileToSend = filesPathToSend + coverPage;
-                communication.SendFile(socket, fileToSend);
+                communication.WriteFile(tcpClient, fileToSend);
             }
             
-            var response = GetResponse(socket);
+            var response = GetResponse(tcpClient);
             
             Console.WriteLine(response);
         }
         
-        private void PublicGame(Socket socket)
+        private void PublicGame(TcpClient tcpClient)
         {
             Console.WriteLine("Ingrese un titulo");
             var title = GameValidation.ValidNotEmpty();
@@ -330,22 +333,22 @@ namespace VaporCliente.Endpoint
             
             var header = new Header(HeaderConstants.Request, CommandConstants.PublicGame, publicGame.Length);
 
-            communication.SendData(socket, header, publicGame);
+            communication.WriteData(tcpClient, header, publicGame);
 
             if (!string.IsNullOrEmpty(coverPage))
             {
                 var fileToSend = filesPathToSend + coverPage;
                 
-                communication.SendFile(socket, fileToSend);
+                communication.WriteFile(tcpClient, fileToSend);
             }
             
-            var response = GetResponse(socket);
+            var response = GetResponse(tcpClient);
             
             Console.WriteLine(response);
             
         }
 
-        private void BuyGame(Socket socket)
+        private void BuyGame(TcpClient tcpClient)
         {
             Console.WriteLine("Ingrese un usuario");
             var userName = GameValidation.ValidNotEmpty();
@@ -356,11 +359,11 @@ namespace VaporCliente.Endpoint
 
             var header = new Header(HeaderConstants.Request, CommandConstants.BuyGame ,userAndGame.Length);
             
-            communication.SendData(socket, header, userAndGame);
+            communication.WriteData(tcpClient, header, userAndGame);
            
             try
             {
-                var response = GetResponse(socket);
+                var response = GetResponse(tcpClient);
                 Console.WriteLine(response);
             }
             catch (Exception)
@@ -370,18 +373,18 @@ namespace VaporCliente.Endpoint
         }
         
 
-        private void GetGames(Socket socket)
+        private void GetGames(TcpClient tcpClient)
         {
             var headerToSend = new Header(HeaderConstants.Request, CommandConstants.GetGames, 0);
 
-            communication.SendData(socket, headerToSend, String.Empty);
+            communication.WriteData(tcpClient, headerToSend, String.Empty);
 
-            var respuesta = GetResponse(socket);
+            var respuesta = GetResponse(tcpClient);
             Console.WriteLine(respuesta);
             
         }
 
-        private void GetCoverPage(Socket socket, string gameName)
+        private void GetCoverPage(TcpClient tcpClient, string gameName)
         {
             if (String.IsNullOrEmpty(gameName))
             {
@@ -391,14 +394,14 @@ namespace VaporCliente.Endpoint
             
             var headerToSendImg = new Header(HeaderConstants.Request, CommandConstants.SendImage, gameName.Length);
 
-            communication.SendData(socket, headerToSendImg, gameName); 
+            communication.WriteData(tcpClient, headerToSendImg, gameName); 
             
-            var response = GetResponse(socket);
+            var response = GetResponse(tcpClient);
             if (response.Equals(ResponseConstants.Ok))
             {
                 try
                 {
-                    communication.ReceiveFile(socket,filesPathRecived);
+                    communication.ReadFile(tcpClient,filesPathRecived);
                     Console.WriteLine("Imagen recibida");
                 }
                 catch (Exception)
@@ -413,19 +416,19 @@ namespace VaporCliente.Endpoint
            
         }
 
-        private string GetResponse(Socket socket)
+        private string GetResponse(TcpClient tcpClient)
         {
             var newHeaderLength = HeaderConstants.Response.Length + HeaderConstants.CommandLength +
                                   HeaderConstants.DataLength;
 
             var newBuffer = new Byte[newHeaderLength];
-            communication.ReceiveData(socket, newHeaderLength, newBuffer);
+            communication.ReadData(tcpClient, newHeaderLength, newBuffer);
 
             var newHeader = new Header();
             newHeader.DecodeData(newBuffer);
 
             var newBufferData = new byte[newHeader.IDataLength];
-            communication.ReceiveData(socket, newHeader.IDataLength, newBufferData);
+            communication.ReadData(tcpClient, newHeader.IDataLength, newBufferData);
 
             var message = Encoding.UTF8.GetString(newBufferData);
             return message;

@@ -15,15 +15,17 @@ namespace VaporServer.Endpoint
     public class Server
     {
         private bool exit;
-        private readonly List<Socket> clients = new List<Socket>();
+        private readonly List<TcpClient> clients = new List<TcpClient>();
         private readonly Logic businessLogic;
         private readonly ISettingsManager settingsManager;
         private readonly ICommunication communication;
-        private string serverIpAddress; 
+        private TcpListener tcpListener; 
+        private IPEndPoint serverIpAddress; 
         private int serverPort;
         private int backLog;
         private string serverFilesPath;
         private readonly GameLogic gameLogic;
+        private long serverIP; 
 
         public Server(Logic businessLogic,ISettingsManager settingsManager,ICommunication communication)
         {
@@ -31,8 +33,12 @@ namespace VaporServer.Endpoint
             this.businessLogic = businessLogic;
             this.communication = communication;
             this.gameLogic = this.businessLogic.GameLogic;
-            this.serverIpAddress = this.settingsManager.ReadSetting(ServerConfig.ServerIpConfigKey);
+            //serverIP = Int64.Parse(this.settingsManager.ReadSetting(ServerConfig.ServerIpConfigKey));
             this.serverPort = int.Parse(this.settingsManager.ReadSetting(ServerConfig.SeverPortConfigKey));
+            this.serverIpAddress =  new IPEndPoint(IPAddress.Loopback, serverPort);
+
+            tcpListener = new TcpListener(serverIpAddress);
+            
             this.backLog = int.Parse(this.settingsManager.ReadSetting(ServerConfig.MaxConnectionConfigKey));
             this.serverFilesPath = this.settingsManager.ReadSetting(ServerConfig.ServerFilePath);
             System.IO.Directory.CreateDirectory(serverFilesPath);
@@ -40,22 +46,22 @@ namespace VaporServer.Endpoint
 
         public void Start()
         {
-            //Console.WriteLine($"ip: {serverIpAddress} - puerto {serverPort} - backlog {backLog}");
+            Console.WriteLine($"ip: {serverIpAddress} - puerto {serverPort} - backlog {backLog}");
             
-            var socketServer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            //var socketServer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             
-            socketServer.Bind(new IPEndPoint(IPAddress.Parse(serverIpAddress),serverPort));
-            socketServer.Listen(backLog);
-           
-            var threadServer = new Thread(()=> ListenForConnections(socketServer));
+            //socketServer.Bind(new IPEndPoint(IPAddress.Parse(serverIpAddress),serverPort));
+            //socketServer.Listen(backLog);
+           tcpListener.Start(backLog);
+           var threadServer = new Thread(()=> ListenForConnections(tcpListener));
             threadServer.Start();
             
             ShowMenu();
 
-            HandleServer(socketServer);
+            HandleServer(tcpListener);
         }
 
-        private void HandleServer(Socket socketServer)
+        private void HandleServer(TcpListener socketServer)
         {
             while (!exit)
             {
@@ -65,16 +71,15 @@ namespace VaporServer.Endpoint
                     case "exit":
                         exit = true;
                         
-                            socketServer.Close(0);
+                            socketServer.Stop();
                             foreach (var client in clients)
                             {
-                                client.Shutdown(SocketShutdown.Both);
+                                client.GetStream().Close();
                                 client.Close();
                             }
 
-                            var fakeSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream,
-                                ProtocolType.Tcp);
-                            fakeSocket.Connect(serverIpAddress, serverPort);
+                        var fakeSocket = new TcpClient();
+                            fakeSocket.Connect(serverIpAddress);
                             break;
                     default:
                         Console.WriteLine("Opcion incorrecta ingresada");
@@ -91,13 +96,13 @@ namespace VaporServer.Endpoint
             Console.WriteLine("Ingrese su opcion: ");
         }
 
-        private void ListenForConnections(Socket socketServer)
+        private void ListenForConnections(TcpListener tcpListener)
         {
             while (!exit)
             {
                 try
                 {
-                    var clientConnected = socketServer.Accept();
+                    var clientConnected = tcpListener.AcceptTcpClient();
                     clients.Add(clientConnected);
                     Console.WriteLine("Accepted new connection...");
                     var threadClient = new Thread(() => HandleClient(clientConnected));
@@ -112,7 +117,7 @@ namespace VaporServer.Endpoint
             Console.WriteLine("Exiting....");
         }
         
-        private void HandleClient(Socket clientSocket)
+        private void HandleClient(TcpClient clientSocket)
         {
             var remoteConnectionClosed = false;  
             while (!exit && !remoteConnectionClosed)
@@ -124,7 +129,7 @@ namespace VaporServer.Endpoint
                 try
                 {
                     
-                    communication.ReceiveData(clientSocket, headerLength, buffer);
+                    communication.ReadData(clientSocket, headerLength, buffer);
                     var header = new Header();
                     header.DecodeData(buffer);
                     
@@ -176,12 +181,12 @@ namespace VaporServer.Endpoint
             }
         }
 
-        private void PublicCalification(Socket clientSocket, Header header)
+        private void PublicCalification(TcpClient clientSocket, Header header)
         {
 
             var receiveGameAndReview = new Byte[header.IDataLength];
             
-            communication.ReceiveData(clientSocket, header.IDataLength, receiveGameAndReview);
+            communication.ReadData(clientSocket, header.IDataLength, receiveGameAndReview);
             try
             {
                 this.gameLogic.PublicReviewInGame(receiveGameAndReview);
@@ -194,11 +199,11 @@ namespace VaporServer.Endpoint
             }
         }
 
-        private void DeleteGame(Socket clientSocket, Header header)
+        private void DeleteGame(TcpClient clientSocket, Header header)
         {
             var receiveGameNameBuffer = new byte[header.IDataLength];
             
-            communication.ReceiveData(clientSocket, header.IDataLength, receiveGameNameBuffer);
+            communication.ReadData(clientSocket, header.IDataLength, receiveGameNameBuffer);
 
             try
             {
@@ -213,11 +218,11 @@ namespace VaporServer.Endpoint
             }
 
         }
-        private void LookupGame(Socket clientSocket, Header header)
+        private void LookupGame(TcpClient clientSocket, Header header)
         {
             var receiveGameAttributeBuffer = new byte[header.IDataLength];
             
-            communication.ReceiveData(clientSocket, header.IDataLength, receiveGameAttributeBuffer);
+            communication.ReadData(clientSocket, header.IDataLength, receiveGameAttributeBuffer);
 
             try
             {
@@ -225,7 +230,7 @@ namespace VaporServer.Endpoint
                 
                 var headerResponse = new Header(HeaderConstants.Response, CommandConstants.GameDetail, gameTitle.Length);
                 
-                communication.SendData(clientSocket,headerResponse,gameTitle);
+                communication.WriteData(clientSocket,headerResponse,gameTitle);
 
             }catch (Exception e)
             {
@@ -233,12 +238,12 @@ namespace VaporServer.Endpoint
             }
         }
 
-        private void GetGameDetail(Socket clientSocket, Header header)
+        private void GetGameDetail(TcpClient clientSocket, Header header)
         {
 
             var receiveGameNameBuffer = new byte[header.IDataLength];
             
-            communication.ReceiveData(clientSocket, header.IDataLength, receiveGameNameBuffer);
+            communication.ReadData(clientSocket, header.IDataLength, receiveGameNameBuffer);
             
             try
             {
@@ -255,7 +260,7 @@ namespace VaporServer.Endpoint
 
                 var headerResponse = new Header(HeaderConstants.Response, CommandConstants.GameDetail, response.Length);
                 
-                communication.SendData(clientSocket,headerResponse,response);
+                communication.WriteData(clientSocket,headerResponse,response);
 
             }
             catch (Exception e)
@@ -264,11 +269,11 @@ namespace VaporServer.Endpoint
             }
         }
         
-        private void ModifyGame(Socket clientSocket, Header header)
+        private void ModifyGame(TcpClient clientSocket, Header header)
         {
             var gameBuffer = new byte[header.IDataLength];
 
-            communication.ReceiveData(clientSocket, header.IDataLength, gameBuffer);
+            communication.ReadData(clientSocket, header.IDataLength, gameBuffer);
 
             try
             {
@@ -278,7 +283,7 @@ namespace VaporServer.Endpoint
                 
                 if (!string.IsNullOrEmpty(cover))
                 {
-                    communication.ReceiveFile(clientSocket,serverFilesPath);
+                    communication.ReadFile(clientSocket,serverFilesPath);
                 }
                 OkResponse(clientSocket,CommandConstants.ModifyGame);
                 
@@ -289,11 +294,11 @@ namespace VaporServer.Endpoint
             }
         }
         
-        private void ProcessGame(Socket clientSocket, Header header)
+        private void ProcessGame(TcpClient clientSocket, Header header)
         {
             var gameBuffer = new byte[header.IDataLength];
 
-            communication.ReceiveData(clientSocket, header.IDataLength, gameBuffer);
+            communication.ReadData(clientSocket, header.IDataLength, gameBuffer);
             
             try
             {
@@ -303,7 +308,7 @@ namespace VaporServer.Endpoint
                 
                 if (!string.IsNullOrEmpty(cover))
                 {
-                    communication.ReceiveFile(clientSocket,serverFilesPath);
+                    communication.ReadFile(clientSocket,serverFilesPath);
                 }
                 
                 OkResponse(clientSocket,CommandConstants.PublicGame);
@@ -314,11 +319,11 @@ namespace VaporServer.Endpoint
             }
         }
 
-        private void SendImage(Socket clientSocket, Header header)
+        private void SendImage(TcpClient clientSocket, Header header)
         {
             var dataBuffer = new byte[header.IDataLength];
             
-            communication.ReceiveData(clientSocket, header.IDataLength, dataBuffer);
+            communication.ReadData(clientSocket, header.IDataLength, dataBuffer);
             
             var game = Encoding.UTF8.GetString(dataBuffer);
             
@@ -330,7 +335,7 @@ namespace VaporServer.Endpoint
                 if (exists)
                 {
                     OkResponse(clientSocket,CommandConstants.SendImage);
-                    communication.SendFile(clientSocket, cover);
+                    communication.WriteFile(clientSocket, cover);
                 }
                 else
                 {
@@ -343,11 +348,11 @@ namespace VaporServer.Endpoint
             }
         }
 
-        private void BuyGame(Socket clientSocket, Header header)
+        private void BuyGame(TcpClient clientSocket, Header header)
         {
             var dataBuffer = new byte[header.IDataLength];
 
-            communication.ReceiveData(clientSocket, header.IDataLength, dataBuffer);
+            communication.ReadData(clientSocket, header.IDataLength, dataBuffer);
 
             var userAndGame = Encoding.UTF8.GetString(dataBuffer).Split('|');
             var user = userAndGame[0];
@@ -365,7 +370,7 @@ namespace VaporServer.Endpoint
             }
         }
 
-        private void GetGames(Socket clientSocket)
+        private void GetGames(TcpClient clientSocket)
         {
             var gameList = businessLogic.GameLogic.GetGames();
             var games = String.Empty;
@@ -373,23 +378,23 @@ namespace VaporServer.Endpoint
 
             var headerToSend = new Header(HeaderConstants.Response, CommandConstants.GetGames,
                 games.Length);
-            communication.SendData(clientSocket, headerToSend, games);
+            communication.WriteData(clientSocket, headerToSend, games);
         }
         
-        private void ErrorResponse(Socket clientSocket, string error,int command)
+        private void ErrorResponse(TcpClient clientSocket, string error,int command)
         {
             var errorMessage = ResponseConstants.Error + error;
             var dataLength = errorMessage.Length;
             var headerResponse = new Header(HeaderConstants.Response, command,
                 dataLength);
-            communication.SendData(clientSocket, headerResponse, errorMessage);
+            communication.WriteData(clientSocket, headerResponse, errorMessage);
         }
         
-        private void OkResponse(Socket clientSocket,int command)
+        private void OkResponse(TcpClient clientSocket,int command)
         {
             var headerResponse = new Header(HeaderConstants.Response, command,
                 ResponseConstants.Ok.Length);
-            communication.SendData(clientSocket, headerResponse, ResponseConstants.Ok);
+            communication.WriteData(clientSocket, headerResponse, ResponseConstants.Ok);
         }
     }
 }

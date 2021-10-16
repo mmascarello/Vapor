@@ -6,9 +6,9 @@ namespace CommunicationInterface
 {
     public interface ICommunication
     { 
-        void ReceiveData(Socket clientSocket, int length, byte[] buffer);
-        void SendData(Socket ourSocket, Header header, string data);
-        void SendFile(Socket ourSocket, string path);
-        void ReceiveFile(Socket ourSocket, string path);
+        void ReadData(TcpClient tcpClient, int length, byte[] buffer);
+        void WriteData(TcpClient tcpClientt, Header header, string data);
+        void WriteFile(TcpClient tcpClient, string path);
+        void ReadFile(TcpClient tcpClient, string path);
     }
 }
