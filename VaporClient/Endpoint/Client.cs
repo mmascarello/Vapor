@@ -166,7 +166,7 @@ namespace VaporCliente.Endpoint
             
             var header = new Header(HeaderConstants.Request, CommandConstants.PublicCalification ,data.Length);
             
-            communication.WriteData(tcpClient, header, data);
+            communication.WriteDataAsync(tcpClient, header, data);
             
             try
             {
@@ -187,7 +187,7 @@ namespace VaporCliente.Endpoint
            
             var header = new Header(HeaderConstants.Request, CommandConstants.DeleteGame, game.Length);
 
-            communication.WriteData(tcpClient, header, game);
+            communication.WriteDataAsync(tcpClient, header, game);
             
             var response = GetResponse(tcpClient);
             
@@ -208,7 +208,7 @@ namespace VaporCliente.Endpoint
             
             var header = new Header(HeaderConstants.Request, CommandConstants.LookupGame, lookup.Length);
             
-            communication.WriteData(tcpClient, header, lookup);
+            communication.WriteDataAsync(tcpClient, header, lookup);
 
             var gameTitle = GetResponse(tcpClient);
             if (gameTitle.Contains(ResponseConstants.Error))
@@ -231,7 +231,7 @@ namespace VaporCliente.Endpoint
             
             var header = new Header(HeaderConstants.Request, CommandConstants.GameDetail, gameName.Length);
             
-            communication.WriteData(tcpClient, header, gameName);
+            communication.WriteDataAsync(tcpClient, header, gameName);
 
             try
             {
@@ -299,7 +299,7 @@ namespace VaporCliente.Endpoint
             
             var header = new Header(HeaderConstants.Request, CommandConstants.ModifyGame, publicGame.Length);
 
-            communication.WriteData(tcpClient, header, publicGame);
+            communication.WriteDataAsync(tcpClient, header, publicGame);
 
             if (!string.IsNullOrEmpty(coverPage))
             {
@@ -333,7 +333,7 @@ namespace VaporCliente.Endpoint
             
             var header = new Header(HeaderConstants.Request, CommandConstants.PublicGame, publicGame.Length);
 
-            communication.WriteData(tcpClient, header, publicGame);
+            communication.WriteDataAsync(tcpClient, header, publicGame);
 
             if (!string.IsNullOrEmpty(coverPage))
             {
@@ -359,7 +359,7 @@ namespace VaporCliente.Endpoint
 
             var header = new Header(HeaderConstants.Request, CommandConstants.BuyGame ,userAndGame.Length);
             
-            communication.WriteData(tcpClient, header, userAndGame);
+            communication.WriteDataAsync(tcpClient, header, userAndGame);
            
             try
             {
@@ -377,7 +377,7 @@ namespace VaporCliente.Endpoint
         {
             var headerToSend = new Header(HeaderConstants.Request, CommandConstants.GetGames, 0);
 
-            communication.WriteData(tcpClient, headerToSend, String.Empty);
+            communication.WriteDataAsync(tcpClient, headerToSend, String.Empty);
 
             var respuesta = GetResponse(tcpClient);
             Console.WriteLine(respuesta);
@@ -394,14 +394,14 @@ namespace VaporCliente.Endpoint
             
             var headerToSendImg = new Header(HeaderConstants.Request, CommandConstants.SendImage, gameName.Length);
 
-            communication.WriteData(tcpClient, headerToSendImg, gameName); 
+            communication.WriteDataAsync(tcpClient, headerToSendImg, gameName); 
             
             var response = GetResponse(tcpClient);
             if (response.Equals(ResponseConstants.Ok))
             {
                 try
                 {
-                    communication.ReadFile(tcpClient,filesPathRecived);
+                    communication.ReadFileAsync(tcpClient,filesPathRecived);
                     Console.WriteLine("Imagen recibida");
                 }
                 catch (Exception)
@@ -422,13 +422,13 @@ namespace VaporCliente.Endpoint
                                   HeaderConstants.DataLength;
 
             var newBuffer = new Byte[newHeaderLength];
-            communication.ReadData(tcpClient, newHeaderLength, newBuffer);
+            communication.ReadDataAsync(tcpClient, newHeaderLength, newBuffer);
 
             var newHeader = new Header();
             newHeader.DecodeData(newBuffer);
 
             var newBufferData = new byte[newHeader.IDataLength];
-            communication.ReadData(tcpClient, newHeader.IDataLength, newBufferData);
+            communication.ReadDataAsync(tcpClient, newHeader.IDataLength, newBufferData);
 
             var message = Encoding.UTF8.GetString(newBufferData);
             return message;

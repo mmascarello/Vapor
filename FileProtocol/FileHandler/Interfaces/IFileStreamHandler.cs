@@ -1,8 +1,10 @@
+using System.Threading.Tasks;
+
 namespace FileProtocol.FileHandler.Interfaces
 {
     public interface IFileStreamHandler
     {
-        byte[] Read(string path, long offset, int length);
-        void Write(string fileName, byte[] data);
+        Task<byte[]> ReadAsync(string path, long offset, int length);
+        Task WriteAsync(string fileName, byte[] data);
     }
 }
