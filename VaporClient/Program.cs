@@ -1,4 +1,5 @@
-﻿using VaporCliente.Factory;
+﻿using System.Threading.Tasks;
+using VaporCliente.Factory;
 
 
 namespace VaporClient
@@ -7,9 +8,9 @@ namespace VaporClient
     {
 
         private static Startup startup = new Startup();
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            startup.Start();
+            await startup.Start();
         }
 
     }

@@ -1,6 +1,7 @@
 ﻿using CommunicationInterface;
 using SettingsManagerInterface;
 using System;
+using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -87,7 +88,7 @@ namespace VaporCliente.Endpoint
                         break;
                     
                     case "obtener juegos":
-                        await  GetGamesAsync(tcpClient);
+                        await GetGamesAsync(tcpClient);
                         break;
                     
                     case "adquirir juego":
@@ -389,7 +390,8 @@ namespace VaporCliente.Endpoint
 
             var resp = "";
             var respuesta = GetResponse(tcpClient,resp);
-            Console.WriteLine(resp);
+            Console.WriteLine("Hola soy un juego");
+            Console.WriteLine(respuesta);
             
         }
 
@@ -427,21 +429,29 @@ namespace VaporCliente.Endpoint
            
         }
 
-        private async Task GetResponse(TcpClient tcpClient, string message)
+        private async Task<string> GetResponse(TcpClient tcpClient, string message)
         {
             var newHeaderLength = HeaderConstants.Response.Length + HeaderConstants.CommandLength +
                                   HeaderConstants.DataLength;
 
             var newBuffer = new Byte[newHeaderLength];
             await communication.ReadDataAsync(tcpClient, newHeaderLength, newBuffer).ConfigureAwait(false);
-
+            
             var newHeader = new Header();
             newHeader.DecodeData(newBuffer);
 
             var newBufferData = new byte[newHeader.IDataLength];
             await communication.ReadDataAsync(tcpClient, newHeader.IDataLength, newBufferData).ConfigureAwait(false);
 
+            //Console.WriteLine();
+            
             message = Encoding.UTF8.GetString(newBufferData);
+            
+            Console.WriteLine(message);
+            /*var tcs = new TaskCompletionSource<string>();
+            tcs.SetResult(message);
+            return tcs.Task;*/
+            return message;
         }
     }
 }

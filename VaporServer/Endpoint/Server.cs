@@ -50,7 +50,7 @@ namespace VaporServer.Endpoint
         {
             Console.WriteLine($"ip: {serverIpAddress} - puerto {serverPort} - backlog {backLog}");
             tcpListener.Start(backLog);
-            await Task.Run(()=> ListenForConnectionsAsync(tcpListener)).ConfigureAwait(false);
+            await Task.Run(async ()=> await ListenForConnectionsAsync(tcpListener)).ConfigureAwait(false);
 
             ShowMenu();
 
@@ -367,11 +367,13 @@ namespace VaporServer.Endpoint
         private async Task GetGamesAsync(TcpClient clientSocket)
         {
             var gameList = businessLogic.GameLogic.GetGames();
+            
             var games = String.Empty;
             gameList.ForEach(g => games += g.Title + "-");
 
             var headerToSend = new Header(HeaderConstants.Response, CommandConstants.GetGames,
                 games.Length);
+            
             await communication.WriteDataAsync(clientSocket, headerToSend, games).ConfigureAwait(false);
         }
         
