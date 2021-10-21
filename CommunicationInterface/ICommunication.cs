@@ -9,7 +9,7 @@ namespace CommunicationInterface
     { 
         Task ReadDataAsync(TcpClient tcpClient, int length, byte[] buffer);
         Task WriteDataAsync(TcpClient tcpClient, Header header, string data);
-        Task WriteFile(TcpClient tcpClient, string path);
+        Task WriteFileAsync(TcpClient tcpClient, string path);
         Task ReadFileAsync(TcpClient tcpClient, string path);
     }
 }

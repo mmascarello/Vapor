@@ -1,4 +1,5 @@
-﻿using CommunicationImplementation;
+﻿using System.Threading.Tasks;
+using CommunicationImplementation;
 using CommunicationInterface;
 using SettingsManagerImplementation;
 using SettingsManagerInterface;
@@ -27,18 +28,11 @@ namespace VaporServer.Factory
             this.server = new Server(businessLogic,manager,communication);
         }
 
-        public void Start()
+        public async Task Start()
         {
             TestData.Load(dataBase.GameDataBase, dataBase.UserDataBase, dataBase.ReviewDataBase);
-            this.server.Start();
+            await this.server.Start();
         }
-
-        // factory
-        // new data acces DA
-        // new de business logic(DA)
-
-        // program
-        // new factory -> accede a BL -> de BL a DA
 
 
     }
