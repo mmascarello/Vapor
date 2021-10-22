@@ -171,9 +171,8 @@ namespace VaporCliente.Endpoint
             
             try
             {
-                var resp = "";
-                var response = GetResponse(tcpClient,resp);
-                Console.WriteLine(resp);
+                var response = await GetResponse(tcpClient);
+                Console.WriteLine(response);
             }
             catch (Exception)
             {
@@ -191,10 +190,9 @@ namespace VaporCliente.Endpoint
 
             await communication.WriteDataAsync(tcpClient, header, game).ConfigureAwait(false);
 
-            var resp = "";
-            var response = GetResponse(tcpClient,resp);
+            var response = await GetResponse(tcpClient);
             
-            Console.WriteLine(resp);
+            Console.WriteLine(response);
             
         }
         
@@ -213,16 +211,15 @@ namespace VaporCliente.Endpoint
             
             await communication.WriteDataAsync(tcpClient, header, lookup).ConfigureAwait(false);
 
-            var resp = "";
-            var gameTitle = GetResponse(tcpClient,resp);
+            var gameTitle = await GetResponse(tcpClient);
             
-            if(resp.Contains(ResponseConstants.Error))
+            if(gameTitle.Contains(ResponseConstants.Error))
             {
-                Console.WriteLine(resp);
+                Console.WriteLine(gameTitle);
             }
             else
             {
-                Console.WriteLine($"Se encontro el juego:{resp}");
+                Console.WriteLine($"Se encontro el juego:{gameTitle}");
             }
         }
 
@@ -240,13 +237,11 @@ namespace VaporCliente.Endpoint
 
             try
             {
-
-                var resp = "";
-                var response = GetResponse(tcpClient,resp);
+                var response = await GetResponse(tcpClient);
                 
-                if(!resp.Contains(ResponseConstants.Error)){
+                if(!response.Contains(ResponseConstants.Error)){
 
-                    var getInformation = resp.Split('|');
+                    var getInformation = response.Split('|');
                     var ratingAverage = getInformation[0];
                     var gameReviews = getInformation[1];
                     var gameGender = getInformation[2];
@@ -255,7 +250,7 @@ namespace VaporCliente.Endpoint
 
                     Console.WriteLine("Mi rating es: "+ratingAverage);
                     Console.WriteLine("Mis reviews: "+gameReviews);
-                    Console.WriteLine("Soy un juego de: "+gameGender);
+                    Console.WriteLine("Genero: "+gameGender);
                     Console.WriteLine("Sinopsis: "+gameSinopsis);
                     Console.WriteLine("Esrb edad permitida : "+gameESRB);
                     
@@ -313,10 +308,9 @@ namespace VaporCliente.Endpoint
                 await communication.WriteFileAsync(tcpClient, fileToSend);
             }
 
-            var resp = "";
-            var response = GetResponse(tcpClient,resp);
+            var response = await GetResponse(tcpClient);
             
-            Console.WriteLine(resp);
+            Console.WriteLine(response);
         }
         
         private async Task PublicGameAsync(TcpClient tcpClient)
@@ -348,11 +342,10 @@ namespace VaporCliente.Endpoint
                 
                 await communication.WriteFileAsync(tcpClient, fileToSend).ConfigureAwait(false);
             }
-
-            var resp = "";
-            var response = GetResponse(tcpClient,resp);
             
-            Console.WriteLine(resp);
+            var response = await GetResponse(tcpClient);
+            
+            Console.WriteLine(response);
             
         }
 
@@ -371,9 +364,8 @@ namespace VaporCliente.Endpoint
            
             try
             {
-                var resp = "";
-                var response = GetResponse(tcpClient,resp);
-                Console.WriteLine(resp);
+                var response = await GetResponse(tcpClient);
+                Console.WriteLine(response);
             }
             catch (Exception)
             {
@@ -387,12 +379,9 @@ namespace VaporCliente.Endpoint
             var headerToSend = new Header(HeaderConstants.Request, CommandConstants.GetGames, 0);
 
             await communication.WriteDataAsync(tcpClient, headerToSend, String.Empty).ConfigureAwait(false);
-
-            var resp = "";
-            var respuesta = GetResponse(tcpClient,resp);
-            Console.WriteLine("Hola soy un juego");
-            Console.WriteLine(respuesta);
             
+            var respuesta = await GetResponse(tcpClient);
+            Console.WriteLine(respuesta);
         }
 
         private async Task GetCoverPageAsync(TcpClient tcpClient, string gameName)
@@ -406,11 +395,10 @@ namespace VaporCliente.Endpoint
             var headerToSendImg = new Header(HeaderConstants.Request, CommandConstants.SendImage, gameName.Length);
 
             await communication.WriteDataAsync(tcpClient, headerToSendImg, gameName).ConfigureAwait(false);
-
-            var resp = "";
-            var response = GetResponse(tcpClient,resp);
             
-            if (resp.Equals(ResponseConstants.Ok))
+            var response = await GetResponse(tcpClient);
+            
+            if (response.Equals(ResponseConstants.Ok))
             {
                 try
                 {
@@ -424,12 +412,12 @@ namespace VaporCliente.Endpoint
             }
             else
             {
-                Console.WriteLine(resp);
+                Console.WriteLine(response);
             }
            
         }
 
-        private async Task<string> GetResponse(TcpClient tcpClient, string message)
+        private async Task<string> GetResponse(TcpClient tcpClient)
         {
             var newHeaderLength = HeaderConstants.Response.Length + HeaderConstants.CommandLength +
                                   HeaderConstants.DataLength;
@@ -442,15 +430,9 @@ namespace VaporCliente.Endpoint
 
             var newBufferData = new byte[newHeader.IDataLength];
             await communication.ReadDataAsync(tcpClient, newHeader.IDataLength, newBufferData).ConfigureAwait(false);
-
-            //Console.WriteLine();
-            
-            message = Encoding.UTF8.GetString(newBufferData);
-            
-            Console.WriteLine(message);
-            /*var tcs = new TaskCompletionSource<string>();
-            tcs.SetResult(message);
-            return tcs.Task;*/
+ 
+            var message = Encoding.UTF8.GetString(newBufferData);
+ 
             return message;
         }
     }
