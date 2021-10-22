@@ -23,7 +23,7 @@ namespace VaporCliente.Factory
 
         public async Task Start()
         {
-            await this.client.Start();
+            await this.client.Start().ConfigureAwait(false);
         }
     }
 }
