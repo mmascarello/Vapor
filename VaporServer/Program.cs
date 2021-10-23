@@ -10,7 +10,7 @@ namespace VaporServer
 
         static async Task Main(string[] args)
         {
-            await _startup.Start();
+            await _startup.Start().ConfigureAwait(false);
         }
     }
 }
