@@ -1,4 +1,5 @@
 ﻿using System.Net.Sockets;
+using System.Threading.Tasks;
 using StringProtocol;
 
 
@@ -6,9 +7,9 @@ namespace CommunicationInterface
 {
     public interface ICommunication
     { 
-        void ReceiveData(Socket clientSocket, int length, byte[] buffer);
-        void SendData(Socket ourSocket, Header header, string data);
-        void SendFile(Socket ourSocket, string path);
-        void ReceiveFile(Socket ourSocket, string path);
+        Task ReadDataAsync(TcpClient tcpClient, int length, byte[] buffer);
+        Task WriteDataAsync(TcpClient tcpClient, Header header, string data);
+        Task WriteFileAsync(TcpClient tcpClient, string path);
+        Task ReadFileAsync(TcpClient tcpClient, string path);
     }
 }

@@ -1,4 +1,5 @@
-﻿using VaporServer.Factory;
+﻿using System.Threading.Tasks;
+using VaporServer.Factory;
 
 
 namespace VaporServer
@@ -7,9 +8,9 @@ namespace VaporServer
     {
         private static Startup _startup = new Startup();
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            _startup.Start();
+            await _startup.Start().ConfigureAwait(false);
         }
     }
 }

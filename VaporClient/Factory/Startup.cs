@@ -1,4 +1,5 @@
-﻿using CommunicationImplementation;
+﻿using System.Threading.Tasks;
+using CommunicationImplementation;
 using CommunicationInterface;
 using SettingsManagerImplementation;
 using SettingsManagerInterface;
@@ -20,9 +21,9 @@ namespace VaporCliente.Factory
             this.client = new Client(communication, manager);
         }
 
-        public void Start()
+        public async Task Start()
         {
-            this.client.Start();
+            await this.client.Start().ConfigureAwait(false);
         }
     }
 }

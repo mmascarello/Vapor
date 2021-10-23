@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using CommunicationInterface;
 using SettingsManagerInterface;
 using StringProtocol;
@@ -15,15 +16,17 @@ namespace VaporServer.Endpoint
     public class Server
     {
         private bool exit;
-        private readonly List<Socket> clients = new List<Socket>();
+        private readonly List<TcpClient> clients = new List<TcpClient>();
         private readonly Logic businessLogic;
         private readonly ISettingsManager settingsManager;
         private readonly ICommunication communication;
-        private string serverIpAddress; 
+        private TcpListener tcpListener; 
+        private IPEndPoint serverIpAddress; 
         private int serverPort;
         private int backLog;
         private string serverFilesPath;
         private readonly GameLogic gameLogic;
+        private IPAddress serverIP; 
 
         public Server(Logic businessLogic,ISettingsManager settingsManager,ICommunication communication)
         {
@@ -31,31 +34,30 @@ namespace VaporServer.Endpoint
             this.businessLogic = businessLogic;
             this.communication = communication;
             this.gameLogic = this.businessLogic.GameLogic;
-            this.serverIpAddress = this.settingsManager.ReadSetting(ServerConfig.ServerIpConfigKey);
+            
+            serverIP = IPAddress.Parse(this.settingsManager.ReadSetting(ServerConfig.ServerIpConfigKey));
             this.serverPort = int.Parse(this.settingsManager.ReadSetting(ServerConfig.SeverPortConfigKey));
+            this.serverIpAddress =  new IPEndPoint(serverIP, serverPort);
+
+            tcpListener = new TcpListener(serverIpAddress);
+            
             this.backLog = int.Parse(this.settingsManager.ReadSetting(ServerConfig.MaxConnectionConfigKey));
             this.serverFilesPath = this.settingsManager.ReadSetting(ServerConfig.ServerFilePath);
             System.IO.Directory.CreateDirectory(serverFilesPath);
         }
 
-        public void Start()
+        public async Task Start()
         {
-            //Console.WriteLine($"ip: {serverIpAddress} - puerto {serverPort} - backlog {backLog}");
-            
-            var socketServer = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            
-            socketServer.Bind(new IPEndPoint(IPAddress.Parse(serverIpAddress),serverPort));
-            socketServer.Listen(backLog);
-           
-            var threadServer = new Thread(()=> ListenForConnections(socketServer));
-            threadServer.Start();
-            
+            Console.WriteLine($"ip: {serverIpAddress} - puerto {serverPort} - backlog {backLog}");
+            tcpListener.Start(backLog);
+            await Task.Run(async ()=> await ListenForConnectionsAsync(tcpListener)).ConfigureAwait(false);
+
             ShowMenu();
 
-            HandleServer(socketServer);
+            await HandleServer(tcpListener).ConfigureAwait(false);
         }
 
-        private void HandleServer(Socket socketServer)
+        private async Task HandleServer(TcpListener tcpListener)
         {
             while (!exit)
             {
@@ -65,16 +67,15 @@ namespace VaporServer.Endpoint
                     case "exit":
                         exit = true;
                         
-                            socketServer.Close(0);
+                            tcpListener.Stop();
                             foreach (var client in clients)
                             {
-                                client.Shutdown(SocketShutdown.Both);
+                                client.GetStream().Close();
                                 client.Close();
                             }
 
-                            var fakeSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream,
-                                ProtocolType.Tcp);
-                            fakeSocket.Connect(serverIpAddress, serverPort);
+                        var fakeSocket = new TcpClient();
+                            await fakeSocket.ConnectAsync(serverIP,serverPort).ConfigureAwait(false);
                             break;
                     default:
                         Console.WriteLine("Opcion incorrecta ingresada");
@@ -91,17 +92,16 @@ namespace VaporServer.Endpoint
             Console.WriteLine("Ingrese su opcion: ");
         }
 
-        private void ListenForConnections(Socket socketServer)
+        private async Task ListenForConnectionsAsync(TcpListener tcpListener)
         {
             while (!exit)
             {
                 try
                 {
-                    var clientConnected = socketServer.Accept();
+                    var clientConnected = await tcpListener.AcceptTcpClientAsync().ConfigureAwait(false);
                     clients.Add(clientConnected);
                     Console.WriteLine("Accepted new connection...");
-                    var threadClient = new Thread(() => HandleClient(clientConnected));
-                    threadClient.Start();
+                    await Task.Run( async () => await HandleClientAsync(clientConnected)).ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {
@@ -112,7 +112,7 @@ namespace VaporServer.Endpoint
             Console.WriteLine("Exiting....");
         }
         
-        private void HandleClient(Socket clientSocket)
+        private async Task HandleClientAsync(TcpClient clientSocket)
         {
             var remoteConnectionClosed = false;  
             while (!exit && !remoteConnectionClosed)
@@ -124,46 +124,46 @@ namespace VaporServer.Endpoint
                 try
                 {
                     
-                    communication.ReceiveData(clientSocket, headerLength, buffer);
+                    await communication.ReadDataAsync(clientSocket, headerLength, buffer).ConfigureAwait(false);
                     var header = new Header();
                     header.DecodeData(buffer);
                     
                     switch (header.ICommand)
                     {
                         case CommandConstants.GetGames:
-                            GetGames(clientSocket);
+                            await GetGamesAsync(clientSocket).ConfigureAwait(false);
                             break;
                         
                         case  CommandConstants.BuyGame:
-                            BuyGame(clientSocket, header);
+                            await BuyGameAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         
                         case CommandConstants.SendImage:
-                            SendImage(clientSocket, header);
+                            await SendImageAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         
                         case CommandConstants.PublicGame:
-                            ProcessGame(clientSocket, header);
+                            await ProcessGameAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         
                         case CommandConstants.ModifyGame:
-                            ModifyGame(clientSocket, header);
+                            await ModifyGameAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         
                         case CommandConstants.GameDetail:
-                            GetGameDetail(clientSocket, header);
+                            await GetGameDetailAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         
                         case CommandConstants.DeleteGame:
-                            DeleteGame(clientSocket, header);
+                            await DeleteGameAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         
                         case CommandConstants.LookupGame:
-                            LookupGame(clientSocket, header);
+                            await LookupGameAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         
                         case CommandConstants.PublicCalification:
-                            PublicCalification(clientSocket, header);
+                            await PublicCalificationAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         
                     }
@@ -176,48 +176,48 @@ namespace VaporServer.Endpoint
             }
         }
 
-        private void PublicCalification(Socket clientSocket, Header header)
+        private async Task PublicCalificationAsync(TcpClient clientSocket, Header header)
         {
 
             var receiveGameAndReview = new Byte[header.IDataLength];
             
-            communication.ReceiveData(clientSocket, header.IDataLength, receiveGameAndReview);
+            await communication.ReadDataAsync(clientSocket, header.IDataLength, receiveGameAndReview).ConfigureAwait(false);
             try
             {
                 this.gameLogic.PublicReviewInGame(receiveGameAndReview);
                 
-                OkResponse(clientSocket,CommandConstants.PublicCalification);
+                await OkResponse(clientSocket,CommandConstants.PublicCalification).ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                ErrorResponse(clientSocket,e.Message,CommandConstants.PublicCalification);
+                await ErrorResponse(clientSocket,e.Message,CommandConstants.PublicCalification).ConfigureAwait(false);
             }
         }
 
-        private void DeleteGame(Socket clientSocket, Header header)
+        private async Task DeleteGameAsync(TcpClient clientSocket, Header header)
         {
             var receiveGameNameBuffer = new byte[header.IDataLength];
             
-            communication.ReceiveData(clientSocket, header.IDataLength, receiveGameNameBuffer);
+            await communication.ReadDataAsync(clientSocket, header.IDataLength, receiveGameNameBuffer).ConfigureAwait(false);
 
             try
             {
                 this.gameLogic.DeleteGame(receiveGameNameBuffer);
                 
-                OkResponse(clientSocket,CommandConstants.DeleteGame);
+                await OkResponse(clientSocket,CommandConstants.DeleteGame).ConfigureAwait(false);
                 
             }
             catch (Exception e)
             {
-                ErrorResponse(clientSocket,e.Message,CommandConstants.DeleteGame);
+                await ErrorResponse(clientSocket,e.Message,CommandConstants.DeleteGame).ConfigureAwait(false);
             }
 
         }
-        private void LookupGame(Socket clientSocket, Header header)
+        private async Task LookupGameAsync(TcpClient clientSocket, Header header)
         {
             var receiveGameAttributeBuffer = new byte[header.IDataLength];
             
-            communication.ReceiveData(clientSocket, header.IDataLength, receiveGameAttributeBuffer);
+            await communication.ReadDataAsync(clientSocket, header.IDataLength, receiveGameAttributeBuffer).ConfigureAwait(false);
 
             try
             {
@@ -225,20 +225,20 @@ namespace VaporServer.Endpoint
                 
                 var headerResponse = new Header(HeaderConstants.Response, CommandConstants.GameDetail, gameTitle.Length);
                 
-                communication.SendData(clientSocket,headerResponse,gameTitle);
+                await communication.WriteDataAsync(clientSocket,headerResponse,gameTitle).ConfigureAwait(false);
 
             }catch (Exception e)
             {
-                ErrorResponse(clientSocket,e.Message,CommandConstants.LookupGame);
+                await ErrorResponse(clientSocket,e.Message,CommandConstants.LookupGame);
             }
         }
 
-        private void GetGameDetail(Socket clientSocket, Header header)
+        private async Task GetGameDetailAsync(TcpClient clientSocket, Header header)
         {
 
             var receiveGameNameBuffer = new byte[header.IDataLength];
             
-            communication.ReceiveData(clientSocket, header.IDataLength, receiveGameNameBuffer);
+            await communication.ReadDataAsync(clientSocket, header.IDataLength, receiveGameNameBuffer).ConfigureAwait(false);
             
             try
             {
@@ -255,20 +255,20 @@ namespace VaporServer.Endpoint
 
                 var headerResponse = new Header(HeaderConstants.Response, CommandConstants.GameDetail, response.Length);
                 
-                communication.SendData(clientSocket,headerResponse,response);
+                await communication.WriteDataAsync(clientSocket,headerResponse,response).ConfigureAwait(false);
 
             }
             catch (Exception e)
             {
-                ErrorResponse(clientSocket,e.Message,CommandConstants.GameDetail);
+                await ErrorResponse(clientSocket,e.Message,CommandConstants.GameDetail);
             }
         }
         
-        private void ModifyGame(Socket clientSocket, Header header)
+        private async Task ModifyGameAsync(TcpClient clientSocket, Header header)
         {
             var gameBuffer = new byte[header.IDataLength];
 
-            communication.ReceiveData(clientSocket, header.IDataLength, gameBuffer);
+            await communication.ReadDataAsync(clientSocket, header.IDataLength, gameBuffer).ConfigureAwait(false);
 
             try
             {
@@ -278,22 +278,21 @@ namespace VaporServer.Endpoint
                 
                 if (!string.IsNullOrEmpty(cover))
                 {
-                    communication.ReceiveFile(clientSocket,serverFilesPath);
-                }
-                OkResponse(clientSocket,CommandConstants.ModifyGame);
+                    await communication.ReadFileAsync(clientSocket,serverFilesPath).ConfigureAwait(false);
+                }  await OkResponse(clientSocket,CommandConstants.ModifyGame);
                 
             }
             catch(Exception e)
             {
-                ErrorResponse(clientSocket,e.Message,CommandConstants.ModifyGame);
+                await ErrorResponse(clientSocket,e.Message,CommandConstants.ModifyGame);
             }
         }
         
-        private void ProcessGame(Socket clientSocket, Header header)
+        private async Task ProcessGameAsync(TcpClient clientSocket, Header header)
         {
             var gameBuffer = new byte[header.IDataLength];
 
-            communication.ReceiveData(clientSocket, header.IDataLength, gameBuffer);
+            await communication.ReadDataAsync(clientSocket, header.IDataLength, gameBuffer).ConfigureAwait(false);
             
             try
             {
@@ -303,22 +302,22 @@ namespace VaporServer.Endpoint
                 
                 if (!string.IsNullOrEmpty(cover))
                 {
-                    communication.ReceiveFile(clientSocket,serverFilesPath);
+                   await communication.ReadFileAsync(clientSocket,serverFilesPath).ConfigureAwait(false);
                 }
                 
-                OkResponse(clientSocket,CommandConstants.PublicGame);
+                await OkResponse(clientSocket,CommandConstants.PublicGame);
             }
             catch(Exception e)
             {
-                ErrorResponse(clientSocket,e.Message,CommandConstants.PublicGame);
+                await ErrorResponse(clientSocket,e.Message,CommandConstants.PublicGame);
             }
         }
 
-        private void SendImage(Socket clientSocket, Header header)
+        private async Task SendImageAsync(TcpClient clientSocket, Header header)
         {
             var dataBuffer = new byte[header.IDataLength];
             
-            communication.ReceiveData(clientSocket, header.IDataLength, dataBuffer);
+            await communication.ReadDataAsync(clientSocket, header.IDataLength, dataBuffer).ConfigureAwait(false);
             
             var game = Encoding.UTF8.GetString(dataBuffer);
             
@@ -329,25 +328,25 @@ namespace VaporServer.Endpoint
                 var exists = File.Exists(cover);
                 if (exists)
                 {
-                    OkResponse(clientSocket,CommandConstants.SendImage);
-                    communication.SendFile(clientSocket, cover);
+                    await OkResponse(clientSocket,CommandConstants.SendImage);
+                    await communication.WriteFileAsync(clientSocket, cover);
                 }
                 else
                 {
-                    ErrorResponse(clientSocket,"No existe la imagen",CommandConstants.SendImage);
+                   await ErrorResponse(clientSocket,"No existe la imagen",CommandConstants.SendImage);
                 }
             }
             catch (Exception e)
             {
-                ErrorResponse(clientSocket,e.Message,CommandConstants.SendImage);
+                await ErrorResponse(clientSocket,e.Message,CommandConstants.SendImage);
             }
         }
 
-        private void BuyGame(Socket clientSocket, Header header)
+        private async Task BuyGameAsync(TcpClient clientSocket, Header header)
         {
             var dataBuffer = new byte[header.IDataLength];
 
-            communication.ReceiveData(clientSocket, header.IDataLength, dataBuffer);
+            await communication.ReadDataAsync(clientSocket, header.IDataLength, dataBuffer).ConfigureAwait(false);
 
             var userAndGame = Encoding.UTF8.GetString(dataBuffer).Split('|');
             var user = userAndGame[0];
@@ -357,39 +356,41 @@ namespace VaporServer.Endpoint
             {
                 businessLogic.UserLogic.BuyGame(user, game);
 
-                OkResponse(clientSocket, CommandConstants.BuyGame);
+                await OkResponse(clientSocket, CommandConstants.BuyGame);
             }
             catch (Exception e)
             {
-                ErrorResponse(clientSocket, e.Message, CommandConstants.BuyGame);
+                await ErrorResponse(clientSocket, e.Message, CommandConstants.BuyGame);
             }
         }
 
-        private void GetGames(Socket clientSocket)
+        private async Task GetGamesAsync(TcpClient clientSocket)
         {
             var gameList = businessLogic.GameLogic.GetGames();
+            
             var games = String.Empty;
             gameList.ForEach(g => games += g.Title + "-");
 
             var headerToSend = new Header(HeaderConstants.Response, CommandConstants.GetGames,
                 games.Length);
-            communication.SendData(clientSocket, headerToSend, games);
+            
+            await communication.WriteDataAsync(clientSocket, headerToSend, games).ConfigureAwait(false);
         }
         
-        private void ErrorResponse(Socket clientSocket, string error,int command)
+        private async Task ErrorResponse(TcpClient clientSocket, string error,int command)
         {
             var errorMessage = ResponseConstants.Error + error;
             var dataLength = errorMessage.Length;
             var headerResponse = new Header(HeaderConstants.Response, command,
                 dataLength);
-            communication.SendData(clientSocket, headerResponse, errorMessage);
+            await communication.WriteDataAsync(clientSocket, headerResponse, errorMessage).ConfigureAwait(false);
         }
         
-        private void OkResponse(Socket clientSocket,int command)
+        private async Task OkResponse(TcpClient clientSocket,int command)
         {
             var headerResponse = new Header(HeaderConstants.Response, command,
                 ResponseConstants.Ok.Length);
-            communication.SendData(clientSocket, headerResponse, ResponseConstants.Ok);
+            await communication.WriteDataAsync(clientSocket, headerResponse, ResponseConstants.Ok).ConfigureAwait(false);
         }
     }
 }
