@@ -31,7 +31,7 @@ namespace VaporServer.Factory
         public async Task Start()
         {
             TestData.Load(dataBase.GameDataBase, dataBase.UserDataBase, dataBase.ReviewDataBase);
-            await this.server.Start();
+            await this.server.Start().ConfigureAwait(false);
         }
 
 

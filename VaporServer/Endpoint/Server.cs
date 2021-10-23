@@ -54,7 +54,7 @@ namespace VaporServer.Endpoint
 
             ShowMenu();
 
-            await HandleServer(tcpListener);
+            await HandleServer(tcpListener).ConfigureAwait(false);
         }
 
         private async Task HandleServer(TcpListener tcpListener)
@@ -124,46 +124,46 @@ namespace VaporServer.Endpoint
                 try
                 {
                     
-                    await communication.ReadDataAsync(clientSocket, headerLength, buffer);
+                    await communication.ReadDataAsync(clientSocket, headerLength, buffer).ConfigureAwait(false);
                     var header = new Header();
                     header.DecodeData(buffer);
                     
                     switch (header.ICommand)
                     {
                         case CommandConstants.GetGames:
-                            await GetGamesAsync(clientSocket);
+                            await GetGamesAsync(clientSocket).ConfigureAwait(false);
                             break;
                         
                         case  CommandConstants.BuyGame:
-                            await BuyGameAsync(clientSocket, header);
+                            await BuyGameAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         
                         case CommandConstants.SendImage:
-                            await SendImageAsync(clientSocket, header);
+                            await SendImageAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         
                         case CommandConstants.PublicGame:
-                            await ProcessGameAsync(clientSocket, header);
+                            await ProcessGameAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         
                         case CommandConstants.ModifyGame:
-                            await ModifyGameAsync(clientSocket, header);
+                            await ModifyGameAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         
                         case CommandConstants.GameDetail:
-                            await GetGameDetailAsync(clientSocket, header);
+                            await GetGameDetailAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         
                         case CommandConstants.DeleteGame:
-                            await DeleteGameAsync(clientSocket, header);
+                            await DeleteGameAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         
                         case CommandConstants.LookupGame:
-                            await LookupGameAsync(clientSocket, header);
+                            await LookupGameAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         
                         case CommandConstants.PublicCalification:
-                            await PublicCalificationAsync(clientSocket, header);
+                            await PublicCalificationAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         
                     }
@@ -186,11 +186,11 @@ namespace VaporServer.Endpoint
             {
                 this.gameLogic.PublicReviewInGame(receiveGameAndReview);
                 
-                await OkResponse(clientSocket,CommandConstants.PublicCalification);
+                await OkResponse(clientSocket,CommandConstants.PublicCalification).ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                await ErrorResponse(clientSocket,e.Message,CommandConstants.PublicCalification);
+                await ErrorResponse(clientSocket,e.Message,CommandConstants.PublicCalification).ConfigureAwait(false);
             }
         }
 
@@ -204,12 +204,12 @@ namespace VaporServer.Endpoint
             {
                 this.gameLogic.DeleteGame(receiveGameNameBuffer);
                 
-                await OkResponse(clientSocket,CommandConstants.DeleteGame);
+                await OkResponse(clientSocket,CommandConstants.DeleteGame).ConfigureAwait(false);
                 
             }
             catch (Exception e)
             {
-                await ErrorResponse(clientSocket,e.Message,CommandConstants.DeleteGame);
+                await ErrorResponse(clientSocket,e.Message,CommandConstants.DeleteGame).ConfigureAwait(false);
             }
 
         }

@@ -54,7 +54,7 @@ namespace VaporCliente.Endpoint
 
                 Help();
 
-                await HandleClient(tcpClient);
+                await HandleClient(tcpClient).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -83,42 +83,42 @@ namespace VaporCliente.Endpoint
                     
                     case "obtener caratula":
                         
-                        await GetCoverPageAsync(tcpClient,String.Empty);
+                        await GetCoverPageAsync(tcpClient,String.Empty).ConfigureAwait(false);
 
                         break;
                     
                     case "obtener juegos":
-                        await GetGamesAsync(tcpClient);
+                        await GetGamesAsync(tcpClient).ConfigureAwait(false);
                         break;
                     
                     case "adquirir juego":
-                        await BuyGameAsync(tcpClient);
+                        await BuyGameAsync(tcpClient).ConfigureAwait(false);
                         break;
                     
                     case "publicar juego":
-                        await PublicGameAsync(tcpClient);
+                        await PublicGameAsync(tcpClient).ConfigureAwait(false);
                         break;
                     
                     case "modificar juego":
                         
-                        await ModifyGameAsync(tcpClient);
+                        await ModifyGameAsync(tcpClient).ConfigureAwait(false);
 
                         break;
                     
                     case "ver detalle juego":
-                        await GetGameDetailsAsync(tcpClient);
+                        await GetGameDetailsAsync(tcpClient).ConfigureAwait(false);
                         break;
                     
                     case "borrar juego":
-                        await DeleteGameAsync(tcpClient);
+                        await DeleteGameAsync(tcpClient).ConfigureAwait(false);
                         break;
                     
                     case "buscar juegos":
-                        await LookUpForGameAsync(tcpClient);
+                        await LookUpForGameAsync(tcpClient).ConfigureAwait(false);
                         break;
                     
                     case "publicar calificacion":
-                        await PublicCalificationAsync(tcpClient);
+                        await PublicCalificationAsync(tcpClient).ConfigureAwait(false);
                         break;
                     
                     case "help":
@@ -154,7 +154,7 @@ namespace VaporCliente.Endpoint
         private async Task PublicCalificationAsync(TcpClient tcpClient)
         {
             Console.WriteLine("Ingrese un juego de los siguientes:");
-            await  GetGamesAsync(tcpClient);
+            await  GetGamesAsync(tcpClient).ConfigureAwait(false);
             var game = ValidationsImplementations.GameValidation.ValidNotEmpty();
             
             Console.WriteLine("Ingrese un rating entre 1 al 5");
@@ -171,7 +171,7 @@ namespace VaporCliente.Endpoint
             
             try
             {
-                var response = await GetResponse(tcpClient);
+                var response = await GetResponse(tcpClient).ConfigureAwait(false);
                 Console.WriteLine(response);
             }
             catch (Exception)
@@ -190,7 +190,7 @@ namespace VaporCliente.Endpoint
 
             await communication.WriteDataAsync(tcpClient, header, game).ConfigureAwait(false);
 
-            var response = await GetResponse(tcpClient);
+            var response = await GetResponse(tcpClient).ConfigureAwait(false);
             
             Console.WriteLine(response);
             
@@ -211,7 +211,7 @@ namespace VaporCliente.Endpoint
             
             await communication.WriteDataAsync(tcpClient, header, lookup).ConfigureAwait(false);
 
-            var gameTitle = await GetResponse(tcpClient);
+            var gameTitle = await GetResponse(tcpClient).ConfigureAwait(false);
             
             if(gameTitle.Contains(ResponseConstants.Error))
             {
@@ -226,7 +226,7 @@ namespace VaporCliente.Endpoint
         private async Task GetGameDetailsAsync(TcpClient tcpClient)
         {
             Console.WriteLine("La lista de Juegos disponibles es:");
-            await GetGamesAsync(tcpClient);
+            await GetGamesAsync(tcpClient).ConfigureAwait(false);
 
             Console.WriteLine("Ingrese el nombre de un Juego:");
             var gameName = GameValidation.ValidNotEmpty();
@@ -237,7 +237,7 @@ namespace VaporCliente.Endpoint
 
             try
             {
-                var response = await GetResponse(tcpClient);
+                var response = await GetResponse(tcpClient).ConfigureAwait(false);
                 
                 if(!response.Contains(ResponseConstants.Error)){
 
@@ -259,7 +259,7 @@ namespace VaporCliente.Endpoint
                     var answer = GameValidation.YesNoValidation();
                     if (answer.Equals("si"))
                     {
-                        await GetCoverPageAsync(tcpClient,gameName);
+                        await GetCoverPageAsync(tcpClient,gameName).ConfigureAwait(false);
                     }
                 }
                 else
@@ -305,10 +305,10 @@ namespace VaporCliente.Endpoint
             if (!string.IsNullOrEmpty(coverPage))
             {
                 var fileToSend = filesPathToSend + coverPage;
-                await communication.WriteFileAsync(tcpClient, fileToSend);
+                await communication.WriteFileAsync(tcpClient, fileToSend).ConfigureAwait(false);
             }
 
-            var response = await GetResponse(tcpClient);
+            var response = await GetResponse(tcpClient).ConfigureAwait(false);
             
             Console.WriteLine(response);
         }
