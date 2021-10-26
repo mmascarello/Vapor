@@ -50,11 +50,13 @@ namespace VaporServer.Endpoint
         {
             Console.WriteLine($"ip: {serverIpAddress} - puerto {serverPort} - backlog {backLog}");
             tcpListener.Start(backLog);
-            await Task.Run(async ()=> await ListenForConnectionsAsync(tcpListener)).ConfigureAwait(false);
 
+            var task = Task.Run(async ()=> await ListenForConnectionsAsync(tcpListener)).ConfigureAwait(false);
+            
             ShowMenu();
-
+            
             await HandleServer(tcpListener).ConfigureAwait(false);
+
         }
 
         private async Task HandleServer(TcpListener tcpListener)
@@ -67,16 +69,25 @@ namespace VaporServer.Endpoint
                     case "exit":
                         exit = true;
                         
-                            tcpListener.Stop();
+                        tcpListener.Stop();
+                        try
+                        {
                             foreach (var client in clients)
                             {
                                 client.GetStream().Close();
                                 client.Close();
                             }
 
-                        var fakeSocket = new TcpClient();
-                            await fakeSocket.ConnectAsync(serverIP,serverPort).ConfigureAwait(false);
-                            break;
+                            var fakeSocket = new TcpClient();
+                            await fakeSocket.ConnectAsync(serverIP, serverPort).ConfigureAwait(false);
+
+                        }
+                        catch(Exception e)
+                        {
+                            Console.WriteLine("Cerrando el servidor");
+                        }
+                        break;
+                    
                     default:
                         Console.WriteLine("Opcion incorrecta ingresada");
                         break;
@@ -84,7 +95,7 @@ namespace VaporServer.Endpoint
             }
         }
 
-        private static void ShowMenu()
+        private void ShowMenu()
         {
             Console.WriteLine("Bienvenido al Sistema Server");
             Console.WriteLine("Opciones validas: ");
@@ -98,10 +109,11 @@ namespace VaporServer.Endpoint
             {
                 try
                 {
-                    var clientConnected = await tcpListener.AcceptTcpClientAsync().ConfigureAwait(false);
-                    clients.Add(clientConnected);
+                    var tcpClientSocket = await tcpListener.AcceptTcpClientAsync().ConfigureAwait(false);
+                    clients.Add(tcpClientSocket);
                     Console.WriteLine("Accepted new connection...");
-                    await Task.Run( async () => await HandleClientAsync(clientConnected)).ConfigureAwait(false);
+                    var task = Task.Run( async () => await HandleClientAsync(tcpClientSocket)).ConfigureAwait(false);
+                    
                 }
                 catch (Exception e)
                 {
