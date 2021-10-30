@@ -388,7 +388,7 @@ namespace VaporCliente.Endpoint
         private async Task BuyGameAsync(TcpClient tcpClient)
         {
             Console.WriteLine("Ingrese un usuario");
-            var userName = GameValidation.ValidNotEmpty();
+            var userName = userLogged;
             
             Console.WriteLine("Ingrese un juego");
             var gameName = GameValidation.ValidNotEmpty();
