@@ -13,6 +13,8 @@ namespace StringProtocol
         public const int LookupGame = 7;
         public const int  DeleteGame= 8;
         public const int  PublicCalification= 9;
+        public const int  Login= 10;
+        
 
     }
 }

@@ -37,5 +37,13 @@ namespace VaporServer.DataAccess
                 users[index].MyOwnedGames.Add(gameId);
             }
         }
+
+        public void Login(string user, string password)
+        {
+            lock (locker)
+            {
+                users.Find(x => x.UserLogin.Equals(user)); //&&x.Password.Equals(password));
+            }
+        }
     }
 }

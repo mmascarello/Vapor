@@ -26,6 +26,7 @@ namespace VaporServer.Endpoint
         private int backLog;
         private string serverFilesPath;
         private readonly GameLogic gameLogic;
+        private readonly UserLogic userLogic;
         private IPAddress serverIP; 
 
         public Server(Logic businessLogic,ISettingsManager settingsManager,ICommunication communication)
@@ -34,6 +35,7 @@ namespace VaporServer.Endpoint
             this.businessLogic = businessLogic;
             this.communication = communication;
             this.gameLogic = this.businessLogic.GameLogic;
+            this.userLogic = this.businessLogic.UserLogic;
             
             serverIP = IPAddress.Parse(this.settingsManager.ReadSetting(ServerConfig.ServerIpConfigKey));
             this.serverPort = int.Parse(this.settingsManager.ReadSetting(ServerConfig.SeverPortConfigKey));
@@ -165,6 +167,9 @@ namespace VaporServer.Endpoint
                         case CommandConstants.PublicCalification:
                             await PublicCalificationAsync(clientSocket, header).ConfigureAwait(false);
                             break;
+                        case CommandConstants.Login:
+                            await Login(clientSocket, header).ConfigureAwait(false);
+                            break;
                         
                     }
                 }
@@ -175,7 +180,25 @@ namespace VaporServer.Endpoint
                 }
             }
         }
+        
+        private async Task Login(TcpClient clientSocket, Header header)
+        {
 
+            var login = new Byte[header.IDataLength];
+            
+            await communication.ReadDataAsync(clientSocket, header.IDataLength, login).ConfigureAwait(false);
+            try
+            {
+                this.userLogic.Login(login);
+
+                await OkResponse(clientSocket,CommandConstants.PublicCalification).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                await ErrorResponse(clientSocket,e.Message,CommandConstants.PublicCalification).ConfigureAwait(false);
+            }
+        }
+        
         private async Task PublicCalificationAsync(TcpClient clientSocket, Header header)
         {
 
