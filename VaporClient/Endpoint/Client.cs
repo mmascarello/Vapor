@@ -155,13 +155,13 @@ namespace VaporCliente.Endpoint
         {
             Console.WriteLine("Ingrese un juego de los siguientes:");
             await  GetGamesAsync(tcpClient).ConfigureAwait(false);
-            var game = ValidationsImplementations.GameValidation.ValidNotEmpty();
+            var game = GameValidation.ValidNotEmpty();
             
             Console.WriteLine("Ingrese un rating entre 1 al 5");
-            var rating = ValidationsImplementations.GameValidation.ValidateRating();
+            var rating = GameValidation.ValidateRating();
             
             Console.WriteLine("Ingrese una review (opinion del juego)");
-            var review = ValidationsImplementations.GameValidation.ValidNotEmpty();
+            var review = GameValidation.ValidNotEmpty();
             
             var data = game+"|"+rating+"|"+review+"|";
             

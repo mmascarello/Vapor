@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Domain;
 using VaporServer.DataAccess;
 
@@ -15,19 +14,89 @@ namespace VaporServer.BusinessLogic
             this.gameLogic = gameLogic;
         }
         
-        public List<User> GetUsers()
+        public string GetUsers()
         {
-            return this.userDb.GetUsers();
+            try
+            {
+                var users = this.userDb.GetUsers();
+                var usersToShow = "";
+                users.ForEach(u=> usersToShow+= u.UserLogin +"-");
+                return usersToShow;
+
+            }
+            catch (Exception e)
+            {
+                throw new Exception("No hay usuarios en el sistema");
+            }
         }
 
-        public void AddUser(string user)
+        public void CreateUser(string user, string password)
         {
-            //validar que no este vacio
             User userToAdd = new User();
             userToAdd.UserLogin = user;
+            userToAdd.Password = password;
             this.userDb.AddUser(userToAdd);
         }
+        
+        public void ModifyUser(string userName,string newName, string password)
+        {
+            try
+            {
+                var user = userDb.GetUser(userName);
 
+                if (!string.IsNullOrEmpty(newName))
+                {
+                    user.UserLogin = newName;
+                }
+                
+                if (!string.IsNullOrEmpty(password))
+                {
+                    user.Password = password;
+                }
+
+                this.userDb.ModifyUser(user);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("El usuario a modificar no existe");
+            }
+        
+        }
+        
+        //ToDo: mejorar metodo. 
+        public bool ExistsUser(string user)
+        {
+            var exists = false;
+
+            try
+            {
+                var foundUser = userDb.GetUser(user);
+                
+                if (foundUser.UserLogin == user)
+                {
+                    exists = true;
+                }
+
+                return exists;
+            }
+            catch (Exception e)
+            {
+               return exists;
+            }
+          
+        }
+        public void DeleteUser(string user)
+        {
+            try
+            {
+                this.userDb.DeleteUser(user);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("User not found");
+            }
+        }
         
         public void BuyGame(string user , string game)
         {
@@ -63,6 +132,40 @@ namespace VaporServer.BusinessLogic
         private bool AlreadyBought(User getUser, Guid gameId)
         {
             return getUser.MyOwnedGames.Exists(g => g.Equals(gameId));
+        }
+
+        public string UserDetail(string user)
+        {
+            try
+            {
+                var userFound = userDb.GetUser(user);
+                var userInfo = userFound.UserLogin + '|' + userFound.Password + '|';
+
+                var userGamesId = userFound.MyOwnedGames;
+                var games = gameLogic.GetGames();
+
+                var userGames = "";
+                
+                foreach (var gameId in userGamesId)
+                {
+                    foreach (var game in games)
+                    {
+                        if (gameId == game.Id)
+                        {
+                            userGames += game.Title + ',';
+                        }
+                    }
+                }
+
+                userInfo += userGames;
+                
+                return userInfo;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("No existe el usuario");
+                throw;
+            }
         }
     }
 }

@@ -15,10 +15,46 @@ namespace VaporServer.DataAccess
         }
         
         public void AddUser(User user){
+            
             lock (locker)
             {
                 this.users.Add(user);
             }
+        }
+        
+        public void ModifyUser(User userModified)
+        {
+            try
+            {
+                lock (locker)
+                {
+                    var index = users.FindIndex(u => u.Id == userModified.Id);
+                    users[index] = userModified;
+
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error al actualizar usuario");
+            }
+            
+        }
+        
+        public void DeleteUser(string user)
+        {
+            try
+            {
+                lock (locker)
+                {
+                    var userToRemove = GetUser(user);
+                    users.Remove(userToRemove);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+
         }
 
         public List<User> GetUsers()
@@ -26,6 +62,22 @@ namespace VaporServer.DataAccess
             lock (locker)
             {
                 return users;
+            }
+        }
+        
+        public User GetUser(string userName)
+        {
+            try
+            {
+                lock (locker)
+                {
+                    var user = users.Find(u => u.UserLogin == userName);
+                    return user;
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("No user found");
             }
         }
 

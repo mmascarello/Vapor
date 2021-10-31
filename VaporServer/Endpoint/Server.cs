@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using CommunicationInterface;
 using SettingsManagerInterface;
 using StringProtocol;
+using ValidationsImplementations;
 using VaporServer.BusinessLogic;
 
 namespace VaporServer.Endpoint
@@ -25,8 +26,10 @@ namespace VaporServer.Endpoint
         private int serverPort;
         private int backLog;
         private string serverFilesPath;
-        private readonly GameLogic gameLogic;
         private IPAddress serverIP; 
+        private readonly GameLogic gameLogic;
+        private readonly UserLogic userLogic;
+
 
         public Server(Logic businessLogic,ISettingsManager settingsManager,ICommunication communication)
         {
@@ -34,6 +37,8 @@ namespace VaporServer.Endpoint
             this.businessLogic = businessLogic;
             this.communication = communication;
             this.gameLogic = this.businessLogic.GameLogic;
+            this.userLogic = this.businessLogic.UserLogic;
+
             
             serverIP = IPAddress.Parse(this.settingsManager.ReadSetting(ServerConfig.ServerIpConfigKey));
             this.serverPort = int.Parse(this.settingsManager.ReadSetting(ServerConfig.SeverPortConfigKey));
@@ -88,6 +93,41 @@ namespace VaporServer.Endpoint
                         }
                         break;
                     
+                    case "modificar usuario":
+
+                        ModifyUser();
+
+                        break;
+                    
+                    case "crear usuario":
+
+                        CreateUser();
+                        
+                        break;
+                    
+                    case "eliminar usuario":
+
+                        DeleteUser();
+                        
+                        break;
+                    case "obtener usuarios":
+
+                        GetUsers();
+                        
+                        break;
+                    
+                    case "ver detalle usuario":
+
+                        UserDetail();
+                        
+                        break;
+                    
+                    case "help":
+
+                        ShowMenu();
+                        
+                        break;
+                        
                     default:
                         Console.WriteLine("Opcion incorrecta ingresada");
                         break;
@@ -95,11 +135,121 @@ namespace VaporServer.Endpoint
             }
         }
 
+        private void UserDetail()
+        {
+            try
+            {
+                Console.WriteLine("Ingrese el nombre de un usuario");
+                var user = Console.ReadLine();
+                var userinfo = userLogic.UserDetail(user);
+                var userifo = userinfo.Split('|');
+                Console.WriteLine($"El nombre del usuario es: {userifo[0]}");
+                Console.WriteLine($"La contrasena del usuario es: {userifo[1]}");
+                Console.WriteLine($"Juego/s: {userifo[2]}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("No se encontro el usuario");
+            }
+            
+        }
+
+        private void GetUsers()
+        {
+            try
+            {
+                var usuarios = userLogic.GetUsers();
+                Console.WriteLine(usuarios);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("No se encontraron");
+            }
+        }
+
+        private void DeleteUser()
+        {
+            try
+            {
+                Console.WriteLine("Que usuario desdea eliminar?");
+                var user = Console.ReadLine();
+                userLogic.DeleteUser(user);
+                Console.WriteLine("Usuario eliminado con exito.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Este usuario no exite");
+            }
+        }
+
+        private void CreateUser()
+        {
+            Console.WriteLine("Ingrese nombre para el usuario");
+            var usuario = UserValidation.ValidNotEmpty().ToLower();
+            
+            var invalid = userLogic.ExistsUser(usuario);
+           
+            while (invalid)
+            {
+                Console.WriteLine("Ingrese el nombre de un usuario NO existente");
+                usuario = UserValidation.ValidNotEmpty().ToLower();
+                invalid = userLogic.ExistsUser(usuario);//valido si existe retorna true y va a volver a entrar al while sino false y se va. 
+            }
+            
+            Console.WriteLine("Ingrese contrasena para el usuario");
+            var pass = UserValidation.ValidNotEmpty().ToLower();
+            
+            userLogic.CreateUser(usuario,pass);
+            
+            Console.WriteLine($"El usuario '{usuario}' fue creado con exito");
+        }
+
+        private void ModifyUser()
+        {
+            try
+            {
+                Console.WriteLine("Que usuario desdea modificar?");
+                var usuario = UserValidation.ValidNotEmpty().ToLower();
+
+                Console.WriteLine($"Usted va a modificar el usuario{usuario} \n" +
+                                  " Si no desea modificar la informacion del campo, dejelo vacio y presione enter");
+
+                Console.WriteLine("Nombre nuevo");
+                var newUsuario = Console.ReadLine().ToLower();
+                
+                var invalid = userLogic.ExistsUser(newUsuario);
+                while (invalid)
+                {
+                    Console.WriteLine("Ingrese el nombre de un usuario NO existente");
+                    newUsuario = Console.ReadLine().ToLower();
+                    invalid = userLogic.ExistsUser(newUsuario);//valido si existe retorna true y va a volver a entrar al while sino false
+                                                               //y se va. 
+                }
+            
+                Console.WriteLine("Ingrese contrasena nueva");
+                var pass = Console.ReadLine().ToLower();
+
+                userLogic.ModifyUser(usuario,newUsuario,pass);
+                Console.WriteLine("Usuario modificado con exito");
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("No se encontro el usuario a modifcar");
+            }
+        }
+
         private void ShowMenu()
         {
             Console.WriteLine("Bienvenido al Sistema Server");
+            Console.WriteLine(" Ingrese 'help' -> cada vez que desee ver 'opciones validas'.");
             Console.WriteLine("Opciones validas: ");
-            Console.WriteLine("exit -> abandonar el programa");
+            Console.WriteLine(" exit -> abandonar el programa");
+            Console.WriteLine(" obtener usuarios -> para obtener lista de usuarios.");
+            Console.WriteLine(" modificar usuario -> para cambiar nombre y/o contrasena");
+            Console.WriteLine(" crear usuario -> para crear usuario con nombre y contrasena");
+            Console.WriteLine(" eliminar usuario -> para eliminar usuario.");
+            Console.WriteLine(" ver detalle usuario -> para ver el nombre, la contrasena, y juegos del usuario.");
             Console.WriteLine("Ingrese su opcion: ");
         }
 
@@ -113,7 +263,6 @@ namespace VaporServer.Endpoint
                     clients.Add(tcpClientSocket);
                     Console.WriteLine("Accepted new connection...");
                     var task = Task.Run( async () => await HandleClientAsync(tcpClientSocket)).ConfigureAwait(false);
-                    
                 }
                 catch (Exception e)
                 {

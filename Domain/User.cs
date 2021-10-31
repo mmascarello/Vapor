@@ -6,6 +6,7 @@ namespace Domain
     public class User
     {
         public string UserLogin;
+        public string Password;
         public List<Guid> MyOwnedGames;
         public Guid Id;
 
