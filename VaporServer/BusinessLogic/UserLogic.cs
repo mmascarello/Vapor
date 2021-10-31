@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using Domain;
 using VaporServer.DataAccess;
 
@@ -166,6 +168,19 @@ namespace VaporServer.BusinessLogic
                 Console.WriteLine("No existe el usuario");
                 throw;
             }
+
+        public void Login(Byte[] data)
+        {
+            var user = Encoding.UTF8.GetString(data).Split('|');
+            try
+            {
+                userDb.Login(user[0], user[1]);
+            }
+            catch (Exception)
+            {
+                throw new Exception("no se puede loguear");
+            }
+            
         }
     }
 }

@@ -3,7 +3,9 @@ using SettingsManagerInterface;
 using System;
 using System.Globalization;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using StringProtocol;
@@ -24,6 +26,7 @@ namespace VaporCliente.Endpoint
         private string filesPathToSend;
         private IPAddress clientIP;
         private IPAddress serverIP;
+        private string userLogged="";
 
         public Client(ICommunication communication, ISettingsManager manager)
         {
@@ -52,6 +55,8 @@ namespace VaporCliente.Endpoint
                 Console.WriteLine("Bienvenido al sistema cliente");
                 Console.WriteLine("");
 
+                Login(tcpClient);
+
                 Help();
 
                 await HandleClient(tcpClient).ConfigureAwait(false);
@@ -63,6 +68,19 @@ namespace VaporCliente.Endpoint
             }
         }
 
+        private void Login(TcpClient tcpClient)
+        {
+            while (userLogged.Equals(""))
+            {
+                Console.WriteLine("Para continuar debe autenticarse");
+                Console.WriteLine("Ingrese nombre de usuario");
+                var user = ValidationsImplementations.UserValidation.ValidNotEmpty();
+                Console.WriteLine("Ingrese contraseña");
+                var password = ValidationsImplementations.UserValidation.ValidNotEmpty();
+                Authenticate(tcpClient,user,password);
+            }
+        }
+        
         private async Task HandleClient(TcpClient tcpClient)
         {
             var connected = true;
@@ -151,6 +169,24 @@ namespace VaporCliente.Endpoint
             Console.WriteLine("Recomendacion: simepre tenga desactivado las mayusculas");
         }
 
+        private async Task Authenticate(TcpClient tcpClient, string user, string password)
+        {
+            var data = user+"|"+password+"|";
+            var header = new Header(HeaderConstants.Request, CommandConstants.Login ,data.Length);
+            await communication.WriteDataAsync(tcpClient, header, data).ConfigureAwait(false);
+
+            var response = await GetResponse(tcpClient);
+            if (response.Equals(ResponseConstants.Ok))
+            {
+                userLogged = user;
+            }
+            else
+            {
+                Console.WriteLine(response); 
+            }
+            
+        }
+        
         private async Task PublicCalificationAsync(TcpClient tcpClient)
         {
             Console.WriteLine("Ingrese un juego de los siguientes:");
@@ -352,7 +388,7 @@ namespace VaporCliente.Endpoint
         private async Task BuyGameAsync(TcpClient tcpClient)
         {
             Console.WriteLine("Ingrese un usuario");
-            var userName = GameValidation.ValidNotEmpty();
+            var userName = userLogged;
             
             Console.WriteLine("Ingrese un juego");
             var gameName = GameValidation.ValidNotEmpty();
