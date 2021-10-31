@@ -147,7 +147,7 @@ namespace VaporServer.BusinessLogic
                 var games = gameLogic.GetGames();
 
                 var userGames = "";
-                
+
                 foreach (var gameId in userGamesId)
                 {
                     foreach (var game in games)
@@ -160,7 +160,7 @@ namespace VaporServer.BusinessLogic
                 }
 
                 userInfo += userGames;
-                
+
                 return userInfo;
             }
             catch (Exception e)
@@ -168,6 +168,7 @@ namespace VaporServer.BusinessLogic
                 Console.WriteLine("No existe el usuario");
                 throw;
             }
+        }
 
         public void Login(Byte[] data)
         {
