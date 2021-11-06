@@ -11,6 +11,7 @@ using SettingsManagerInterface;
 using StringProtocol;
 using ValidationsImplementations;
 using VaporServer.BusinessLogic;
+using VaporServer.MQHandler;
 
 namespace VaporServer.Endpoint
 {
@@ -29,9 +30,9 @@ namespace VaporServer.Endpoint
         private IPAddress serverIP; 
         private readonly GameLogic gameLogic;
         private readonly UserLogic userLogic;
+        private readonly MQProducer logsProducer; 
 
-
-        public Server(Logic businessLogic,ISettingsManager settingsManager,ICommunication communication)
+        public Server(Logic businessLogic,ISettingsManager settingsManager,ICommunication communication, MQProducer logsProducer)
         {
             this.settingsManager = settingsManager;
             this.businessLogic = businessLogic;
@@ -47,6 +48,7 @@ namespace VaporServer.Endpoint
             this.backLog = int.Parse(this.settingsManager.ReadSetting(ServerConfig.MaxConnectionConfigKey));
             this.serverFilesPath = this.settingsManager.ReadSetting(ServerConfig.ServerFilePath);
             System.IO.Directory.CreateDirectory(serverFilesPath);
+            this.logsProducer = logsProducer;
         }
 
         public async Task Start()
@@ -555,6 +557,8 @@ namespace VaporServer.Endpoint
                 games.Length);
             
             await communication.WriteDataAsync(clientSocket, headerToSend, games).ConfigureAwait(false);
+            
+            SendLog();
         }
         
         private async Task ErrorResponse(TcpClient clientSocket, string error,int command)
@@ -571,6 +575,11 @@ namespace VaporServer.Endpoint
             var headerResponse = new Header(HeaderConstants.Response, command,
                 ResponseConstants.Ok.Length);
             await communication.WriteDataAsync(clientSocket, headerResponse, ResponseConstants.Ok).ConfigureAwait(false);
+        }
+
+        private void SendLog()
+        {
+            logsProducer.SendLog("Holi");
         }
     }
 }

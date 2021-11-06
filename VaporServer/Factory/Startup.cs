@@ -6,6 +6,7 @@ using SettingsManagerInterface;
 using VaporServer.DataAccess;
 using VaporServer.BusinessLogic;
 using VaporServer.Endpoint;
+using VaporServer.MQHandler;
 
 namespace VaporServer.Factory
 {
@@ -16,6 +17,7 @@ namespace VaporServer.Factory
         private readonly Server server;
         private readonly ISettingsManager manager;
         private readonly ICommunication communication;
+        private readonly MQProducer logsProducer;
         
 
         public Startup()
@@ -24,8 +26,9 @@ namespace VaporServer.Factory
             this.dataBase = new MemoryDataBase();
             this.businessLogic = new Logic(dataBase);
             this.communication = new Communication();
+            this.logsProducer = new MQProducer();
             
-            this.server = new Server(businessLogic,manager,communication);
+            this.server = new Server(businessLogic,manager,communication,logsProducer);
         }
 
         public async Task Start()
@@ -33,7 +36,6 @@ namespace VaporServer.Factory
             TestData.Load(dataBase.GameDataBase, dataBase.UserDataBase, dataBase.ReviewDataBase);
             await this.server.Start().ConfigureAwait(false);
         }
-
 
     }
 }

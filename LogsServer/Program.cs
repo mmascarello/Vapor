@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Threading.Tasks;
+using LogsServer.Factory;
 
 namespace LogsServer
 {
     class Program
     {
-        static void Main(string[] args)
+        private static Startup _startup = new Startup();
+
+        static async Task Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            await _startup.Start().ConfigureAwait(false);
         }
     }
 }

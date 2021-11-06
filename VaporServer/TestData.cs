@@ -49,12 +49,12 @@ namespace VaporServer
             gameDataBase.AddGames(new Game(){ Title = "pokemon",Id = pokemonId, Gender = "aventura"});
             gameDataBase.AddGames(new Game(){ Title = "warcraft",Id = warCraftId, Gender = "estrategia"});
             
-            userDataBase.AddUser(new User(){UserLogin = "mica", Id = micaId, MyOwnedGames= new List<Guid>()
+            userDataBase.AddUser(new User(){UserLogin = "mica", Password = "mica", Id = micaId, MyOwnedGames= new List<Guid>()
             {
                 superMarioId,bomermanId
             }});
             
-            userDataBase.AddUser(new User(){UserLogin = "maxi", Id = maxiId, MyOwnedGames= new List<Guid>()
+            userDataBase.AddUser(new User(){UserLogin = "maxi",Password = "maxi", Id = maxiId, MyOwnedGames= new List<Guid>()
             {
                 pokemonId,bomermanId
             }});
