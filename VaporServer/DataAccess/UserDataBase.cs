@@ -90,11 +90,12 @@ namespace VaporServer.DataAccess
             }
         }
 
-        public void Login(string user, string password)
+        public User Login(string user, string password)
         {
             lock (locker)
             {
-                users.Find(u => u.UserLogin.Equals(user) && u.Password.Equals(password));
+                var findUser = users.Find(u => u.UserLogin.Equals(user) && u.Password.Equals(password));
+                return findUser;
             }
         }
     }

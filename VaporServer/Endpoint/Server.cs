@@ -4,9 +4,9 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using CommunicationInterface;
+using Domain;
 using SettingsManagerInterface;
 using StringProtocol;
 using ValidationsImplementations;
@@ -30,7 +30,8 @@ namespace VaporServer.Endpoint
         private IPAddress serverIP; 
         private readonly GameLogic gameLogic;
         private readonly UserLogic userLogic;
-        private readonly MQProducer logsProducer; 
+        private readonly MQProducer logsProducer;
+        private User userLogged;
 
         public Server(Logic businessLogic,ISettingsManager settingsManager,ICommunication communication, MQProducer logsProducer)
         {
@@ -272,64 +273,63 @@ namespace VaporServer.Endpoint
             }
             Console.WriteLine("Exiting....");
         }
-        
+
         private async Task HandleClientAsync(TcpClient clientSocket)
         {
-            var remoteConnectionClosed = false;  
+            var remoteConnectionClosed = false;
             while (!exit && !remoteConnectionClosed)
             {
                 var headerLength = HeaderConstants.Request.Length + HeaderConstants.CommandLength +
                                    HeaderConstants.DataLength;
                 var buffer = new byte[headerLength];
-                
+
                 try
                 {
-                    
+
                     await communication.ReadDataAsync(clientSocket, headerLength, buffer).ConfigureAwait(false);
                     var header = new Header();
                     header.DecodeData(buffer);
-                    
+
                     switch (header.ICommand)
                     {
                         case CommandConstants.GetGames:
                             await GetGamesAsync(clientSocket).ConfigureAwait(false);
                             break;
-                        
-                        case  CommandConstants.BuyGame:
+
+                        case CommandConstants.BuyGame:
                             await BuyGameAsync(clientSocket, header).ConfigureAwait(false);
                             break;
-                        
+
                         case CommandConstants.SendImage:
                             await SendImageAsync(clientSocket, header).ConfigureAwait(false);
                             break;
-                        
+
                         case CommandConstants.PublicGame:
                             await ProcessGameAsync(clientSocket, header).ConfigureAwait(false);
                             break;
-                        
+
                         case CommandConstants.ModifyGame:
                             await ModifyGameAsync(clientSocket, header).ConfigureAwait(false);
                             break;
-                        
+
                         case CommandConstants.GameDetail:
                             await GetGameDetailAsync(clientSocket, header).ConfigureAwait(false);
                             break;
-                        
+
                         case CommandConstants.DeleteGame:
                             await DeleteGameAsync(clientSocket, header).ConfigureAwait(false);
                             break;
-                        
+
                         case CommandConstants.LookupGame:
                             await LookupGameAsync(clientSocket, header).ConfigureAwait(false);
                             break;
-                        
+
                         case CommandConstants.PublicCalification:
                             await PublicCalificationAsync(clientSocket, header).ConfigureAwait(false);
                             break;
                         case CommandConstants.Login:
                             await Login(clientSocket, header).ConfigureAwait(false);
                             break;
-                        
                     }
                 }
                 catch (Exception e)
@@ -339,7 +339,7 @@ namespace VaporServer.Endpoint
                 }
             }
         }
-        
+
         private async Task Login(TcpClient clientSocket, Header header)
         {
 
@@ -348,13 +348,17 @@ namespace VaporServer.Endpoint
             await communication.ReadDataAsync(clientSocket, header.IDataLength, login).ConfigureAwait(false);
             try
             {
-                this.userLogic.Login(login);
-
+                userLogged = this.userLogic.Login(login);
+                
                 await OkResponse(clientSocket,CommandConstants.PublicCalification).ConfigureAwait(false);
+                
+                await SendLog(CommandConstants.LoginDescription,"",ResponseConstants.Ok).ConfigureAwait(false);
             }
             catch (Exception e)
             {
                 await ErrorResponse(clientSocket,e.Message,CommandConstants.PublicCalification).ConfigureAwait(false);
+                
+                await SendLog(CommandConstants.LoginDescription,"",ResponseConstants.Error+e.Message).ConfigureAwait(false);
             }
         }
         
@@ -364,15 +368,22 @@ namespace VaporServer.Endpoint
             var receiveGameAndReview = new Byte[header.IDataLength];
             
             await communication.ReadDataAsync(clientSocket, header.IDataLength, receiveGameAndReview).ConfigureAwait(false);
+            
+            var info = Encoding.UTF8.GetString(receiveGameAndReview).Split('|');
+            var game = info[0];
+            
             try
             {
                 this.gameLogic.PublicReviewInGame(receiveGameAndReview);
                 
                 await OkResponse(clientSocket,CommandConstants.PublicCalification).ConfigureAwait(false);
+                
+                await SendLog(CommandConstants.PublicCalificationDescription,game,ResponseConstants.Ok).ConfigureAwait(false);
             }
             catch (Exception e)
             {
                 await ErrorResponse(clientSocket,e.Message,CommandConstants.PublicCalification).ConfigureAwait(false);
+                await SendLog(CommandConstants.PublicCalificationDescription,game,ResponseConstants.Error+e.Message).ConfigureAwait(false);
             }
         }
 
@@ -381,17 +392,21 @@ namespace VaporServer.Endpoint
             var receiveGameNameBuffer = new byte[header.IDataLength];
             
             await communication.ReadDataAsync(clientSocket, header.IDataLength, receiveGameNameBuffer).ConfigureAwait(false);
-
+            
+            var info = Encoding.UTF8.GetString(receiveGameNameBuffer).Split('|');
+            var game = info[0];
+            
             try
             {
                 this.gameLogic.DeleteGame(receiveGameNameBuffer);
                 
                 await OkResponse(clientSocket,CommandConstants.DeleteGame).ConfigureAwait(false);
-                
+                await SendLog(CommandConstants.DeleteGameDescription,game, ResponseConstants.Ok).ConfigureAwait(false);
             }
             catch (Exception e)
             {
                 await ErrorResponse(clientSocket,e.Message,CommandConstants.DeleteGame).ConfigureAwait(false);
+                await SendLog(CommandConstants.DeleteGameDescription,game,ResponseConstants.Error+e.Message).ConfigureAwait(false);
             }
 
         }
@@ -401,6 +416,9 @@ namespace VaporServer.Endpoint
             
             await communication.ReadDataAsync(clientSocket, header.IDataLength, receiveGameAttributeBuffer).ConfigureAwait(false);
 
+            var info = Encoding.UTF8.GetString(receiveGameAttributeBuffer).Split('|');
+            var game = info[0];
+
             try
             {
                 var gameTitle = this.gameLogic.LookupGame(receiveGameAttributeBuffer);
@@ -408,10 +426,13 @@ namespace VaporServer.Endpoint
                 var headerResponse = new Header(HeaderConstants.Response, CommandConstants.GameDetail, gameTitle.Length);
                 
                 await communication.WriteDataAsync(clientSocket,headerResponse,gameTitle).ConfigureAwait(false);
+                
+                await SendLog(CommandConstants.LookupGameDescription,game, ResponseConstants.Ok).ConfigureAwait(false);
 
             }catch (Exception e)
             {
-                await ErrorResponse(clientSocket,e.Message,CommandConstants.LookupGame);
+                await ErrorResponse(clientSocket,e.Message,CommandConstants.LookupGame).ConfigureAwait(false);
+                await SendLog(CommandConstants.LookupGameDescription, game, ResponseConstants.Error + e.Message).ConfigureAwait(false);
             }
         }
 
@@ -421,6 +442,9 @@ namespace VaporServer.Endpoint
             var receiveGameNameBuffer = new byte[header.IDataLength];
             
             await communication.ReadDataAsync(clientSocket, header.IDataLength, receiveGameNameBuffer).ConfigureAwait(false);
+            
+            var info = Encoding.UTF8.GetString(receiveGameNameBuffer).Split('|');
+            var game = info[0];
             
             try
             {
@@ -438,11 +462,12 @@ namespace VaporServer.Endpoint
                 var headerResponse = new Header(HeaderConstants.Response, CommandConstants.GameDetail, response.Length);
                 
                 await communication.WriteDataAsync(clientSocket,headerResponse,response).ConfigureAwait(false);
-
+                await SendLog(CommandConstants.GetGamesDescription,game,ResponseConstants.Ok).ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                await ErrorResponse(clientSocket,e.Message,CommandConstants.GameDetail);
+                await ErrorResponse(clientSocket,e.Message,CommandConstants.GameDetail).ConfigureAwait(false);
+                await SendLog(CommandConstants.GetGamesDescription,game,ResponseConstants.Error+e.Message).ConfigureAwait(false);
             }
         }
         
@@ -452,21 +477,27 @@ namespace VaporServer.Endpoint
 
             await communication.ReadDataAsync(clientSocket, header.IDataLength, gameBuffer).ConfigureAwait(false);
 
+            var info = Encoding.UTF8.GetString(gameBuffer).Split('|');
+            var game = info[0];
+            
             try
             {
                 this.gameLogic.ModifyGame(gameBuffer);
-                
-                var cover = Encoding.UTF8.GetString(gameBuffer).Split('|')[5];
+
+                var cover = info[5];
                 
                 if (!string.IsNullOrEmpty(cover))
                 {
                     await communication.ReadFileAsync(clientSocket,serverFilesPath).ConfigureAwait(false);
-                }  await OkResponse(clientSocket,CommandConstants.ModifyGame);
-                
+                } 
+                await OkResponse(clientSocket,CommandConstants.ModifyGame).ConfigureAwait(false);
+                await SendLog(CommandConstants.ModifyGameDescription,game,ResponseConstants.Ok).ConfigureAwait(false);
+
             }
             catch(Exception e)
             {
-                await ErrorResponse(clientSocket,e.Message,CommandConstants.ModifyGame);
+                await ErrorResponse(clientSocket,e.Message,CommandConstants.ModifyGame).ConfigureAwait(false);
+                await SendLog(CommandConstants.ModifyGameDescription,game, ResponseConstants.Error+e.Message).ConfigureAwait(false);
             }
         }
         
@@ -475,23 +506,28 @@ namespace VaporServer.Endpoint
             var gameBuffer = new byte[header.IDataLength];
 
             await communication.ReadDataAsync(clientSocket, header.IDataLength, gameBuffer).ConfigureAwait(false);
+           
+            var info = Encoding.UTF8.GetString(gameBuffer).Split('|');
+            var game = info[0];
             
             try
             {
                 this.gameLogic.PublicGame(gameBuffer);
-                
-                var cover = Encoding.UTF8.GetString(gameBuffer).Split('|')[4];
+
+                var cover = info[4];
                 
                 if (!string.IsNullOrEmpty(cover))
                 {
                    await communication.ReadFileAsync(clientSocket,serverFilesPath).ConfigureAwait(false);
                 }
                 
-                await OkResponse(clientSocket,CommandConstants.PublicGame);
+                await OkResponse(clientSocket,CommandConstants.PublicGame).ConfigureAwait(false);
+                await SendLog(CommandConstants.PublicGameDescription,game,ResponseConstants.Ok).ConfigureAwait(false);
             }
             catch(Exception e)
             {
-                await ErrorResponse(clientSocket,e.Message,CommandConstants.PublicGame);
+                await ErrorResponse(clientSocket,e.Message,CommandConstants.PublicGame).ConfigureAwait(false);
+                await SendLog(CommandConstants.PublicGameDescription,game,ResponseConstants.Error+e.Message).ConfigureAwait(false);
             }
         }
 
@@ -510,17 +546,21 @@ namespace VaporServer.Endpoint
                 var exists = File.Exists(cover);
                 if (exists)
                 {
-                    await OkResponse(clientSocket,CommandConstants.SendImage);
-                    await communication.WriteFileAsync(clientSocket, cover);
+                    await OkResponse(clientSocket,CommandConstants.SendImage).ConfigureAwait(false);
+                    await communication.WriteFileAsync(clientSocket, cover).ConfigureAwait(false);
+                    await SendLog(CommandConstants.SendImageDescription,game,ResponseConstants.Ok).ConfigureAwait(false);
                 }
                 else
                 {
-                   await ErrorResponse(clientSocket,"No existe la imagen",CommandConstants.SendImage);
+                    var message = "No existe la imagen";
+                   await ErrorResponse(clientSocket,message,CommandConstants.SendImage).ConfigureAwait(false);
+                   await SendLog(CommandConstants.SendImageDescription,game,ResponseConstants.Error+message).ConfigureAwait(false);
                 }
             }
             catch (Exception e)
             {
-                await ErrorResponse(clientSocket,e.Message,CommandConstants.SendImage);
+                await ErrorResponse(clientSocket,e.Message,CommandConstants.SendImage).ConfigureAwait(false);
+                await SendLog(CommandConstants.SendImageDescription,game,ResponseConstants.Error+e.Message).ConfigureAwait(false);
             }
         }
 
@@ -539,10 +579,12 @@ namespace VaporServer.Endpoint
                 businessLogic.UserLogic.BuyGame(user, game);
 
                 await OkResponse(clientSocket, CommandConstants.BuyGame);
+                await SendLog(CommandConstants.BuyGameDescription,game,ResponseConstants.Ok).ConfigureAwait(false);
             }
             catch (Exception e)
             {
                 await ErrorResponse(clientSocket, e.Message, CommandConstants.BuyGame);
+                await SendLog(CommandConstants.BuyGameDescription,game,ResponseConstants.Error+e.Message).ConfigureAwait(false);
             }
         }
 
@@ -558,7 +600,7 @@ namespace VaporServer.Endpoint
             
             await communication.WriteDataAsync(clientSocket, headerToSend, games).ConfigureAwait(false);
             
-            SendLog();
+            await SendLog(CommandConstants.GetGamesDescription,"",ResponseConstants.Ok).ConfigureAwait(false);
         }
         
         private async Task ErrorResponse(TcpClient clientSocket, string error,int command)
@@ -577,9 +619,14 @@ namespace VaporServer.Endpoint
             await communication.WriteDataAsync(clientSocket, headerResponse, ResponseConstants.Ok).ConfigureAwait(false);
         }
 
-        private void SendLog()
+        private async Task SendLog(string command, string game, string response)
         {
-            logsProducer.SendLog("Holi");
+            var log = new Log();
+            log.Game = game;
+            log.User = userLogged.UserLogin;
+            log.Action = command;
+            log.Response = response;
+            await logsProducer.SendLog(log).ConfigureAwait(false);
         }
     }
 }

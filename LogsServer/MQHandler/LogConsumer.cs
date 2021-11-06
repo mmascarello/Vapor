@@ -12,7 +12,7 @@ namespace LogsServer.Endpoint
     {
         public async Task Start()
         {
-            var factory = new ConnectionFactory();
+            /*var factory = new ConnectionFactory();
             factory.Uri =
                 new Uri("amqps://fhnocqil:3VamHErDywnXy607WYu3QD21i903fFTS@beaver.rmq.cloudamqp.com/fhnocqil");
             using (var connection = factory.CreateConnection())
@@ -39,7 +39,7 @@ namespace LogsServer.Endpoint
 
                 Console.WriteLine(" Press [enter] to exit.");
                 Console.ReadLine();
-            }
+            }*/
         }
     }
 }

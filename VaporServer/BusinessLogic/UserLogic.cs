@@ -170,12 +170,13 @@ namespace VaporServer.BusinessLogic
             }
         }
 
-        public void Login(Byte[] data)
+        public User Login(Byte[] data)
         {
-            var user = Encoding.UTF8.GetString(data).Split('|');
+            var userName = Encoding.UTF8.GetString(data).Split('|');
             try
             {
-                userDb.Login(user[0], user[1]);
+               var user = userDb.Login(userName[0], userName[1]);
+               return user; 
             }
             catch (Exception)
             {
@@ -183,5 +184,6 @@ namespace VaporServer.BusinessLogic
             }
             
         }
+        
     }
 }

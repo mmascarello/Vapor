@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Domain;
 using RabbitMQ.Client;
 
 namespace VaporServer.MQHandler
@@ -38,6 +40,13 @@ namespace VaporServer.MQHandler
             }
 
             return Task.FromResult(returnVal);
+        }
+        
+        public async Task SendLog(Log log)
+        { 
+            var stringLog = JsonSerializer.Serialize(log);
+            var result = await SendLog(stringLog).ConfigureAwait(false);
+            Console.WriteLine(result ? "Message {0} sent successfully" : "Could not send {0}", stringLog);
         }
     }
 }

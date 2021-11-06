@@ -1,4 +1,6 @@
-﻿namespace Domain
+﻿using System;
+
+namespace Domain
 {
     public class Log
     {
@@ -6,5 +8,11 @@
         public string Game;
         public string Action;
         public string Response;
+        private DateTime Date;
+
+        public Log()
+        {
+            Date = DateTime.Now;
+        }
     }
 }
