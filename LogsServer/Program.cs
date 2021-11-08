@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using LogsServer.Factory;
 
 namespace LogsServer
@@ -8,9 +7,10 @@ namespace LogsServer
     {
         private static Startup _startup = new Startup();
 
-        static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
-            await _startup.Start().ConfigureAwait(false);
+           _startup.Start();
+           Console.ReadLine();//al crear la web api lo puedo borrar. 
         }
     }
 }

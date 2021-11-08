@@ -4,11 +4,11 @@ namespace Domain
 {
     public class Log
     {
-        public string User;
-        public string Game;
-        public string Action;
-        public string Response;
-        private DateTime Date;
+        public string User { get; set; }
+        public string Game { get; set; }
+        public string Action { get; set; }
+        public string Response { get; set; }
+        public DateTime Date {  get; private set; } 
 
         public Log()
         {

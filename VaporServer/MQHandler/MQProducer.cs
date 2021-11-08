@@ -21,7 +21,7 @@ namespace VaporServer.MQHandler
                 arguments: null);
         }
         
-        public  Task<bool> SendLog(string message)
+        private  Task<bool> SendLog(string message)
         {
             bool returnVal;
             try
