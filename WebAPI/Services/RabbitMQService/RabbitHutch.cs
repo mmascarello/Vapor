@@ -1,23 +1,22 @@
 using System;
-using WebAPI.Services.RabbitMQService;
 using RabbitMQ.Client;
 
 namespace WebAPI.Services.RabbitMQService
 {
     public class RabbitHutch
     {
-        private static ConnectionFactory _factory;
-        private static IConnection _connection;
-        private static IModel _channel;
+        private static ConnectionFactory factory;
+        private static IConnection connection;
+        private static IModel channel;
 
         public static IBus CreateBus(string uri)
         {
-            _factory = new ConnectionFactory{ DispatchConsumersAsync = true };
-            _factory.Uri = new Uri(uri);
-            _connection = _factory.CreateConnection();
-            _channel = _connection.CreateModel();
+            factory = new ConnectionFactory{ DispatchConsumersAsync = true };
+            factory.Uri = new Uri(uri);
+            connection = factory.CreateConnection();
+            channel = connection.CreateModel();
 
-            return new RabbitBus(_channel);
+            return new RabbitBus(channel);
         }
 
         public static IBus CreateBus(
@@ -27,7 +26,7 @@ namespace WebAPI.Services.RabbitMQService
             string username,
             string password)
         {
-            _factory = new ConnectionFactory
+            factory = new ConnectionFactory
             {
                 HostName = hostName,
                 Port = hostPort,
@@ -37,10 +36,10 @@ namespace WebAPI.Services.RabbitMQService
                 DispatchConsumersAsync = true
             };
 
-            _connection = _factory.CreateConnection();
-            _channel = _connection.CreateModel();
+            connection = factory.CreateConnection();
+            channel = connection.CreateModel();
 
-            return new RabbitBus(_channel);
+            return new RabbitBus(channel);
         }
 
     }

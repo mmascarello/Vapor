@@ -10,31 +10,31 @@ namespace WebAPI.Services.RabbitMQService
 {
     public class RabbitBus : IBus
     {
-        private readonly IModel _channel;
+        private readonly IModel channel;
 
         internal RabbitBus(IModel channel)
         {
-            _channel = channel;
+            this.channel = channel;
         }
 
         public async Task SendAsync<T>(string queue, T message)
         {
             await Task.Run(() =>
             {
-                _channel.QueueDeclare(queue, false, false, false);
+                channel.QueueDeclare(queue, false, false, false);
 
-                var properties = _channel.CreateBasicProperties();
+                var properties = channel.CreateBasicProperties();
                 properties.Persistent = false;
 
                 var output = JsonConvert.SerializeObject(message);
-                _channel.BasicPublish(string.Empty, queue, null, Encoding.UTF8.GetBytes(output));
+                channel.BasicPublish(string.Empty, queue, null, Encoding.UTF8.GetBytes(output));
             });
         }
 
         public async Task ReceiveAsync<T>(string queue, Action<T> onMessage)
         {
-            _channel.QueueDeclare(queue, false, false, false);
-            var consumer = new AsyncEventingBasicConsumer(_channel);
+            channel.QueueDeclare(queue, false, false, false);
+            var consumer = new AsyncEventingBasicConsumer(channel);
             consumer.Received += async (s, e) =>
             {
                 var body = e.Body.ToArray();
@@ -43,7 +43,7 @@ namespace WebAPI.Services.RabbitMQService
                 onMessage(item);
                 await Task.Yield();
             };
-            _channel.BasicConsume(queue, true, consumer);
+            channel.BasicConsume(queue, true, consumer);
             await Task.Yield();
         }
     }

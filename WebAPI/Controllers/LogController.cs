@@ -30,7 +30,7 @@ namespace WebAPI.Controllers
 
         // GET: api/Log/5
         [HttpGet("{id}", Name = "Get")]
-        public async Task<ActionResult<Log>> GetTodoItem(int id)
+        public async Task<ActionResult<Log>> GetLog(int id)
         {
             var log = await context.Logs.FindAsync(id);
 
@@ -49,7 +49,7 @@ namespace WebAPI.Controllers
             context.Logs.Add(log);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetTodoItem), new { id = log.Id }, log);
+            return CreatedAtAction(nameof(GetLog), new { id = log.Id }, log);
         }
         
         /*// PUT: api/Log/5
@@ -62,7 +62,7 @@ namespace WebAPI.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTodoItem(int id,[FromBody] Log log)
+        public async Task<IActionResult> PutLog(int id,[FromBody] Log log)
         {
             if (id != log.Id)
             {
