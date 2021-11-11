@@ -626,6 +626,8 @@ namespace VaporServer.Endpoint
             log.User = userLogged.UserLogin;
             log.Action = command;
             log.Response = response;
+            log.Date = DateTime.Now;
+            
             await logsProducer.SendLog(log).ConfigureAwait(false);
         }
     }

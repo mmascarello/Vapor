@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Domain;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WebAPI.Context;
+using WebAPI.BusinessLogic;
+using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
@@ -14,101 +12,27 @@ namespace WebAPI.Controllers
     [ApiController]
     public class LogController : ControllerBase
     {
-        private readonly LogContext context;
-
-        public LogController(LogContext context)
+        private readonly LogLogic logLogic;
+        public LogController(LogLogic logLogic)
         {
-            this.context = context;
+            this.logLogic = logLogic;
         }
-        
-        // GET: api/Log
+
+        // GET: api/Log/
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Log>>> GetAll()
+        public async Task<ActionResult<List<Log>>> GetFilteredLogs([FromQuery]LogModel logModel)
         {
-            return await context.Logs.ToListAsync();
-        }
-
-        // GET: api/Log/5
-        [HttpGet("{id}", Name = "Get")]
-        public async Task<ActionResult<Log>> GetLog(int id)
-        {
-            var log = await context.Logs.FindAsync(id);
-
-            if (log == null)
-            {
-                return NotFound();
-            }
-
-            return log;
-        }
-
-        // POST: api/Log
-        [HttpPost]
-        public async Task<ActionResult<Log>> PostLog([FromBody] Log log)
-        {
-            context.Logs.Add(log);
-            await context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetLog), new { id = log.Id }, log);
-        }
-        
-        /*// PUT: api/Log/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }*/
-
-        // PUT: api/TodoItem/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutLog(int id,[FromBody] Log log)
-        {
-            if (id != log.Id)
-            {
-                return BadRequest();
-            }
-
-            context.Entry(log).State = EntityState.Modified;
-
             try
             {
-                await context.SaveChangesAsync();
+                var log= logModel.ToEntity();
+                var logs = await logLogic.GetFiltered(log);
+                if (logs.Count == 0) return NotFound();
+                return logs;
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!LogExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-        
-        
-        // DELETE: api/Log/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<Log>> DeleteLog(int id)
-        {
-            var log = await context.Logs.FindAsync(id);
-            if (log == null)
+            catch (Exception e)
             {
                 return NotFound();
             }
-
-            context.Logs.Remove(log);
-            await context.SaveChangesAsync();
-
-            return log;
-        }
-        private bool LogExists(int id)
-        {
-            return context.Logs.Any(l => l.Id == id);
         }
     }
 }

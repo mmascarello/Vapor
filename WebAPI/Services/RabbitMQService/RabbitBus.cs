@@ -1,7 +1,6 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using WebAPI.Services.RabbitMQService;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -16,21 +15,7 @@ namespace WebAPI.Services.RabbitMQService
         {
             this.channel = channel;
         }
-
-        public async Task SendAsync<T>(string queue, T message)
-        {
-            await Task.Run(() =>
-            {
-                channel.QueueDeclare(queue, false, false, false);
-
-                var properties = channel.CreateBasicProperties();
-                properties.Persistent = false;
-
-                var output = JsonConvert.SerializeObject(message);
-                channel.BasicPublish(string.Empty, queue, null, Encoding.UTF8.GetBytes(output));
-            });
-        }
-
+        
         public async Task ReceiveAsync<T>(string queue, Action<T> onMessage)
         {
             channel.QueueDeclare(queue, false, false, false);

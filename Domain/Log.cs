@@ -9,11 +9,6 @@ namespace Domain
         public string Game { get; set; }
         public string Action { get; set; }
         public string Response { get; set; }
-        public DateTime Date {  get; private set; } 
-
-        public Log()
-        {
-            Date = DateTime.Now;
-        }
+        public DateTime Date {  get;  set; }
     }
 }

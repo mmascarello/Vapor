@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using WebAPI.BusinessLogic;
 using WebAPI.Context;
 using WebAPI.Services;
 
@@ -32,7 +33,7 @@ namespace WebAPI
             services.AddControllers();
             services.AddDbContext<LogContext>(opt => opt.UseInMemoryDatabase("LogsList"));
             services.AddHostedService<Worker>(); // Inyecta un servicio que corre en modo SINGLETON y se encarga de recibir los mensajes
-            //services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "WebAPI", Version = "v1"}); });
+            services.AddScoped<LogLogic>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
