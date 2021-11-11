@@ -96,19 +96,19 @@ namespace VaporServer.Endpoint
                     
                     case "modificar usuario":
 
-                        ModifyUser();
+                        await ModifyUser().ConfigureAwait(false);
 
                         break;
                     
                     case "crear usuario":
 
-                        CreateUser();
+                        await CreateUser().ConfigureAwait(false);
                         
                         break;
                     
                     case "eliminar usuario":
 
-                        DeleteUser();
+                        await DeleteUser().ConfigureAwait(false);
                         
                         break;
                     case "obtener usuarios":
@@ -136,7 +136,7 @@ namespace VaporServer.Endpoint
             }
         }
 
-        private void UserDetail()
+        private void UserDetail()//ToDo: Ver si hacer log de esto.
         {
             try
             {
@@ -155,7 +155,7 @@ namespace VaporServer.Endpoint
             
         }
 
-        private void GetUsers()
+        private void GetUsers()//ToDo: Ver si hacer log de esto.
         {
             try
             {
@@ -164,11 +164,11 @@ namespace VaporServer.Endpoint
             }
             catch (Exception e)
             {
-                Console.WriteLine("No se encontraron");
+                Console.WriteLine("No se encontraron usuarios");
             }
         }
 
-        private void DeleteUser()
+        private async Task DeleteUser()
         {
             try
             {
@@ -176,14 +176,18 @@ namespace VaporServer.Endpoint
                 var user = Console.ReadLine();
                 userLogic.DeleteUser(user);
                 Console.WriteLine("Usuario eliminado con exito.");
+               
+                await SendLog(CommandConstants.DeleteUserDescription,"", ResponseConstants.Ok+" usuario eliminado").ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                Console.WriteLine("Este usuario no exite");
+                var message = " Este usuario no exite";
+                Console.WriteLine(message);
+                await SendLog(CommandConstants.DeleteUserDescription,"", ResponseConstants.Error + message).ConfigureAwait(false);
             }
         }
 
-        private void CreateUser()
+        private async Task CreateUser()
         {
             Console.WriteLine("Ingrese nombre para el usuario");
             var usuario = UserValidation.ValidNotEmpty().ToLower();
@@ -201,11 +205,14 @@ namespace VaporServer.Endpoint
             var pass = UserValidation.ValidNotEmpty().ToLower();
             
             userLogic.CreateUser(usuario,pass);
-            
+
             Console.WriteLine($"El usuario '{usuario}' fue creado con exito");
+            
+            await SendLog(CommandConstants.CreateUserDescription,"", ResponseConstants.Ok+"Usuario creado").ConfigureAwait(false);
+
         }
 
-        private void ModifyUser()
+        private async Task ModifyUser()
         {
             try
             {
@@ -232,11 +239,14 @@ namespace VaporServer.Endpoint
 
                 userLogic.ModifyUser(usuario,newUsuario,pass);
                 Console.WriteLine("Usuario modificado con exito");
-
+                await SendLog(CommandConstants.ModifyUserDescription,"", ResponseConstants.Ok).ConfigureAwait(false);
+                
             }
             catch (Exception e)
             {
-                Console.WriteLine("No se encontro el usuario a modifcar");
+                var message = "  No se encontro el usuario a modifcar";
+                Console.WriteLine(message);
+                await SendLog(CommandConstants.ModifyUserDescription,"", ResponseConstants.Error +  message).ConfigureAwait(false);
             }
         }
 
