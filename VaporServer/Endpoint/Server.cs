@@ -61,7 +61,7 @@ namespace VaporServer.Endpoint
             
             ShowMenu();
             
-            await HandleServer(tcpListener).ConfigureAwait(false);
+            var serverTask = Task.Run(async ()=> await HandleServer(tcpListener)).ConfigureAwait(false);
 
         }
 
@@ -96,19 +96,19 @@ namespace VaporServer.Endpoint
                     
                     case "modificar usuario":
 
-                        ModifyUser();
+                       await ModifyUser();
 
                         break;
                     
                     case "crear usuario":
 
-                        CreateUser();
+                        await CreateUser();
                         
                         break;
                     
                     case "eliminar usuario":
 
-                        DeleteUser();
+                        await DeleteUser();
                         
                         break;
                     case "obtener usuarios":
@@ -135,11 +135,7 @@ namespace VaporServer.Endpoint
                 }
             }
         }
-        private async Task<string> GetInputAsync()
-        {
-            return await Task.Run(() => Console.ReadLine());
-        }
-        
+
         private void UserDetail()//ToDo: Ver si hacer log de esto
         {
             try
