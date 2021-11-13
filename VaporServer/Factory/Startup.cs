@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using CommunicationImplementation;
 using CommunicationInterface;
 using SettingsManagerImplementation;
@@ -32,10 +33,12 @@ namespace VaporServer.Factory
         }
 
         public async Task Start()
-        {
+        {   
+            Console.WriteLine("Iniciado.");
             TestData.Load(dataBase.GameDataBase, dataBase.UserDataBase, dataBase.ReviewDataBase);
             await this.server.Start().ConfigureAwait(false);
         }
-
+        
+        
     }
 }

@@ -1,0 +1,68 @@
+syntax = "proto3"; //Version de la sintaxis que estamos usando
+
+option csharp_namespace = "VaporServer.Endpoint"; //Indica cual es el namespace donde vamos a implementar nuestro servicio
+
+package greet;
+
+// The greeting service definition.
+service Greeter {
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
+  rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse);
+  rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse);
+
+  rpc CreateGame (CreateGameRequest) returns (CreateGameResponse);
+  rpc UpdateGame (UpdateGameRequest) returns (UpdateGameResponse);
+  rpc DeleteGame (DeleteGameRequest) returns (DeleteGameResponse);
+
+  rpc BuyGame (BuyGameRequest) returns (BuyGameResponse);
+}
+
+// The request message containing the user's name.
+message CreateUserRequest {
+  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+}
+message CreateUserResponse {
+  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+}
+
+message UpdateUserRequest {
+  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+}
+message UpdateUserResponse {
+  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+}
+
+message DeleteUserRequest {
+  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+}
+message DeleteUserResponse {
+  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+}
+
+message CreateGameRequest {
+  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+}
+message CreateGameResponse {
+  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+}
+
+message UpdateGameRequest {
+  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+}
+message UpdateGameResponse {
+  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+}
+
+message DeleteGameRequest {
+  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+}
+message DeleteGameResponse {
+  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+}
+
+message BuyGameRequest {
+  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+}
+message BuyGameResponse {
+  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+}

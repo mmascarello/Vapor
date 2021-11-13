@@ -61,7 +61,8 @@ namespace VaporServer.Endpoint
             
             ShowMenu();
             
-            await HandleServer(tcpListener).ConfigureAwait(false);
+            //await HandleServer(tcpListener).ConfigureAwait(false);
+            var taskServer = Task.Run(async ()=> await HandleServer(tcpListener)).ConfigureAwait(false);
 
         }
 
@@ -69,8 +70,8 @@ namespace VaporServer.Endpoint
         {
             while (!exit)
             {
-                var userInput = Console.ReadLine();
-                switch (userInput)
+                var userInput = GetInputAsync();
+                switch (userInput.Result)
                 {
                     case "exit":
                         exit = true;
@@ -135,7 +136,12 @@ namespace VaporServer.Endpoint
                 }
             }
         }
-
+    
+        private async Task<string> GetInputAsync()
+        {
+            return await Task.Run(() => Console.ReadLine());
+        }
+        
         private void UserDetail()
         {
             try
