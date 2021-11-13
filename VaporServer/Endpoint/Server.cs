@@ -177,13 +177,13 @@ namespace VaporServer.Endpoint
                 userLogic.DeleteUser(user);
                 Console.WriteLine("Usuario eliminado con exito.");
                
-                await SendLog(CommandConstants.DeleteUserDescription,"", ResponseConstants.Ok+" usuario eliminado").ConfigureAwait(false);
+                await SendLogFromServer(CommandConstants.DeleteUserDescription,"", ResponseConstants.Ok+" usuario eliminado").ConfigureAwait(false);
             }
             catch (Exception e)
             {
                 var message = " Este usuario no exite";
                 Console.WriteLine(message);
-                await SendLog(CommandConstants.DeleteUserDescription,"", ResponseConstants.Error + message).ConfigureAwait(false);
+                await SendLogFromServer(CommandConstants.DeleteUserDescription,"", ResponseConstants.Error + message).ConfigureAwait(false);
             }
         }
 
@@ -208,7 +208,7 @@ namespace VaporServer.Endpoint
 
             Console.WriteLine($"El usuario '{usuario}' fue creado con exito");
             
-            await SendLog(CommandConstants.CreateUserDescription,"", ResponseConstants.Ok+"Usuario creado").ConfigureAwait(false);
+            await SendLogFromServer(CommandConstants.CreateUserDescription,"", ResponseConstants.Ok+"Usuario creado").ConfigureAwait(false);
 
         }
 
@@ -239,14 +239,14 @@ namespace VaporServer.Endpoint
 
                 userLogic.ModifyUser(usuario,newUsuario,pass);
                 Console.WriteLine("Usuario modificado con exito");
-                await SendLog(CommandConstants.ModifyUserDescription,"", ResponseConstants.Ok).ConfigureAwait(false);
+                await SendLogFromServer(CommandConstants.ModifyUserDescription,"", ResponseConstants.Ok).ConfigureAwait(false);
                 
             }
             catch (Exception e)
             {
                 var message = "  No se encontro el usuario a modifcar";
                 Console.WriteLine(message);
-                await SendLog(CommandConstants.ModifyUserDescription,"", ResponseConstants.Error +  message).ConfigureAwait(false);
+                await SendLogFromServer(CommandConstants.ModifyUserDescription,"", ResponseConstants.Error +  message).ConfigureAwait(false);
             }
         }
 
@@ -634,6 +634,18 @@ namespace VaporServer.Endpoint
             var log = new Log();
             log.Game = game;
             log.User = userLogged.UserLogin;
+            log.Action = command;
+            log.Response = response;
+            log.Date = DateTime.Now;
+            
+            await logsProducer.SendLog(log).ConfigureAwait(false);
+        }
+        
+        private async Task SendLogFromServer(string command, string game, string response)
+        {
+            var log = new Log();
+            log.Game = game;
+            log.User = "server";
             log.Action = command;
             log.Response = response;
             log.Date = DateTime.Now;
