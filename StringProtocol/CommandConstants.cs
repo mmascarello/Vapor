@@ -33,5 +33,11 @@ namespace StringProtocol
 
         public const int  Login= 10;
         public const string  LoginDescription = "Login";
+        
+        public const string  ModifyUserDescription = "ModifyUser";
+
+
+        public const string CreateUserDescription = "CreateUser";
+        public const string DeleteUserDescription = "DeleteUser";
     }
 }
