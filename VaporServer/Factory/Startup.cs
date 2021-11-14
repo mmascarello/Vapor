@@ -27,9 +27,8 @@ namespace VaporServer.Factory
             this.dataBase = MemoryDataBase.Instance;
             this.businessLogic = new Logic(dataBase);
             this.communication = new Communication();
-            this.logsProducer = new MQProducer();
-            
-            this.server = new Server(businessLogic,manager,communication,logsProducer);
+
+            this.server = new Server(businessLogic,manager,communication);
         }
 
         public async Task Start()
