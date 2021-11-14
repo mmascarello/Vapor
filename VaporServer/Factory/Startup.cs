@@ -24,7 +24,7 @@ namespace VaporServer.Factory
         public Startup()
         {
             this.manager = new SettingsManager();
-            this.dataBase = new MemoryDataBase();
+            this.dataBase = MemoryDataBase.Instance;
             this.businessLogic = new Logic(dataBase);
             this.communication = new Communication();
             this.logsProducer = new MQProducer();

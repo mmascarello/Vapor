@@ -13,11 +13,25 @@ namespace VaporServer.DataAccess
         public readonly GameDataBase GameDataBase;
         public readonly ReviewDataBase ReviewDataBase;
 
+        private static MemoryDataBase instance = null;
+        private static readonly object Mlock = new object();
+        
         public MemoryDataBase()
         {
-            this.UserDataBase = new UserDataBase(users);
-            this.GameDataBase = new GameDataBase(games);
-            this.ReviewDataBase = new ReviewDataBase(reviews);
+           UserDataBase = new UserDataBase(users);
+           GameDataBase = new GameDataBase(games);
+           ReviewDataBase = new ReviewDataBase(reviews); 
+        }
+        
+        public static MemoryDataBase Instance
+        {
+            get
+            {
+                lock (Mlock)
+                {
+                    return instance ??= new MemoryDataBase();
+                }
+            }
         }
     }
 }

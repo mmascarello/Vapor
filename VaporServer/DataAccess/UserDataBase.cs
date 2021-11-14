@@ -65,6 +65,14 @@ namespace VaporServer.DataAccess
             }
         }
         
+        public bool FindUser(string userName)
+        {
+            lock (locker)
+            {
+                return  users.Exists(u => u.UserLogin == userName);
+            }
+        }
+        
         public User GetUser(string userName)
         {
             try
