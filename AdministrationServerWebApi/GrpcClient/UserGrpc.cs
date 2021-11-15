@@ -1,22 +1,22 @@
-﻿using AdministrationServerWebApi.Models;
+﻿using System;
+using System.Net.Sockets;
+using System.Threading.Tasks;
+using AdministrationServerWebApi.Models;
+using Grpc.Net.Client;
 
 namespace AdministrationServerWebApi.GrpcClient
 {
     public class UserGrpc 
     {
-        private readonly GrpcConnection client;
-        public UserGrpc()
+
+        public async Task<string> CreateUserAsync(UserModel userModel)
         {
-           client = GrpcConnection.GetGrpcConnectionInstance();
-        }
-        
-        public string CreateUser(UserModel userModel)
-        {
-            var name = userModel.Name;
-            var pw = userModel.Password;
-            var request = new CreateUserRequest{UserName = name, Password = pw};
-            var respnse = "ok";
-            return respnse;
+            var name = userModel.Name.ToLower();
+            var pw = userModel.Password.ToLower();
+            var response =  await Program.Client.CreateUserAsync(
+                new CreateUserRequest{UserName = name, Password = pw});
+
+            return response.Message;
         }
 
     }
