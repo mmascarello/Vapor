@@ -33,7 +33,7 @@ namespace VaporServer.Endpoint
         private readonly MQProducer logsProducer;
         private User userLogged;
 
-        public Server(Logic businessLogic,ISettingsManager settingsManager,ICommunication communication)
+        public Server(Logic businessLogic,ISettingsManager settingsManager,ICommunication communication, MQProducer logsProducer)
         {
             this.settingsManager = settingsManager;
             this.businessLogic = businessLogic;
@@ -49,7 +49,7 @@ namespace VaporServer.Endpoint
             this.backLog = int.Parse(this.settingsManager.ReadSetting(ServerConfig.MaxConnectionConfigKey));
             this.serverFilesPath = this.settingsManager.ReadSetting(ServerConfig.ServerFilePath);
             System.IO.Directory.CreateDirectory(serverFilesPath);
-            this.logsProducer = MQProducer.Instance;
+            this.logsProducer = logsProducer;
         }
 
         public async Task Start()

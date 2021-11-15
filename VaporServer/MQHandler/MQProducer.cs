@@ -10,9 +10,6 @@ namespace VaporServer.MQHandler
     public class MQProducer
     {
         private readonly IModel channel;
-        private static MQProducer instance = null;
-        private static readonly object Mlock = new object();
-
          public  MQProducer()
          {
              var uri = new Uri("amqps://fhnocqil:3VamHErDywnXy607WYu3QD21i903fFTS@beaver.rmq.cloudamqp.com/fhnocqil");
@@ -23,19 +20,8 @@ namespace VaporServer.MQHandler
                 autoDelete: false,
                 arguments: null);
         }
-         
-         public static MQProducer Instance
-         {
-             get
-             {
-                 lock (Mlock)
-                 {
-                     return instance ??= new MQProducer();
-                 }
-             }
-         }
         
-        private Task<bool> SendLog(string message)
+        private  Task<bool> SendLog(string message)
         {
             bool returnVal;
             try
