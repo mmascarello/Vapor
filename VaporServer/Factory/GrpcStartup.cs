@@ -27,7 +27,7 @@ namespace VaporServer.Factory
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<GreeterService>();
+                endpoints.MapGrpcService<AdministrationService>();
 
                 endpoints.MapGet("/",
                     async context =>

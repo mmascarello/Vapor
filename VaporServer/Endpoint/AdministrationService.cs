@@ -7,12 +7,12 @@ using VaporServer.DataAccess;
 
 namespace VaporServer.Endpoint
 {
-    public class GreeterService : Greeter.GreeterBase
+    public class AdministrationService : Greeter.GreeterBase
     {
-        private readonly ILogger<GreeterService> _logger;
+        private readonly ILogger<AdministrationService> _logger;
         private readonly UserDataBase userDb;
 
-        public GreeterService(ILogger<GreeterService> logger)
+        public AdministrationService(ILogger<AdministrationService> logger)
         {
             _logger = logger;
             this.userDb = MemoryDataBase.Instance.UserDataBase;
