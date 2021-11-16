@@ -19,10 +19,6 @@ namespace AdministrationServerWebApi
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
-            
-            //AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            var channel = GrpcChannel.ForAddress("http://localhost:5001");
-            Client = new Greeter.GreeterClient(channel);
         }
 
         private static IHostBuilder CreateHostBuilder(string[] args) =>
