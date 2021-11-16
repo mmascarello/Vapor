@@ -81,6 +81,24 @@ namespace VaporCliente.Endpoint
             }
         }
         
+        private void Authenticate(TcpClient tcpClient, string user, string password)
+        {
+            var data = user+"|"+password+"|";
+            var header = new Header(HeaderConstants.Request, CommandConstants.Login ,data.Length);
+            communication.WriteDataAsync(tcpClient, header, data).ConfigureAwait(false);
+
+            var response = GetResponse(tcpClient);
+            if (response.Result.Equals(ResponseConstants.Ok))
+            {
+                userLogged = user;
+            }
+            else
+            {
+                Console.WriteLine(response); 
+            }
+            
+        }
+        
         private async Task HandleClient(TcpClient tcpClient)
         {
             var connected = true;
@@ -169,24 +187,6 @@ namespace VaporCliente.Endpoint
             Console.WriteLine("Recomendacion: simepre tenga desactivado las mayusculas");
         }
 
-        private async Task Authenticate(TcpClient tcpClient, string user, string password)
-        {
-            var data = user+"|"+password+"|";
-            var header = new Header(HeaderConstants.Request, CommandConstants.Login ,data.Length);
-            await communication.WriteDataAsync(tcpClient, header, data).ConfigureAwait(false);
-
-            var response = await GetResponse(tcpClient);
-            if (response.Equals(ResponseConstants.Ok))
-            {
-                userLogged = user;
-            }
-            else
-            {
-                Console.WriteLine(response); 
-            }
-            
-        }
-        
         private async Task PublicCalificationAsync(TcpClient tcpClient)
         {
             Console.WriteLine("Ingrese un juego de los siguientes:");
