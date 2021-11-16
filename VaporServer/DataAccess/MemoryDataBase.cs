@@ -16,7 +16,7 @@ namespace VaporServer.DataAccess
         private static MemoryDataBase instance = null;
         private static readonly object Mlock = new object();
         
-        public MemoryDataBase()
+        private MemoryDataBase()
         {
            UserDataBase = new UserDataBase(users);
            GameDataBase = new GameDataBase(games);

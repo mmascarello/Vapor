@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Domain;
 using Grpc.Core;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
 using VaporServer.DataAccess;
 
@@ -10,13 +11,20 @@ namespace VaporServer.Endpoint
     public class AdministrationService : Greeter.GreeterBase
     {
         private readonly ILogger<AdministrationService> _logger;
+        private readonly MemoryDataBase instance;
         private readonly UserDataBase userDb;
+        private readonly GameDataBase gameDB;
+        private readonly AdministrationService admInstance = null;
+        private static readonly object Mlock = new object();
 
         public AdministrationService(ILogger<AdministrationService> logger)
         {
             _logger = logger;
-            this.userDb = MemoryDataBase.Instance.UserDataBase;
+            this.instance = MemoryDataBase.Instance;
+            this.userDb = this.instance.UserDataBase;
+            this.gameDB = this.instance.GameDataBase;
         }
+        
 
         public override Task<GetUsersResponse> GetUsers(GetUsersRequest request, ServerCallContext context)
         {
@@ -147,6 +155,187 @@ namespace VaporServer.Endpoint
             {
                 Message = message
             });
+        }
+        
+        
+        
+        
+        public override Task<CreateGameResponse> CreateGame(CreateGameRequest request, ServerCallContext context)
+        {
+            string message = "";
+            
+            var title = request.Title.ToLower();
+            var gender = request.Gender.ToLower();
+            var sinopsis = request.Sinopsis.ToLower();
+            var ageAllowed = int.Parse(request.AgeAllowed);
+            
+            
+            try
+            {
+                if (!String.IsNullOrEmpty(title) &&
+                    !String.IsNullOrEmpty(gender) &&
+                    !String.IsNullOrEmpty(sinopsis) &&
+                    ageAllowed >= 0)
+                {
+                    if (!gameDB.FindGame(title))
+                    {
+                        var game = new Game()
+                        {
+                            Title = title,
+                            Gender = gender,
+                            Sinopsis = sinopsis,
+                            ageAllowed = GetEsrb(ageAllowed)
+                        };
+                        gameDB.AddGames(game);
+                        message = $"Game: {title} created!";
+                    }
+                    else
+                    {
+                        message = "Game already exsits";
+                    }
+                }
+                else
+                {
+                    message = "all atributes cannot be empty";
+                }
+            }
+            catch (Exception e)
+            {
+                message = e.Message;
+            }
+
+            return Task.FromResult(new CreateGameResponse
+            {
+                Message = message
+            });
+        }
+
+        public override Task<UpdateGameResponse> UpdateGame(UpdateGameRequest request, ServerCallContext context)
+        {
+            string message = "";
+            
+            var title = request.Title.ToLower();
+            var newTitle = request.NewTitle.ToLower();
+            var newgender = request.NewGender.ToLower();
+            var newsinopsis = request.NewSinopsis.ToLower();
+            var newageAllowed = int.Parse(request.NewAgeAllowed);
+            
+            
+            try
+            {
+                if (!String.IsNullOrEmpty(title))
+                {
+                    if (gameDB.FindGame(title))
+                    {
+                        var game = gameDB.GetGame(title);
+                        if (!String.IsNullOrEmpty(newTitle) && !gameDB.FindGame(newTitle))
+                        {
+                            game.Title = newTitle;
+                        }
+                        else
+                        {
+                            throw new Exception("the new title already exists");
+                        }
+                        if (!String.IsNullOrEmpty(newgender))
+                        {
+                            game.Gender = newgender;
+                        }
+                        if (!String.IsNullOrEmpty(newsinopsis))
+                        {
+                            game.Sinopsis = newsinopsis;
+                        }
+                        if (newageAllowed >= 0)
+                        {
+                            game.ageAllowed = GetEsrb(newageAllowed);
+                        }
+                        gameDB.ModifyGame(game);
+                        message = $"Game: {title} modifed!";
+                    }
+                    else
+                    {
+                        message = "Game not found";
+                    }
+                }
+                else
+                {
+                    message = "Title cannot be empty";
+                }
+            }
+            catch (Exception e)
+            {
+                message = e.Message;
+            }
+
+            return Task.FromResult(new UpdateGameResponse()
+            {
+                Message = message
+            });
+        }
+        
+        /*public override Task<DeleteGameResponse> DeleteGame(DeleteGameRequest request, ServerCallContext context)
+        {
+            var message = "";
+            var username = request.UserName.ToLower();
+
+            try
+            {
+                if (!String.IsNullOrEmpty(username))
+                {
+                    if (userDb.FindUser(username))
+                    {
+                        userDb.DeleteUser(username);
+                        message = $"user: {username} deleted!";
+                    }
+                    else
+                    {
+                        message = "user not exists";
+                    }
+                }
+                else
+                {
+                    message = "username cannot be empty";
+                }
+            }
+            catch (Exception e)
+            {
+                message = e.Message;
+            }
+
+            return Task.FromResult(new DeleteGameResponse()
+            {
+                Message = message
+            });
+        }*/
+        
+        private ESRB GetEsrb(int num)
+        {
+            var ageEsrb = new ESRB();
+            
+            switch (num)
+            {
+                case 0:
+                    ageEsrb = ESRB.EveryOne;
+                    break;
+                case 1:
+                    ageEsrb = ESRB.TenPlus;
+                    break;
+                case 2:
+                    ageEsrb = ESRB.Teen;
+                    break;
+                case 3:
+                    ageEsrb = ESRB.SeventeenPlus;
+                    break;
+                case 4:
+                    ageEsrb = ESRB.EighteenPlus;
+                    break;
+                case 5:
+                    ageEsrb = ESRB.Pending;
+                    break;
+                default:
+                    ageEsrb = ESRB.EveryOne;
+                    break;
+            }
+            return ageEsrb;
         }
         
     }

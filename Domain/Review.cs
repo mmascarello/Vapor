@@ -8,5 +8,10 @@ namespace Domain
         public Guid Id;
         public string Description;
         public int Rating;
+        
+        public Review ()
+        {
+            Id = Guid.NewGuid();
+        }
     }
 }

@@ -51,24 +51,32 @@ message DeleteUserResponse {
 }
 
 message CreateGameRequest {
-  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+  string title = 1;
+  string gender = 2;
+  string sinopsis = 3;
+  string ageAllowed = 4;
 }
 message CreateGameResponse {
-  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+  string message = 1;
 }
 
 message UpdateGameRequest {
-  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+  string title = 1;
+  string newTitle = 2;
+  string newGender = 3;
+  string newSinopsis = 4;
+  string newAgeAllowed = 5;
 }
+
 message UpdateGameResponse {
-  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+  string message = 1;
 }
 
 message DeleteGameRequest {
-  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+  string title = 1;
 }
 message DeleteGameResponse {
-  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+  string message = 1;
 }
 
 message BuyGameRequest {

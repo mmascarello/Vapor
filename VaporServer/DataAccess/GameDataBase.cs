@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.AccessControl;
 using Domain;
 
 namespace VaporServer.DataAccess
@@ -161,6 +162,14 @@ namespace VaporServer.DataAccess
             catch (ArgumentNullException e)
             {
                 throw new Exception("El juego no existe");
+            }
+        }
+
+        public bool FindGame(string title)
+        {
+            lock (locker)
+            {
+                return games.Exists(g => g.Title.Equals(title));
             }
         }
     }

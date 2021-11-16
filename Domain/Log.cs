@@ -11,4 +11,6 @@ namespace Domain
         public string Response { get; set; }
         public DateTime Date {  get;  set; }
     }
+    
+    
 }
