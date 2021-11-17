@@ -13,6 +13,7 @@ namespace Domain
         public User()
         {
             MyOwnedGames = new List<Guid>();
+            Id = Guid.NewGuid();
         }
     }
 }

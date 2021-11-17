@@ -17,6 +17,7 @@ namespace Domain
         public Game()
         {
             Reviews = new List<Guid>();
+            Id = Guid.NewGuid();
         }
     }
 }

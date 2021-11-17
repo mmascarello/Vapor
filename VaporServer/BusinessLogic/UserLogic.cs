@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using Domain;
 using VaporServer.DataAccess;
@@ -18,6 +17,7 @@ namespace VaporServer.BusinessLogic
         
         public string GetUsers()
         {
+            Console.WriteLine("Estoy en get user GRPC");
             try
             {
                 var users = this.userDb.GetUsers();
@@ -37,7 +37,17 @@ namespace VaporServer.BusinessLogic
             User userToAdd = new User();
             userToAdd.UserLogin = user;
             userToAdd.Password = password;
-            this.userDb.AddUser(userToAdd);
+            if (!ExistsUser(user))
+            {
+                this.userDb.AddUser(userToAdd);
+            }
+            else
+            {
+                throw new Exception("El usuario ya existe");
+            }
+            
+            
+            
         }
         
         public void ModifyUser(string userName,string newName, string password)
