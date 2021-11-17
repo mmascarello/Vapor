@@ -1,6 +1,6 @@
 syntax = "proto3"; //Version de la sintaxis que estamos usando
 
-option csharp_namespace = "AdministrationWebApi.GrpcClient"; //Indica cual es el namespace donde vamos a implementar nuestro servicio
+option csharp_namespace = "AdministratorWebApi.GrpcClient"; //Indica cual es el namespace donde vamos a implementar nuestro servicio
 
 package greet;
 

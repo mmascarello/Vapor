@@ -1,8 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
-using AdministrationWebApi.GrpcClient;
+﻿using System.Threading.Tasks;
 using AdministrationWebApi.Models;
-using Grpc.Net.Client;
+using AdministratorWebApi.Connection;
 
 namespace AdministratorWebApi.GrpcClient
 {
@@ -11,10 +9,7 @@ namespace AdministratorWebApi.GrpcClient
         private Greeter.GreeterClient client;
         public UserGrpc()
         {
-            AppContext.SetSwitch(
-                "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            var channel = GrpcChannel.ForAddress("http://localhost:6001");
-            this.client = new Greeter.GreeterClient(channel);
+            client = GrpcConnection.GetGrpcConnectionInstance().GetClient();
         }
         
         public async Task<string> CreateUserAsync(UserModel userModel)

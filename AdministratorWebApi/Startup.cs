@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AdministratorWebApi.Connection;
 using AdministratorWebApi.GrpcClient;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,6 +29,7 @@ namespace AdministratorWebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            //services.AddSingleton<GrpcConnection>();
             services.AddScoped<UserGrpc>();
             
             services.AddSwaggerGen(c =>
