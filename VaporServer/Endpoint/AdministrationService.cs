@@ -176,7 +176,7 @@ namespace VaporServer.Endpoint
             var title = request.Title.ToLower();
             var gender = request.Gender.ToLower();
             var sinopsis = request.Sinopsis.ToLower();
-            var ageAllowed = int.Parse(request.AgeAllowed);
+            var ageAllowed = request.AgeAllowed;
             
             
             try
@@ -227,7 +227,7 @@ namespace VaporServer.Endpoint
             var newTitle = request.NewTitle.ToLower();
             var newgender = request.NewGender.ToLower();
             var newsinopsis = request.NewSinopsis.ToLower();
-            var newageAllowed = int.Parse(request.NewAgeAllowed);
+            var newageAllowed = request.NewAgeAllowed;
             
             
             try

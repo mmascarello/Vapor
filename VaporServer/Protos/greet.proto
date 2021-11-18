@@ -65,7 +65,7 @@ message CreateGameRequest {
   string title = 1;
   string gender = 2;
   string sinopsis = 3;
-  string ageAllowed = 4;
+  int32 ageAllowed = 4;
 }
 message CreateGameResponse {
   string message = 1;
@@ -76,7 +76,7 @@ message UpdateGameRequest {
   string newTitle = 2;
   string newGender = 3;
   string newSinopsis = 4;
-  string newAgeAllowed = 5;
+  int32 newAgeAllowed = 5;
 }
 
 message UpdateGameResponse {
