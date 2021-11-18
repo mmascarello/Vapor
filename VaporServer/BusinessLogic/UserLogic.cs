@@ -109,6 +109,40 @@ namespace VaporServer.BusinessLogic
                 Console.WriteLine("User not found");
             }
         }
+
+        
+        public void DeleteGame(byte[] game)
+        {
+            try
+            {
+                var gameToDelete = Encoding.UTF8.GetString(game);
+                var games = gameLogic.GetGames();
+                var gameFound = games.Exists(g => g.Title == gameToDelete);
+                if (gameFound)
+                {
+                    var gameObject = games.Find(g => g.Title == gameToDelete);
+                    var users = userDb.GetUsers();
+                
+                    var found = users.Exists(u => u.MyOwnedGames.Exists(g => g == gameObject.Id));
+                    if (!found)
+                    {
+                        gameLogic.RemoveGame(gameToDelete);
+                    }else
+                    {
+                        throw new Exception("Game cannot be deleted");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Game not exists");
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+        
         
         public void BuyGame(string user , string game)
         {
