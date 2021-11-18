@@ -408,7 +408,7 @@ namespace VaporServer.Endpoint
             
             try
             {
-                this.gameLogic.DeleteGame(receiveGameNameBuffer);
+                this.userLogic.DeleteGame(receiveGameNameBuffer);
                 
                 await OkResponse(clientSocket,CommandConstants.DeleteGame).ConfigureAwait(false);
                 await SendLog(CommandConstants.DeleteGameDescription,game, ResponseConstants.Ok).ConfigureAwait(false);

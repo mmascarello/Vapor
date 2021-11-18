@@ -13,6 +13,7 @@ namespace VaporServer.BusinessLogic
             this.ReviewLogic = new ReviewLogic(memoryDataBase.ReviewDataBase);
             this.GameLogic = new GameLogic(memoryDataBase.GameDataBase,ReviewLogic);
             this.UserLogic = new UserLogic(memoryDataBase.UserDataBase,GameLogic);
+            
         }
     }
 }

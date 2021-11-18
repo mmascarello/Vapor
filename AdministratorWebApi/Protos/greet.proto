@@ -72,8 +72,15 @@ message DeleteGameResponse {
 }
 
 message BuyGameRequest {
-  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+  string username = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
 }
 message BuyGameResponse {
   string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+}
+
+message RefundGameRequest {
+    
+}
+message RefundGameRespone {
+
 }

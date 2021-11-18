@@ -91,6 +91,7 @@ namespace VaporServer.Endpoint
                     !String.IsNullOrEmpty(newPassword) &&
                     !String.IsNullOrEmpty(username))
                 {
+                    
                     if (userDb.FindUser(username) && !userDb.FindUser(newUsername))
                     {
                         var user = userDb.GetUser(username);
@@ -157,7 +158,15 @@ namespace VaporServer.Endpoint
             });
         }
         
-        
+        public override Task<GetGamesResponse> GetGames(GetGamesRequest request, ServerCallContext context)
+        {
+            var message = "";
+            gameDB.GetGames().ForEach(x =>  message += x.Title+ "-");
+            return Task.FromResult(new GetGamesResponse()
+            {
+                Message = message
+            });
+        }
         
         
         public override Task<CreateGameResponse> CreateGame(CreateGameRequest request, ServerCallContext context)
@@ -272,28 +281,38 @@ namespace VaporServer.Endpoint
             });
         }
         
-        /*public override Task<DeleteGameResponse> DeleteGame(DeleteGameRequest request, ServerCallContext context)
+        public override Task<DeleteGameResponse> DeleteGame(DeleteGameRequest request, ServerCallContext context)
         {
             var message = "";
-            var username = request.UserName.ToLower();
+            var title = request.Title.ToLower();
 
             try
             {
-                if (!String.IsNullOrEmpty(username))
+                if (!String.IsNullOrEmpty(title))
                 {
-                    if (userDb.FindUser(username))
+                    if (gameDB.FindGame(title))
                     {
-                        userDb.DeleteUser(username);
-                        message = $"user: {username} deleted!";
+                        var game = gameDB.GetGame(title);
+                        var users = userDb.GetUsers();
+                        var found = users.Exists(u => u.MyOwnedGames.Exists(g => g == game.Id));
+                        if (!found)
+                        {
+                            gameDB.DeleteGame(title);
+                            message = $"game: {title} deleted!";
+                        }
+                        else
+                        {
+                            message = $"game cannot be deleted";
+                        }
                     }
                     else
                     {
-                        message = "user not exists";
+                        message = "Game not found";
                     }
                 }
                 else
                 {
-                    message = "username cannot be empty";
+                    message = "game title cannot be empty";
                 }
             }
             catch (Exception e)
@@ -305,7 +324,138 @@ namespace VaporServer.Endpoint
             {
                 Message = message
             });
-        }*/
+        }
+        
+        public override Task<GetUserGamesResponse> GetUserGames(GetUserGamesRequest request, ServerCallContext context)
+        {
+            var message = "";
+            var user = request.UserName.ToLower();
+            try
+            {
+                if (!String.IsNullOrEmpty(user))
+                {
+                    if (userDb.FindUser(user))
+                    {
+                        var userObj = userDb.GetUser(user);
+                        var games = gameDB.GetGames();
+                        userObj.MyOwnedGames.ForEach(x => message+= games.Find(g => g.Id == x).Title + "-");
+                    }
+                    else
+                    {
+                        message = "user not exists";  
+                    }
+                   
+                }else
+                {
+                    message = "user cannot be empty"; 
+                }
+            }
+            catch (Exception e)
+            {
+                message = e.Message;
+            }
+
+            return Task.FromResult(new GetUserGamesResponse()
+            {
+                Message = message
+            });
+       }
+
+        public override Task<BuyGameResponse> BuyGame(BuyGameRequest request, ServerCallContext context)
+        {
+            var message = "";
+            var userName = request.UserName.ToLower();
+            var title = request.Title.ToLower();
+
+            try
+            {
+                if (!String.IsNullOrEmpty(title) &&
+                    !String.IsNullOrEmpty(userName))
+                {
+                    if (gameDB.FindGame(title) && userDb.FindUser(userName))
+                    {
+                        var game = gameDB.GetGame(title);
+                        var user = userDb.GetUser(userName);
+                        if (!user.MyOwnedGames.Exists(g => g == game.Id))
+                        {
+                            userDb.BuyGame(user.Id,game.Id);
+                            message = $"game bought!";
+                        }
+                        else
+                        {
+                            message = $"user already has this game!";
+                        }
+                        
+                    }
+                    else
+                    {
+                        message = "user or game not exists";
+                    }
+                }
+                else
+                {
+                    message = "game title and username cannot be empty";
+                }
+            }
+            catch (Exception e)
+            {
+                message = e.Message;
+            }
+
+            return Task.FromResult(new BuyGameResponse()
+            {
+                Message = message
+            });
+        }
+        
+        public override Task<RefundGameResponse> RefundGame(RefundGameRequest request, ServerCallContext context)
+        {
+            var message = "";
+            var userName = request.UserName.ToLower();
+            var title = request.Title.ToLower();
+
+            try
+            {
+                if (!String.IsNullOrEmpty(title) &&
+                    !String.IsNullOrEmpty(userName))
+                {
+                    if (gameDB.FindGame(title) && userDb.FindUser(userName))
+                    {
+                        var game = gameDB.GetGame(title);
+                        var user = userDb.GetUser(userName);
+                        if (user.MyOwnedGames.Exists(g => g == game.Id))
+                        {
+                            userDb.RefundGame(user.Id, game.Id);
+                            message = $"game refunded!";
+                        }
+                        else
+                        {
+                            message = $"user doesn't has this game!";
+                        }
+                    }
+                    else
+                    {
+                        message = "user or game not exists";
+                    }
+                }
+                else
+                {
+                    message = "game title and username cannot be empty";
+                }
+            }
+            catch (Exception e)
+            {
+                message = e.Message;
+            }
+
+            return Task.FromResult(new RefundGameResponse()
+            {
+                Message = message
+            });
+        }
+        
+        
+        
         
         private ESRB GetEsrb(int num)
         {
