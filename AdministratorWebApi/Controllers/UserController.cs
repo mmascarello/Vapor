@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 using AdministrationWebApi.Models;
 using AdministratorWebApi.GrpcClient;
 using Domain;
+using GrpcCommon;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
+using Newtonsoft.Json;
+using Constants = GrpcCommon.Constants;
 
 namespace AdministratorWebApi.Controllers
 {
@@ -35,19 +38,16 @@ namespace AdministratorWebApi.Controllers
             try
             {
                 var result = await userGrpc.CreateUserAsync(userModel);
+                var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(result);
+                
 
-
-                if (result.Equals("user already exsits"))
+                if (deserialized.Response.Equals(Constants.Error))
                 {
-                    return BadRequest("user already exsits");
-                }
-                else if (result.Equals("user and password cannot be empty"))
-                {
-                    return BadRequest("user and password cannot be empty");
+                    return BadRequest(result);
                 }
                 else
                 {
-                    return Created("", userModel);
+                    return Created("", result);
                 }
             }
             catch (Exception e)
