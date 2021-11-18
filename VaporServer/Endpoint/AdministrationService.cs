@@ -3,7 +3,11 @@ using System.Threading.Tasks;
 using Domain;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using VaporServer.DataAccess;
+using GrpcCommon;
+
+
 
 namespace VaporServer.Endpoint
 {
@@ -28,7 +32,7 @@ namespace VaporServer.Endpoint
         public override Task<GetUsersResponse> GetUsers(GetUsersRequest request, ServerCallContext context)
         {
             var message = "";
-            userDb.GetUsers().ForEach(x =>  message += x.UserLogin + "-");
+            //JsonSerializer.Serialize(userdb.GetUsers().ForEach(x =>  message += x.UserLogin + "-");
             return Task.FromResult(new GetUsersResponse()
             {
                 Message = message
@@ -38,10 +42,10 @@ namespace VaporServer.Endpoint
         //ToDo:Refactor para que sea mantenible. 
         public override Task<CreateUserResponse> CreateUser(CreateUserRequest request, ServerCallContext context)
         {
-            var message = "";
             var username = request.UserName.ToLower();
             var password = request.Password.ToLower();
-
+            var grpcResponse = new GrpcResponse();
+            
             try
             {
                 if (!String.IsNullOrEmpty(username) &&
@@ -49,32 +53,37 @@ namespace VaporServer.Endpoint
                 {
                     if (!userDb.FindUser(username)) //Todo: Refactor, nunca entra en el if.
                     {
-                        var user = new User()
+                        User user = new User()
                         {
                             UserLogin = username,
                             Password = password
                         };
                         userDb.AddUser(user);
-                        message = $"user: {username} created!";
+                        grpcResponse.Response = Constants.Ok;
+                        grpcResponse.Message = user;
+                        
                     }
                     else
                     {
-                        message = "user already exsits";
+                        grpcResponse.Response = Constants.Error;
+                        grpcResponse.Message = "The user exists";
                     }
                 }
                 else
                 {
-                    message = "user and password cannot be empty";
+                    grpcResponse.Response = Constants.Error;
+                    grpcResponse.Message = "User and Password cannot be empty";
                 }
             }
             catch (Exception e)
             {
-                message = e.Message;
+                grpcResponse.Response = Constants.Error;
+                grpcResponse.Message = e.Message;
             }
 
             return Task.FromResult(new CreateUserResponse
             {
-                Message = message
+                Message = JsonConvert.SerializeObject(grpcResponse)
             });
         }
 
