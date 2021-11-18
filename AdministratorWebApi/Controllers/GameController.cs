@@ -36,7 +36,6 @@ namespace AdministratorWebApi.Controllers
             {
                 var result = await gameGrpc.CreateGameAsync(gameModel);
                 
-                
                 if (result.Equals("Game already exsits"))
                 {
                     return  BadRequest("Game already exsits");

@@ -109,12 +109,12 @@ namespace AdministratorWebApi.Controllers
             }
         }
 
-        [HttpPut("{name} , {game}", Name = "BuyGame")]
-        public async Task<ActionResult<string>> BuyGameAsync(string userName, string game)
+        [HttpPut]
+        public async Task<ActionResult<string>> BuyGameAsync([FromQuery]string userName, [FromQuery] string gameTitle)
         {
             try
             {
-                var result = await userGrpc.BuyGameAsync(userName, game);
+                var result = await userGrpc.BuyGameAsync(userName, gameTitle);
 
                 if (result.Equals("user already has this game!"))
                 {
@@ -140,8 +140,8 @@ namespace AdministratorWebApi.Controllers
             }
         }
 
-        [HttpDelete("{user},{game}", Name = "RefundGame")]
-        public async Task<ActionResult<string>> RefundGameAsync(string userName, string gameTitle)
+        [HttpDelete]
+        public async Task<ActionResult<string>> RefundGameAsync([FromQuery]string userName,[FromQuery] string gameTitle)
         {
             try
             {
