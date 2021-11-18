@@ -10,10 +10,12 @@ namespace VaporServer.BusinessLogic
     {
         private readonly GameDataBase gameDb;
         private readonly ReviewLogic reviewLogic;
+        private readonly UserLogic userLogic;
         public GameLogic(GameDataBase gameDataBase, ReviewLogic reviewLogic)
         {
             this.gameDb = gameDataBase;
             this.reviewLogic = reviewLogic;
+            this.userLogic = userLogic;
         }
 
         public List<Game> GetGames()
@@ -52,12 +54,11 @@ namespace VaporServer.BusinessLogic
 
         }
 
-        public void DeleteGame(Byte[] game)
+        public void RemoveGame(string gameToDelete)
         {
             try
             {
-                var gameToDelete = Encoding.UTF8.GetString(game);
-                gameDb.DeleteGame(gameToDelete);
+               gameDb.DeleteGame(gameToDelete);
             }
             catch (Exception e)
             {

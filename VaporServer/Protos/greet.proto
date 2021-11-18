@@ -15,7 +15,7 @@ service Greeter {
   rpc CreateGame (CreateGameRequest) returns (CreateGameResponse);
   rpc UpdateGame (UpdateGameRequest) returns (UpdateGameResponse);
   rpc DeleteGame (DeleteGameRequest) returns (DeleteGameResponse);
-
+  
   rpc GetUserGames(GetUserGamesRequest) returns (GetUserGamesResponse);
 
   rpc BuyGame (BuyGameRequest) returns (BuyGameResponse);
@@ -24,7 +24,7 @@ service Greeter {
 
 // The request message containing the user's name.
 message GetUsersRequest {
-
+  
 }
 message GetUsersResponse {
   string message = 1;
@@ -98,11 +98,11 @@ message GetUserGamesResponse{
 }
 
 message BuyGameRequest {
-  string userName = 1;
+  string userName = 1; 
   string title = 2;
 }
 message BuyGameResponse {
-  string message = 1;
+  string message = 1; 
 }
 
 message RefundGameRequest {

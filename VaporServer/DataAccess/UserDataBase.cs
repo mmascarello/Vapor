@@ -98,6 +98,15 @@ namespace VaporServer.DataAccess
             }
         }
 
+        public void RefundGame(Guid userId, Guid gameId)
+        {
+            lock (locker)
+            {
+                var index = users.FindIndex(u => u.Id == userId);
+                users[index].MyOwnedGames.Remove(gameId);
+            }
+        }
+
         public User Login(string user, string password)
         {
             lock (locker)
