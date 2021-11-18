@@ -51,5 +51,27 @@ namespace AdministratorWebApi.GrpcClient
 
             return response.Message;
         }
+        
+        public async Task<string> BuyGameAsync(string userName,string gameTitle)
+        {
+            var user = userName;
+            var title = gameTitle;
+
+            var response =  await client.BuyGameAsync(
+                new BuyGameRequest{ UserName = user,Title = title});
+
+            return response.Message;
+        }
+
+        public async Task<string> RefundGameAsync(string userName, string gameTitle)
+        {
+            var user = userName;
+            var title = gameTitle;
+
+            var response =  await client.RefundGameAsync(
+                new RefundGameRequest{ UserName = user,Title = title});
+
+            return response.Message;
+        }
     }
 }

@@ -57,6 +57,5 @@ namespace AdministratorWebApi.GrpcClient
 
             return response.Message;
         }
-        
     }
 }
