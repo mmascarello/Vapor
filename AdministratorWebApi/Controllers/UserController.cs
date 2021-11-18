@@ -5,7 +5,9 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using AdministrationWebApi.Models;
 using AdministratorWebApi.GrpcClient;
+using Domain;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 
 namespace AdministratorWebApi.Controllers
 {
@@ -22,12 +24,93 @@ namespace AdministratorWebApi.Controllers
         }
         
         [HttpGet]
-        public string Get()
+        public string GetUsersAsync()
         {
            var response = userGrpc.GetUsers();
            return response;
-        }    
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<UserModel>> PostUserAsync([FromBody] UserModel userModel)
+        {
+            try
+            {
+                var result = await userGrpc.CreateUserAsync(userModel);
+                
+                
+                if (result.Equals("user already exsits"))
+                {
+                    return  BadRequest("user already exsits");
+                    
+                }else if(result.Equals("user and password cannot be empty"))
+                {
+                    return  BadRequest("user and password cannot be empty");
+                    
+                } else
+                {
+                    return Created("",userModel);
+                }
+                
+            }catch(Exception e)
+            { 
+                return BadRequest();
+            }
+        }
         
+        [HttpPut("{name}")]
+        public async Task<ActionResult<UserModel>> PutUserAsync(string name, [FromBody] UserModel userModel)
+        {
+            try
+            {
+                var result = await userGrpc.ModifyUserAsync(name,userModel);
+
+
+                if (result.Equals("New user already exsits"))
+                {
+                    return  BadRequest("New user already exsits");
+
+                }else if(result.Equals("user and password cannot be empty"))
+                {
+                    return  BadRequest("user and password cannot be empty");
+                    
+                } else
+                {
+                    return userModel;
+                }
+                
+            }catch(Exception e)
+            { 
+                return BadRequest();
+            }
+        }
+
+        [HttpDelete]
+        public async Task<ActionResult<string>> DeleteUserAsync([FromBody] string user)
+        {
+            try
+            {
+                var result = await userGrpc.DeleteUserAsync(user);
+                    
+                if (result.Equals("New user already exsits"))
+                {
+                    return  BadRequest("New user already exsits");
+
+                }else if(result.Equals("user and password cannot be empty"))
+                {
+                    return  BadRequest("user and password cannot be empty");
+                    
+                } else
+                {
+                    return NoContent();
+                }
+                
+            }catch(Exception e)
+            { 
+                return BadRequest();
+            }
+          
+            
+        }
         
     }
 }

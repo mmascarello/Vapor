@@ -29,8 +29,8 @@ namespace AdministratorWebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            //services.AddSingleton<GrpcConnection>();
             services.AddScoped<UserGrpc>();
+            services.AddScoped<GameGrpc>();
             
             services.AddSwaggerGen(c =>
             {

@@ -11,16 +11,20 @@ service Greeter {
   rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse);
   rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse);
 
+  rpc GetGames (GetGamesRequest) returns (GetGamesResponse);
   rpc CreateGame (CreateGameRequest) returns (CreateGameResponse);
   rpc UpdateGame (UpdateGameRequest) returns (UpdateGameResponse);
   rpc DeleteGame (DeleteGameRequest) returns (DeleteGameResponse);
 
+  rpc GetUserGames(GetUserGamesRequest) returns (GetUserGamesResponse);
+
   rpc BuyGame (BuyGameRequest) returns (BuyGameResponse);
+  rpc RefundGame (RefundGameRequest) returns (RefundGameResponse);
 }
 
 // The request message containing the user's name.
 message GetUsersRequest {
-  
+
 }
 message GetUsersResponse {
   string message = 1;
@@ -50,11 +54,18 @@ message DeleteUserResponse {
   string message = 1;
 }
 
+message GetGamesRequest {
+
+}
+message GetGamesResponse {
+  string message = 1;
+}
+
 message CreateGameRequest {
   string title = 1;
   string gender = 2;
   string sinopsis = 3;
-  string ageAllowed = 4;
+  int32 ageAllowed = 4;
 }
 message CreateGameResponse {
   string message = 1;
@@ -65,7 +76,7 @@ message UpdateGameRequest {
   string newTitle = 2;
   string newGender = 3;
   string newSinopsis = 4;
-  string newAgeAllowed = 5;
+  int32 newAgeAllowed = 5;
 }
 
 message UpdateGameResponse {
@@ -79,9 +90,25 @@ message DeleteGameResponse {
   string message = 1;
 }
 
+message GetUserGamesRequest{
+  string userName = 1;
+}
+message GetUserGamesResponse{
+  string message = 1;
+}
+
 message BuyGameRequest {
-  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+  string userName = 1;
+  string title = 2;
 }
 message BuyGameResponse {
-  string name = 1; //Siempre va un numero al lado del parametro, lo usa el compiler de Protocol Buffers para indexar los parametros
+  string message = 1;
+}
+
+message RefundGameRequest {
+  string userName = 1;
+  string title = 2;
+}
+message  RefundGameResponse {
+  string message = 1;
 }

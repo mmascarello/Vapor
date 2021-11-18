@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Domain;
 using Grpc.Core;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
 using VaporServer.DataAccess;
 
@@ -35,7 +34,8 @@ namespace VaporServer.Endpoint
                 Message = message
             });
         }
-
+        
+        //ToDo:Refactor para que sea mantenible. 
         public override Task<CreateUserResponse> CreateUser(CreateUserRequest request, ServerCallContext context)
         {
             var message = "";
@@ -47,7 +47,7 @@ namespace VaporServer.Endpoint
                 if (!String.IsNullOrEmpty(username) &&
                     !String.IsNullOrEmpty(password))
                 {
-                    if (!userDb.FindUser(username))
+                    if (!userDb.FindUser(username)) //Todo: Refactor, nunca entra en el if.
                     {
                         var user = new User()
                         {
@@ -103,7 +103,7 @@ namespace VaporServer.Endpoint
                     }
                     else
                     {
-                        message = "New user already exsits";
+                        message = "New user already exsits";//ToDo:Aca dejaria solo user already exists --> podriamos hacer una clase estatica con mensajes estaticos.
                     }
                 }
                 else
@@ -167,7 +167,7 @@ namespace VaporServer.Endpoint
             var title = request.Title.ToLower();
             var gender = request.Gender.ToLower();
             var sinopsis = request.Sinopsis.ToLower();
-            var ageAllowed = int.Parse(request.AgeAllowed);
+            var ageAllowed = request.AgeAllowed;
             
             
             try
@@ -218,7 +218,7 @@ namespace VaporServer.Endpoint
             var newTitle = request.NewTitle.ToLower();
             var newgender = request.NewGender.ToLower();
             var newsinopsis = request.NewSinopsis.ToLower();
-            var newageAllowed = int.Parse(request.NewAgeAllowed);
+            var newageAllowed = request.NewAgeAllowed;
             
             
             try
