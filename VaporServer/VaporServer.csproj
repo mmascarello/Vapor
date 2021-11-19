@@ -9,6 +9,7 @@
       <ProjectReference Include="..\CommunicationImplementation\CommunicationImplementation.csproj" />
       <ProjectReference Include="..\CommunicationInterface\CommunicationInterface.csproj" />
       <ProjectReference Include="..\Domain\Domain.csproj" />
+      <ProjectReference Include="..\GrpcCommon\GrpcCommon.csproj" />
       <ProjectReference Include="..\SettingsManagerInterface\SettingsManagerInterface.csproj" />
       <ProjectReference Include="..\SettingsManagerImplementation\SettingsManagerImplementation.csproj" />
       <ProjectReference Include="..\StringProtocol\StringProtocol.csproj" />
@@ -21,6 +22,7 @@
 
     <ItemGroup>
       <PackageReference Include="Grpc.AspNetCore" Version="2.40.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
       <PackageReference Include="RabbitMQ.Client" Version="6.2.2" />
     </ItemGroup>
 
