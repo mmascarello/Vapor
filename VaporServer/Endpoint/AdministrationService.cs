@@ -57,7 +57,7 @@ namespace VaporServer.Endpoint
             else
             {
                 grpcResponse.Response = Constants.Error;
-                grpcResponse.Message = "Game not found";
+                grpcResponse.Message = "game not found";
             }
             return Task.FromResult(new GetUsersForAGameResponse()
             {
@@ -73,8 +73,8 @@ namespace VaporServer.Endpoint
             
             try
             {
-                if (!String.IsNullOrEmpty(username) &&
-                    !String.IsNullOrEmpty(password))
+                if (!string.IsNullOrEmpty(username) &&
+                    !string.IsNullOrEmpty(password))
                 {
                     if (!userDb.FindUser(username)) //Todo: Refactor, nunca entra en el if.
                     {
@@ -91,13 +91,13 @@ namespace VaporServer.Endpoint
                     else
                     {
                         grpcResponse.Response = Constants.Error;
-                        grpcResponse.Message = "The user exists";
+                        grpcResponse.Message = "the user exists";
                     }
                 }
                 else
                 {
                     grpcResponse.Response = Constants.Error;
-                    grpcResponse.Message = "User and Password cannot be empty";
+                    grpcResponse.Message = "user and Password cannot be empty";
                 }
             }
             catch (Exception e)
@@ -121,12 +121,12 @@ namespace VaporServer.Endpoint
 
             try
             {
-                if (!String.IsNullOrEmpty(newUsername) &&
-                    !String.IsNullOrEmpty(newPassword) &&
-                    !String.IsNullOrEmpty(username))
+                if (!string.IsNullOrEmpty(newUsername) &&
+                    !string.IsNullOrEmpty(newPassword) &&
+                    !string.IsNullOrEmpty(username))
                 {
                     
-                    if (userDb.FindUser(username) && !userDb.FindUser(newUsername))
+                    if (userDb.FindUser(username) && (!userDb.FindUser(newUsername) || username == newUsername ))
                     {
                         var user = userDb.GetUser(username);
 
@@ -140,7 +140,7 @@ namespace VaporServer.Endpoint
                     else
                     {
                         grpcResponse.Response = Constants.Error;
-                        grpcResponse.Message = "New user already exsits";
+                        grpcResponse.Message = "new user already exsits";
                     }
                 }
                 else
@@ -168,7 +168,7 @@ namespace VaporServer.Endpoint
 
             try
             {
-                if (!String.IsNullOrEmpty(username))
+                if (!string.IsNullOrEmpty(username))
                 {
                     if (userDb.FindUser(username))
                     {
@@ -224,9 +224,9 @@ namespace VaporServer.Endpoint
             
             try
             {
-                if (!String.IsNullOrEmpty(title) &&
-                    !String.IsNullOrEmpty(gender) &&
-                    !String.IsNullOrEmpty(sinopsis) &&
+                if (!string.IsNullOrEmpty(title) &&
+                    !string.IsNullOrEmpty(gender) &&
+                    !string.IsNullOrEmpty(sinopsis) &&
                     ageAllowed >= 0)
                 {
                     if (!gameDB.FindGame(title))
@@ -245,7 +245,7 @@ namespace VaporServer.Endpoint
                     else
                     {
                         grpcResponse.Response = Constants.Error;
-                        grpcResponse.Message = "Game already exsits";
+                        grpcResponse.Message = "game already exsits";
                     }
                 }
                 else
@@ -279,12 +279,12 @@ namespace VaporServer.Endpoint
             
             try
             {
-                if (!String.IsNullOrEmpty(title))
+                if (!string.IsNullOrEmpty(title))
                 {
                     if (gameDB.FindGame(title))
                     {
                         var game = gameDB.GetGame(title);
-                        if (!String.IsNullOrEmpty(newTitle) && !gameDB.FindGame(newTitle))
+                        if (!string.IsNullOrEmpty(newTitle) && (!gameDB.FindGame(newTitle) || newTitle == title))
                         {
                             game.Title = newTitle;
                         }
@@ -292,11 +292,11 @@ namespace VaporServer.Endpoint
                         {
                             throw new Exception("the new title already exists");
                         }
-                        if (!String.IsNullOrEmpty(newgender))
+                        if (!string.IsNullOrEmpty(newgender))
                         {
                             game.Gender = newgender;
                         }
-                        if (!String.IsNullOrEmpty(newsinopsis))
+                        if (!string.IsNullOrEmpty(newsinopsis))
                         {
                             game.Sinopsis = newsinopsis;
                         }
@@ -312,13 +312,13 @@ namespace VaporServer.Endpoint
                     else
                     {
                         grpcResponse.Response = Constants.Error;
-                        grpcResponse.Message = "Game not found";
+                        grpcResponse.Message = "game not found";
                     }
                 }
                 else
                 {
                     grpcResponse.Response = Constants.Error;
-                    grpcResponse.Message = "Title cannot be empty";
+                    grpcResponse.Message = "title cannot be empty";
                 }
             }
             catch (Exception e)
@@ -340,7 +340,7 @@ namespace VaporServer.Endpoint
 
             try
             {
-                if (!String.IsNullOrEmpty(title))
+                if (!string.IsNullOrEmpty(title))
                 {
                     if (gameDB.FindGame(title))
                     {
@@ -355,13 +355,13 @@ namespace VaporServer.Endpoint
                         else
                         {
                             grpcResponse.Response = Constants.Error;
-                            grpcResponse.Message = "game cannot be deleted";
+                            grpcResponse.Message = "the game cannot be deleted, a user purchased this game.";
                         }
                     }
                     else
                     {
                         grpcResponse.Response = Constants.Error;
-                        grpcResponse.Message = "Game not found";
+                        grpcResponse.Message = "game not found";
                     }
                 }
                 else
@@ -388,7 +388,7 @@ namespace VaporServer.Endpoint
             var user = request.UserName.ToLower();
             try
             {
-                if (!String.IsNullOrEmpty(user))
+                if (!string.IsNullOrEmpty(user))
                 {
                     if (userDb.FindUser(user))
                     {
@@ -432,8 +432,8 @@ namespace VaporServer.Endpoint
 
             try
             {
-                if (!String.IsNullOrEmpty(title) &&
-                    !String.IsNullOrEmpty(userName))
+                if (!string.IsNullOrEmpty(title) &&
+                    !string.IsNullOrEmpty(userName))
                 {
                     if (gameDB.FindGame(title) && userDb.FindUser(userName))
                     {
@@ -484,8 +484,8 @@ namespace VaporServer.Endpoint
 
             try
             {
-                if (!String.IsNullOrEmpty(title) &&
-                    !String.IsNullOrEmpty(userName))
+                if (!string.IsNullOrEmpty(title) &&
+                    !string.IsNullOrEmpty(userName))
                 {
                     if (gameDB.FindGame(title) && userDb.FindUser(userName))
                     {
