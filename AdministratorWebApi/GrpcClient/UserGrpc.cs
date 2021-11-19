@@ -1,6 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using AdministrationWebApi.Models;
 using AdministratorWebApi.Connection;
+using GrpcCommon;
+using Newtonsoft.Json;
 
 namespace AdministratorWebApi.GrpcClient
 {
@@ -12,13 +15,29 @@ namespace AdministratorWebApi.GrpcClient
             client = GrpcConnection.GetGrpcConnectionInstance().GetClient();
         }
         
-        public string GetUsers()
+        public async Task<string> GetUsers()
         {
-            var response =  client.GetUsers(
+            var response =  await client.GetUsersAsync(
                 new GetUsersRequest());
             
             return response.Message;
         }
+        
+        public async Task<string> GetUsersForAGameAsync(string title)
+        {
+            var game = title.ToLower();
+            var response =  await client.GetUsersForAGameAsync(
+                new GetUsersForAGameRequest{Title = game});
+            
+            var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
+            if (deserialized.Response.Equals(Constants.Error))
+            {
+                throw new ArgumentException(deserialized.Message.ToString());
+            }
+            
+            return response.Message;
+        }
+        
         
         public async Task<string> CreateUserAsync(UserModel userModel)
         {
@@ -26,7 +45,13 @@ namespace AdministratorWebApi.GrpcClient
             var pw = userModel.Password.ToLower();
             var response =  await client.CreateUserAsync(
                 new CreateUserRequest{UserName = name, Password = pw});
-
+            
+            var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
+            if (deserialized.Response.Equals(Constants.Error))
+            {
+                throw new ArgumentException(deserialized.Message.ToString());
+            }
+            
             return response.Message;
         }
 
@@ -34,11 +59,17 @@ namespace AdministratorWebApi.GrpcClient
         {
             var name = userName.ToLower();
             var newName = userModel.Name.ToLower();
-            var newPW = userModel.Password.ToLower();
+            var newPw = userModel.Password.ToLower();
             
             var response =  await client.UpdateUserAsync(
-                new UpdateUserRequest{UserName = name, NewUserName = newName, NewPassword = newPW });
-
+                new UpdateUserRequest{UserName = name, NewUserName = newName, NewPassword = newPw });
+            
+            var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
+            if (deserialized.Response.Equals(Constants.Error))
+            {
+                throw new ArgumentException(deserialized.Message.ToString());
+            }
+            
             return response.Message;
         }
       
@@ -48,7 +79,13 @@ namespace AdministratorWebApi.GrpcClient
 
             var response =  await client.UpdateUserAsync(
                 new UpdateUserRequest{UserName = name});
-
+            
+            var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
+            if (deserialized.Response.Equals(Constants.Error))
+            {
+                throw new ArgumentException(deserialized.Message.ToString());
+            }
+            
             return response.Message;
         }
         
@@ -59,7 +96,13 @@ namespace AdministratorWebApi.GrpcClient
 
             var response =  await client.BuyGameAsync(
                 new BuyGameRequest{ UserName = user,Title = title});
-
+            
+            var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
+            if (deserialized.Response.Equals(Constants.Error))
+            {
+                throw new ArgumentException(deserialized.Message.ToString());
+            }
+            
             return response.Message;
         }
 
@@ -70,7 +113,13 @@ namespace AdministratorWebApi.GrpcClient
 
             var response =  await client.RefundGameAsync(
                 new RefundGameRequest{ UserName = user,Title = title});
-
+            
+            var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
+            if (deserialized.Response.Equals(Constants.Error))
+            {
+                throw new ArgumentException(deserialized.Message.ToString());
+            }
+            
             return response.Message;
         }
     }

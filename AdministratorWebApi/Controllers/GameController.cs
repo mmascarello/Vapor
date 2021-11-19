@@ -20,99 +20,44 @@ namespace AdministratorWebApi.Controllers
             this.gameGrpc = gameGrpc;
         }
         
-        
-        // GET: api/Game
         [HttpGet]
-        public string GetGames()
+        public async Task<ActionResult<string>> GetUserGames([FromQuery(Name = "userName")] string userName)
         {
-            return gameGrpc.GetGames();
+            var result = "";
+            if (String.IsNullOrEmpty(userName))
+            {
+                result = await gameGrpc.GetGames();
+            }
+            else
+            {
+                result = await gameGrpc.GetUserGamesAsync(userName);
+            }
+
+            return result;
         }
 
         // POST: api/Game
         [HttpPost]
-        public async Task<ActionResult<GameModel>> PostGameAsync([FromBody] GameModel gameModel)
+        public async Task<ActionResult<string>> PostGameAsync([FromBody] GameModel gameModel)
         {
-            try
-            {
-                var result = await gameGrpc.CreateGameAsync(gameModel);
-                
-                if (result.Equals("Game already exsits"))
-                {
-                    return  BadRequest("Game already exsits");
-                    
-                }else if(result.Equals("all atributes cannot be empty"))
-                {
-                    return  BadRequest("all atributes cannot be empty");
-                    
-                } else
-                {
-                    return Created("",gameModel);
-                }
-                
-            }catch(Exception e)
-            { 
-                return BadRequest();
-            }
+            var result = await gameGrpc.CreateGameAsync(gameModel);
+            return Created("",result);
         }
 
         // PUT: api/Game/amongUs
         [HttpPut("{name}")]
-        public async Task<ActionResult<GameModel>> PutGameAsync(string name, [FromBody] GameModel gameModel)
+        public async Task<ActionResult<string>> PutGameAsync(string name, [FromBody] GameModel gameModel)
         {
-            try
-            {
-                var result = await gameGrpc.ModifyGameAsync(name,gameModel);
-                
-                if (result.Equals("Game already exsits"))
-                {
-                    return  BadRequest("Game already exsits");
-                    
-                }else if(result.Equals("all atributes cannot be empty"))
-                {
-                    return  BadRequest("all atributes cannot be empty");
-                    
-                } else if (result.Equals("Game not found"))
-                {
-                    return  BadRequest("Game not found");
-                }else
-                {
-                    return Created("",gameModel);
-                }
-                
-            }catch(Exception e)
-            { 
-                return BadRequest(e.Message);
-            }
+            var result = await gameGrpc.ModifyGameAsync(name,gameModel);
+            return result;
         }
 
         // DELETE: api/Game/pokemon
         [HttpDelete("{game}")]
         public async Task<ActionResult<string>> DeleteGameAsync(string game)
         {
-            try
-            {
-                var result = await gameGrpc.DeleteGameAsync(game);
-                    
-                if (result.Equals("game cannot be deleted"))
-                {
-                    return  BadRequest("game cannot be deleted");
-                    
-                }else if(result.Equals("game title cannot be empty"))
-                {
-                    return  BadRequest("game title cannot be empty");
-                    
-                } else if (result.Equals("Game not found"))
-                {
-                    return  BadRequest("Game not found");
-                }else
-                {
-                    return NoContent();
-                }
-                
-            }catch(Exception e)
-            { 
-                return BadRequest(e.Message);
-            }
-        }
+            var result = await gameGrpc.DeleteGameAsync(game);
+            return result;
+       }
     }
 }

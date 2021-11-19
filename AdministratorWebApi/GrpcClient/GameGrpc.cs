@@ -1,6 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using AdministrationWebApi.Models;
 using AdministratorWebApi.Connection;
+using GrpcCommon;
+using Newtonsoft.Json;
 
 namespace AdministratorWebApi.GrpcClient
 {
@@ -13,9 +16,9 @@ namespace AdministratorWebApi.GrpcClient
             client = GrpcConnection.GetGrpcConnectionInstance().GetClient();
         }
         
-        public string GetGames()
+        public async Task<string> GetGames()
         {
-            var response =  client.GetGames(
+            var response = await client.GetGamesAsync(
                 new GetGamesRequest());
             
             return response.Message;
@@ -30,7 +33,13 @@ namespace AdministratorWebApi.GrpcClient
             
             var response =  await client.CreateGameAsync(
                 new CreateGameRequest{ Title = title, Gender = gender, Sinopsis = sinopsis, AgeAllowed = ageAllowed});
-
+            
+            var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
+            if (deserialized.Response.Equals(Constants.Error))
+            {
+                throw new ArgumentException(deserialized.Message.ToString());
+            }
+            
             return response.Message;
         }
         
@@ -44,7 +53,12 @@ namespace AdministratorWebApi.GrpcClient
             
             var response =  await client.UpdateGameAsync(
                 new UpdateGameRequest{ Title = title, NewTitle = newTitle, NewGender = newGender, NewSinopsis = newSinopsis, NewAgeAllowed = newAgeAllowed});
-
+            var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
+            if (deserialized.Response.Equals(Constants.Error))
+            {
+                throw new ArgumentException(deserialized.Message.ToString());
+            }
+            
             return response.Message;
         }
         
@@ -54,7 +68,26 @@ namespace AdministratorWebApi.GrpcClient
 
             var response =  await client.DeleteGameAsync(
                 new DeleteGameRequest{ Title = title});
-
+            var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
+            if (deserialized.Response.Equals(Constants.Error))
+            {
+                throw new ArgumentException(deserialized.Message.ToString());
+            }
+            
+            return response.Message;
+        }
+        
+        public async Task<string> GetUserGamesAsync(string name)
+        {
+            var user = name.ToLower();
+            var response = await client.GetUserGamesAsync(new GetUserGamesRequest{UserName = user});
+            
+            var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
+            if (deserialized.Response.Equals(Constants.Error))
+            {
+                throw new ArgumentException(deserialized.Message.ToString());
+            }
+            
             return response.Message;
         }
     }

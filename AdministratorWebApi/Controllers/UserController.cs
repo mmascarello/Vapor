@@ -26,148 +26,55 @@ namespace AdministratorWebApi.Controllers
         }
 
         [HttpGet]
-        public string GetUsersAsync()
+        public async Task<ActionResult<string>> GetUsersAsync([FromQuery(Name = "title")] string title)
         {
-            var response = userGrpc.GetUsers();
+            var response = "";
+            if (string.IsNullOrEmpty(title))
+            {
+                response = await userGrpc.GetUsers();
+            }
+            else
+            {
+                response = await userGrpc.GetUsersForAGameAsync(title);
+            }
             return response;
         }
+        
 
         [HttpPost]
-        public async Task<ActionResult<UserModel>> PostUserAsync([FromBody] UserModel userModel)
+        public async Task<ActionResult<string>> PostUserAsync([FromBody] UserModel userModel)
         {
-            try
-            {
-                var result = await userGrpc.CreateUserAsync(userModel);
-                var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(result);
-                
-
-                if (deserialized.Response.Equals(Constants.Error))
-                {
-                    return BadRequest(result);
-                }
-                else
-                {
-                    return Created("", result);
-                }
-            }
-            catch (Exception e)
-            {
-                return BadRequest();
-            }
+            var result = await userGrpc.CreateUserAsync(userModel);
+            return Created("", result);
         }
 
         [HttpPut("{name}")]
-        public async Task<ActionResult<UserModel>> PutUserAsync(string name, [FromBody] UserModel userModel)
+        public async Task<ActionResult<string>> PutUserAsync(string name, [FromBody] UserModel userModel)
         {
-            try
-            {
-                var result = await userGrpc.ModifyUserAsync(name, userModel);
-
-
-                if (result.Equals("New user already exsits"))
-                {
-                    return BadRequest("New user already exsits");
-                }
-                else if (result.Equals("user and password cannot be empty"))
-                {
-                    return BadRequest("user and password cannot be empty");
-                }
-                else
-                {
-                    return userModel;
-                }
-            }
-            catch (Exception e)
-            {
-                return BadRequest();
-            }
+            var result = await userGrpc.ModifyUserAsync(name, userModel);
+            return result;
         }
 
         [HttpDelete("{user}")]
         public async Task<ActionResult<string>> DeleteUserAsync(string user)
         {
-            try
-            {
-                var result = await userGrpc.DeleteUserAsync(user);
-
-                if (result.Equals("New user already exsits"))
-                {
-                    return BadRequest("New user already exsits");
-                }
-                else if (result.Equals("user and password cannot be empty"))
-                {
-                    return BadRequest("user and password cannot be empty");
-                }
-                else
-                {
-                    return NoContent();
-                }
-            }
-            catch (Exception e)
-            {
-                return BadRequest();
-            }
+            var result = await userGrpc.DeleteUserAsync(user);
+            return result;
         }
 
         [HttpPut]
         public async Task<ActionResult<string>> BuyGameAsync([FromQuery]string userName, [FromQuery] string gameTitle)
         {
-            try
-            {
-                var result = await userGrpc.BuyGameAsync(userName, gameTitle);
-
-                if (result.Equals("user already has this game!"))
-                {
-                    return BadRequest("user already has this game!");
-                }
-                else if (result.Equals("user or game not exists"))
-                {
-                    return BadRequest("user or game not exists");
-                }
-
-                if (result.Equals("game title and username cannot be empty"))
-                {
-                    return BadRequest("game title and username cannot be empty");
-                }
-                else
-                {
-                    return result;
-                }
-            }
-            catch (Exception e)
-            {
-                return BadRequest();
-            }
-        }
+            var result = await userGrpc.BuyGameAsync(userName, gameTitle);
+            return result;
+       }
 
         [HttpDelete]
         public async Task<ActionResult<string>> RefundGameAsync([FromQuery]string userName,[FromQuery] string gameTitle)
         {
-            try
-            {
-                var result = await userGrpc.RefundGameAsync(userName,gameTitle);
-                
-                if (result.Equals("user doesn't has this game!)"))
-                {
-                    return BadRequest("user doesn't has this game!)");
-                }
-                else if (result.Equals("user or game not exists"))
-                {
-                    return BadRequest("user or game not exists");
-                    
-                } else if (result.Equals("game title and username cannot be empty"))
-                {
-                    return BadRequest("game title and username cannot be empty");
-                }
-                else
-                {
-                    return NoContent();
-                }
-            }
-            catch (Exception e)
-            {
-                return BadRequest();
-            }
+            var result = await userGrpc.RefundGameAsync(userName,gameTitle);
+            return result;
+           
         }
 
     }

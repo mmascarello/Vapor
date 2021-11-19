@@ -43,6 +43,29 @@ namespace VaporServer.Endpoint
             });
         }
         
+        public override Task<GetUsersForAGameResponse> GetUsersForAGame(GetUsersForAGameRequest request, ServerCallContext context)
+        {
+            var title = request.Title;
+            var grpcResponse = new GrpcResponse();
+            if (!string.IsNullOrEmpty(title) && gameDB.FindGame(title))
+            {
+                var game = gameDB.GetGame(title);
+                var users = userDb.GetUsers().FindAll(u => u.MyOwnedGames.Exists(g=>g==game.Id));
+                grpcResponse.Response = Constants.Ok;
+                grpcResponse.Message = users;
+            }
+            else
+            {
+                grpcResponse.Response = Constants.Error;
+                grpcResponse.Message = "Game not found";
+            }
+            return Task.FromResult(new GetUsersForAGameResponse()
+            {
+                Message = JsonConvert.SerializeObject(grpcResponse)
+            });
+        }
+        
+        
         //ToDo:Refactor para que sea mantenible. 
         public override Task<CreateUserResponse> CreateUser(CreateUserRequest request, ServerCallContext context)
         {
