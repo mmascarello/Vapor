@@ -23,7 +23,7 @@ namespace VaporServer.Endpoint
 
         public AdministrationService(ILogger<AdministrationService> logger)
         {
-            _logger = logger;
+            this._logger = logger;
             this.instance = MemoryDataBase.Instance;
             this.userDb = this.instance.UserDataBase;
             this.gameDB = this.instance.GameDataBase;
@@ -65,8 +65,6 @@ namespace VaporServer.Endpoint
             });
         }
         
-        
-        //ToDo:Refactor para que sea mantenible. 
         public override Task<CreateUserResponse> CreateUser(CreateUserRequest request, ServerCallContext context)
         {
             var username = request.UserName.ToLower();
@@ -142,7 +140,7 @@ namespace VaporServer.Endpoint
                     else
                     {
                         grpcResponse.Response = Constants.Error;
-                        grpcResponse.Message = "New user already exsits";//ToDo:Aca dejaria solo user already exists --> podriamos hacer una clase estatica con mensajes estaticos.
+                        grpcResponse.Message = "New user already exsits";
                     }
                 }
                 else
@@ -503,7 +501,7 @@ namespace VaporServer.Endpoint
                         else
                         {
                             grpcResponse.Response = Constants.Error;
-                            grpcResponse.Message ="user doesn't has this game!";
+                            grpcResponse.Message ="user doesn't have this game!";
                         }
                     }
                     else

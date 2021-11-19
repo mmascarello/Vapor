@@ -32,7 +32,7 @@ namespace AdministratorWebApi.GrpcClient
             var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
             if (deserialized.Response.Equals(Constants.Error))
             {
-                throw new ArgumentException(deserialized.Message.ToString());
+                throw new ArgumentException(response.Message);
             }
             
             return response.Message;
@@ -49,7 +49,7 @@ namespace AdministratorWebApi.GrpcClient
             var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
             if (deserialized.Response.Equals(Constants.Error))
             {
-                throw new ArgumentException(deserialized.Message.ToString());
+                throw new ArgumentException(response.Message);
             }
             
             return response.Message;
@@ -67,7 +67,7 @@ namespace AdministratorWebApi.GrpcClient
             var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
             if (deserialized.Response.Equals(Constants.Error))
             {
-                throw new ArgumentException(deserialized.Message.ToString());
+                throw new ArgumentException(response.Message);
             }
             
             return response.Message;
@@ -83,7 +83,7 @@ namespace AdministratorWebApi.GrpcClient
             var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
             if (deserialized.Response.Equals(Constants.Error))
             {
-                throw new ArgumentException(deserialized.Message.ToString());
+                throw new ArgumentException(response.Message);
             }
             
             return response.Message;
@@ -100,7 +100,7 @@ namespace AdministratorWebApi.GrpcClient
             var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
             if (deserialized.Response.Equals(Constants.Error))
             {
-                throw new ArgumentException(deserialized.Message.ToString());
+                throw new ArgumentException(response.Message);
             }
             
             return response.Message;
@@ -117,7 +117,7 @@ namespace AdministratorWebApi.GrpcClient
             var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
             if (deserialized.Response.Equals(Constants.Error))
             {
-                throw new ArgumentException(deserialized.Message.ToString());
+                throw new ArgumentException(response.Message);
             }
             
             return response.Message;

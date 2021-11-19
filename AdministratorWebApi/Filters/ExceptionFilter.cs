@@ -6,8 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace AdministratorWebApi.Filters
 {
-    [ExcludeFromCodeCoverage]
-    public class ExceptionFilter : IExceptionFilter
+public class ExceptionFilter : IExceptionFilter
     {
         public void OnException(ExceptionContext context)
         {

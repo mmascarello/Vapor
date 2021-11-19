@@ -16,7 +16,7 @@ namespace AdministratorWebApi.GrpcClient
             client = GrpcConnection.GetGrpcConnectionInstance().GetClient();
         }
         
-        public async Task<string> GetGames()
+        public async Task<string> GetGamesAsync()
         {
             var response = await client.GetGamesAsync(
                 new GetGamesRequest());
@@ -37,7 +37,7 @@ namespace AdministratorWebApi.GrpcClient
             var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
             if (deserialized.Response.Equals(Constants.Error))
             {
-                throw new ArgumentException(deserialized.Message.ToString());
+                throw new ArgumentException(response.Message);
             }
             
             return response.Message;
@@ -56,7 +56,7 @@ namespace AdministratorWebApi.GrpcClient
             var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
             if (deserialized.Response.Equals(Constants.Error))
             {
-                throw new ArgumentException(deserialized.Message.ToString());
+                throw new ArgumentException(response.Message);
             }
             
             return response.Message;
@@ -71,7 +71,7 @@ namespace AdministratorWebApi.GrpcClient
             var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
             if (deserialized.Response.Equals(Constants.Error))
             {
-                throw new ArgumentException(deserialized.Message.ToString());
+                throw new ArgumentException(response.Message);
             }
             
             return response.Message;
@@ -85,7 +85,7 @@ namespace AdministratorWebApi.GrpcClient
             var deserialized = JsonConvert.DeserializeObject<GrpcResponse>(response.Message);
             if (deserialized.Response.Equals(Constants.Error))
             {
-                throw new ArgumentException(deserialized.Message.ToString());
+                throw new ArgumentException(response.Message);
             }
             
             return response.Message;

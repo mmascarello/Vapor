@@ -26,7 +26,7 @@ namespace AdministratorWebApi.Controllers
             var result = "";
             if (String.IsNullOrEmpty(userName))
             {
-                result = await gameGrpc.GetGames();
+                result = await gameGrpc.GetGamesAsync();
             }
             else
             {
