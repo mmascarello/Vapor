@@ -10,6 +10,7 @@
       <ProjectReference Include="..\CommunicationInterface\CommunicationInterface.csproj" />
       <ProjectReference Include="..\Domain\Domain.csproj" />
       <ProjectReference Include="..\GrpcCommon\GrpcCommon.csproj" />
+      <ProjectReference Include="..\MqCommon\MqCommon.csproj" />
       <ProjectReference Include="..\SettingsManagerInterface\SettingsManagerInterface.csproj" />
       <ProjectReference Include="..\SettingsManagerImplementation\SettingsManagerImplementation.csproj" />
       <ProjectReference Include="..\StringProtocol\StringProtocol.csproj" />

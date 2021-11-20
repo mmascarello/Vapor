@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace WebAPI.Services.RabbitMQService
+namespace LogWebAPI.Services.RabbitMQService
 {
     public class RabbitBus : IBus
     {
@@ -24,7 +24,7 @@ namespace WebAPI.Services.RabbitMQService
             {
                 var body = e.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
-                var item = JsonConvert.DeserializeObject<T>(message); //retorna el elemento deserializado o null en el caso de un error de sintaxis
+                var item = JsonConvert.DeserializeObject<T>(message); 
                 onMessage(item);
                 await Task.Yield();
             };

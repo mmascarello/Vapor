@@ -425,10 +425,6 @@ namespace VaporServer.Endpoint
             var receiveGameAttributeBuffer = new byte[header.IDataLength];
             
             await communication.ReadDataAsync(clientSocket, header.IDataLength, receiveGameAttributeBuffer).ConfigureAwait(false);
-
-            var info = Encoding.UTF8.GetString(receiveGameAttributeBuffer).Split('|');
-            var game = info[0];
-
             try
             {
                 var gameTitle = this.gameLogic.LookupGame(receiveGameAttributeBuffer);
@@ -437,12 +433,12 @@ namespace VaporServer.Endpoint
                 
                 await communication.WriteDataAsync(clientSocket,headerResponse,gameTitle).ConfigureAwait(false);
                 
-                await SendLog(CommandConstants.LookupGameDescription,game, ResponseConstants.Ok).ConfigureAwait(false);
+                await SendLog(CommandConstants.LookupGameDescription,"", ResponseConstants.Ok).ConfigureAwait(false);
 
             }catch (Exception e)
             {
                 await ErrorResponse(clientSocket,e.Message,CommandConstants.LookupGame).ConfigureAwait(false);
-                await SendLog(CommandConstants.LookupGameDescription, game, ResponseConstants.Error + e.Message).ConfigureAwait(false);
+                await SendLog(CommandConstants.LookupGameDescription, "", ResponseConstants.Error + e.Message).ConfigureAwait(false);
             }
         }
 
@@ -472,12 +468,12 @@ namespace VaporServer.Endpoint
                 var headerResponse = new Header(HeaderConstants.Response, CommandConstants.GameDetail, response.Length);
                 
                 await communication.WriteDataAsync(clientSocket,headerResponse,response).ConfigureAwait(false);
-                await SendLog(CommandConstants.GetGamesDescription,game,ResponseConstants.Ok).ConfigureAwait(false);
+                await SendLog(CommandConstants.GameDetailDescription,game,ResponseConstants.Ok).ConfigureAwait(false);
             }
             catch (Exception e)
             {
                 await ErrorResponse(clientSocket,e.Message,CommandConstants.GameDetail).ConfigureAwait(false);
-                await SendLog(CommandConstants.GetGamesDescription,game,ResponseConstants.Error+e.Message).ConfigureAwait(false);
+                await SendLog(CommandConstants.GameDetailDescription,game,ResponseConstants.Error+e.Message).ConfigureAwait(false);
             }
         }
         

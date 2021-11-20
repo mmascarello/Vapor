@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace WebAPI.Services.RabbitMQService
+namespace LogWebAPI.Services.RabbitMQService
 {
     public interface IBus
     {

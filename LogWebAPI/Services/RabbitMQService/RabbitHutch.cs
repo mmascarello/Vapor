@@ -1,7 +1,7 @@
 using System;
 using RabbitMQ.Client;
 
-namespace WebAPI.Services.RabbitMQService
+namespace LogWebAPI.Services.RabbitMQService
 {
     public class RabbitHutch
     {
