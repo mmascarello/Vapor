@@ -1,7 +1,7 @@
 ﻿using Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace WebAPI.Context
+namespace LogWebAPI.Context
 {
     public class LogContext:DbContext
     {

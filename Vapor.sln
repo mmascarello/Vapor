@@ -20,11 +20,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileProtocol", "FileProtoco
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValidationsImplementations", "ValidationsImplementations\ValidationsImplementations.csproj", "{BBB9D66B-CA15-43CA-8C8E-D242A5E2CDBB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI", "WebAPI\WebAPI.csproj", "{C61A79D0-62BC-44D0-9BEF-006D2367516B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogWebAPI", "LogWebAPI\LogWebAPI.csproj", "{C61A79D0-62BC-44D0-9BEF-006D2367516B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdministratorWebApi", "AdministratorWebApi\AdministratorWebApi.csproj", "{54618988-5DD3-4680-A20A-8F04C95D6D85}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrpcCommon", "GrpcCommon\GrpcCommon.csproj", "{789080C5-55D7-4152-9739-A8C1F3013EB1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MqCommon", "MqCommon\MqCommon.csproj", "{6C37BFA1-3B46-482D-A140-2A4C3C68A764}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -84,5 +86,9 @@ Global
 		{789080C5-55D7-4152-9739-A8C1F3013EB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{789080C5-55D7-4152-9739-A8C1F3013EB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{789080C5-55D7-4152-9739-A8C1F3013EB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C37BFA1-3B46-482D-A140-2A4C3C68A764}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C37BFA1-3B46-482D-A140-2A4C3C68A764}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C37BFA1-3B46-482D-A140-2A4C3C68A764}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C37BFA1-3B46-482D-A140-2A4C3C68A764}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

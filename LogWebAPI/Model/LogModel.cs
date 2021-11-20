@@ -1,7 +1,7 @@
 ﻿using System;
 using Domain;
 
-namespace WebAPI.Models
+namespace LogWebAPI.Models
 {
     public class LogModel
     {

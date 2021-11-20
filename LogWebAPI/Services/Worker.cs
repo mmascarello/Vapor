@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Domain;
@@ -7,10 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using WebAPI.Context;
-using WebAPI.Services.RabbitMQService;
+using LogWebAPI.Context;
+using LogWebAPI.Services.RabbitMQService;
+using MqCommon;
 
-namespace WebAPI.Services
+namespace LogWebAPI.Services
 {
     public class Worker : BackgroundService
     {
@@ -21,7 +21,7 @@ namespace WebAPI.Services
         public Worker(ILogger<Worker> logger, IServiceProvider serviceProvider){
             this.serviceProvider = serviceProvider;
             this.logger = logger;
-            busControl = RabbitHutch.CreateBus("amqps://fhnocqil:3VamHErDywnXy607WYu3QD21i903fFTS@beaver.rmq.cloudamqp.com/fhnocqil");
+            busControl = RabbitHutch.CreateBus(MqConstants.QueueUri);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
