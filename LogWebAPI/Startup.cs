@@ -8,6 +8,7 @@ using LogWebAPI.BusinessLogic;
 using LogWebAPI.Context;
 using LogWebAPI.Filters;
 using LogWebAPI.Services;
+using Microsoft.OpenApi.Models;
 
 namespace LogWebAPI
 {
@@ -27,6 +28,11 @@ namespace LogWebAPI
             services.AddDbContext<LogContext>(opt => opt.UseInMemoryDatabase("LogsList"));
             services.AddHostedService<Worker>(); // Inyecta un servicio que corre en modo SINGLETON y se encarga de recibir los mensajes
             services.AddScoped<LogLogic>();
+            
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo {Title = "LogWebApi", Version = "v1"});
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -35,8 +41,8 @@ namespace LogWebAPI
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                //app.UseSwagger();
-                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LogWebAPI v1"));
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LogWebAPI v1"));
             }
             
             app.UseRouting();
