@@ -19,7 +19,6 @@ namespace VaporServer.Endpoint
         private readonly UserDataBase userDb;
         private readonly GameDataBase gameDB;
         private readonly AdministrationService admInstance = null;
-        private static readonly object Mlock = new object();
 
         public AdministrationService(ILogger<AdministrationService> logger)
         {
