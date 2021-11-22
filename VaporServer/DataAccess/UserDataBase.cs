@@ -15,10 +15,46 @@ namespace VaporServer.DataAccess
         }
         
         public void AddUser(User user){
+            
             lock (locker)
             {
                 this.users.Add(user);
             }
+        }
+        
+        public void ModifyUser(User userModified)
+        {
+            try
+            {
+                lock (locker)
+                {
+                    var index = users.FindIndex(u => u.Id == userModified.Id);
+                    users[index] = userModified;
+
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error al actualizar usuario");
+            }
+            
+        }
+        
+        public void DeleteUser(string user)
+        {
+            try
+            {
+                lock (locker)
+                {
+                    var userToRemove = GetUser(user);
+                    users.Remove(userToRemove);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+
         }
 
         public List<User> GetUsers()
@@ -28,6 +64,30 @@ namespace VaporServer.DataAccess
                 return users;
             }
         }
+        
+        public bool FindUser(string userName)
+        {
+            lock (locker)
+            {
+                return  users.Exists(u => u.UserLogin == userName);
+            }
+        }
+        
+        public User GetUser(string userName)
+        {
+            try
+            {
+                lock (locker)
+                {
+                    var user = users.Find(u => u.UserLogin == userName);
+                    return user;
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("No user found");
+            }
+        }
 
         public void BuyGame(Guid userId, Guid gameId)
         {
@@ -35,6 +95,24 @@ namespace VaporServer.DataAccess
             {
                 var index = users.FindIndex(u => u.Id == userId);
                 users[index].MyOwnedGames.Add(gameId);
+            }
+        }
+
+        public void RefundGame(Guid userId, Guid gameId)
+        {
+            lock (locker)
+            {
+                var index = users.FindIndex(u => u.Id == userId);
+                users[index].MyOwnedGames.Remove(gameId);
+            }
+        }
+
+        public User Login(string user, string password)
+        {
+            lock (locker)
+            {
+                var findUser = users.Find(u => u.UserLogin.Equals(user) && u.Password.Equals(password));
+                return findUser;
             }
         }
     }

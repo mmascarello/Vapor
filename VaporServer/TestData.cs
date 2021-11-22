@@ -15,24 +15,20 @@ namespace VaporServer
             Guid warCraftId = Guid.NewGuid();
             Guid superIcyTowerId = Guid.NewGuid();
 
-            
-            Guid micaId = Guid.NewGuid();
-            Guid maxiId = Guid.NewGuid();
-
             Guid reviewMica = Guid.NewGuid();
             Guid reviewMaxi = Guid.NewGuid();
 
             
-            //ambos tienen el mismo juego y le hacen una review.
+            
             
             reviewDataBase.AddReview(new Review()
             {
-                Id = reviewMica, Description = "este juego es muy bueno ", Rating = 4   /*, UserId = micaId*/
+                Id = reviewMica, Description = "este juego es muy bueno ", Rating = 4   
             });
             
             reviewDataBase.AddReview(new Review()
             {
-                Id = reviewMaxi, Description = "este juego es muy malo ", Rating = 2 /*, UserId = maxiId*/
+                Id = reviewMaxi, Description = "este juego es muy malo ", Rating = 2 
             });
             
             
@@ -49,12 +45,12 @@ namespace VaporServer
             gameDataBase.AddGames(new Game(){ Title = "pokemon",Id = pokemonId, Gender = "aventura"});
             gameDataBase.AddGames(new Game(){ Title = "warcraft",Id = warCraftId, Gender = "estrategia"});
             
-            userDataBase.AddUser(new User(){UserLogin = "mica", Id = micaId, MyOwnedGames= new List<Guid>()
+            userDataBase.AddUser(new User(){UserLogin = "mica", Password = "mica",MyOwnedGames= new List<Guid>()
             {
                 superMarioId,bomermanId
             }});
             
-            userDataBase.AddUser(new User(){UserLogin = "maxi", Id = maxiId, MyOwnedGames= new List<Guid>()
+            userDataBase.AddUser(new User(){UserLogin = "maxi",Password = "maxi", MyOwnedGames= new List<Guid>()
             {
                 pokemonId,bomermanId
             }});

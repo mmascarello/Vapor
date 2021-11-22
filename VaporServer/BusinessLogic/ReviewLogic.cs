@@ -19,7 +19,7 @@ namespace VaporServer.BusinessLogic
             var reviewsIdInGame = game.Reviews;
             var reviewsInGame ="";
             
-            //ToDo: Validar que hay descripciones en el sistema. 
+             
             
             foreach (var r in reviews)
             {

@@ -10,10 +10,12 @@ namespace VaporServer.BusinessLogic
     {
         private readonly GameDataBase gameDb;
         private readonly ReviewLogic reviewLogic;
+        private readonly UserLogic userLogic;
         public GameLogic(GameDataBase gameDataBase, ReviewLogic reviewLogic)
         {
             this.gameDb = gameDataBase;
             this.reviewLogic = reviewLogic;
+            this.userLogic = userLogic;
         }
 
         public List<Game> GetGames()
@@ -52,12 +54,11 @@ namespace VaporServer.BusinessLogic
 
         }
 
-        public void DeleteGame(Byte[] game)
+        public void RemoveGame(string gameToDelete)
         {
             try
             {
-                var gameToDelete = Encoding.UTF8.GetString(game);
-                gameDb.DeleteGame(gameToDelete);
+               gameDb.DeleteGame(gameToDelete);
             }
             catch (Exception e)
             {
@@ -107,7 +108,7 @@ namespace VaporServer.BusinessLogic
                 throw new Exception(e.Message);
             }
         }
-//Todo: cambiar de lugar este metodo. 
+ 
         private ESRB GetEsrb(int num)
         {
             var ageEsrb = new ESRB();
@@ -160,7 +161,7 @@ namespace VaporServer.BusinessLogic
             {
                 var game = GetGame(gameTitle);
                 
-                //obtener lista de reviews para ese juego
+                
                 var reviewsInGame = reviewLogic.GetReviewsInGame(game);
                 
                 return reviewsInGame;
@@ -192,7 +193,7 @@ namespace VaporServer.BusinessLogic
 
         public string GetData(Byte[] gameTitle)
         {
-            //detalle de los datos del juego
+            
             var game = GetGame(gameTitle);
             
             var data = "";
@@ -201,7 +202,7 @@ namespace VaporServer.BusinessLogic
             data+="|"+game.Sinopsis;
             data+="|"+game.ageAllowed;
             
-            //ToDo: Agregar la imagen
+            
             
             return data;
         }
