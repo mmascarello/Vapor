@@ -17,12 +17,9 @@ namespace VaporServer
             Console.Write("Iniciando Server con Sockets...");
             await Task.Run(async () =>  await _startup.Start().ConfigureAwait(false));
             
-            //await _startup.Start().ConfigureAwait(false);
-            
             Console.Write("Iniciando Server con GRPC...");
             await Task.Run(async () => await CreateHostBuilder(args).Build().RunAsync().ConfigureAwait(false));
             
-            //await CreateHostBuilder(args).Build().RunAsync().ConfigureAwait(false);
         }
 
         private static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -31,7 +28,6 @@ namespace VaporServer
                 {
                     webBuilder.ConfigureKestrel(options =>
                     {
-                        // Setup a HTTP/2 endpoint without TLS.
                         options.ListenLocalhost(6001, o => o.Protocols = 
                             HttpProtocols.Http2);
                     });

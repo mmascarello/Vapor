@@ -1,10 +1,10 @@
-syntax = "proto3"; //Version de la sintaxis que estamos usando
+syntax = "proto3"; 
 
-option csharp_namespace = "VaporServer.Endpoint"; //Indica cual es el namespace donde vamos a implementar nuestro servicio
+option csharp_namespace = "VaporServer.Endpoint"; 
 
 package greet;
 
-// The greeting service definition.
+
 service Greeter {
   rpc GetUsers (GetUsersRequest) returns (GetUsersResponse);
   rpc GetUsersForAGame(GetUsersForAGameRequest) returns (GetUsersForAGameResponse);
@@ -23,7 +23,7 @@ service Greeter {
   rpc RefundGame (RefundGameRequest) returns (RefundGameResponse);
 }
 
-// The request message containing the user's name.
+
 message GetUsersRequest {
   
 }

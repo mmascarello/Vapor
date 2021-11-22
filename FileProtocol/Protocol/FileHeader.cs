@@ -21,19 +21,19 @@ namespace FileProtocol.Protocol
         public byte[] Create(string fileName, long fileSize)
         {
             var header =
-                new byte[GetLength()]; // Creo un array de bytes de largo Specification.FixedFileNameLength + Specification.FixedFileSizeLength;
+                new byte[GetLength()]; 
             var fileNameData =
-                BitConverter.GetBytes(Encoding.UTF8.GetBytes(fileName).Length); // Obtengo largo del nombre
+                BitConverter.GetBytes(Encoding.UTF8.GetBytes(fileName).Length); 
             
             if (fileNameData.Length != Specification.FixedFileNameLength)
                 throw new Exception("There is something wrong with the file name");
             
-            var fileSizeData = BitConverter.GetBytes(fileSize); // Obtengo tamaño del archivo en array de bytes
+            var fileSizeData = BitConverter.GetBytes(fileSize); 
 
             Array.Copy(fileNameData, 0,
-                header, 0, Specification.FixedFileNameLength); // Copio al array destino XXXX a partir de la posicion 0
+                header, 0, Specification.FixedFileNameLength);
             Array.Copy(fileSizeData, 0, header,
-                Specification.FixedFileNameLength, Specification.FixedFileSizeLength); // Copio al array de destino YYYYYYYY a partir de la posicion 4
+                Specification.FixedFileNameLength, Specification.FixedFileSizeLength); 
 
             return header;
         }
