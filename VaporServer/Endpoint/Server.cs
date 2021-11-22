@@ -230,8 +230,8 @@ namespace VaporServer.Endpoint
                 {
                     Console.WriteLine("Ingrese el nombre de un usuario NO existente");
                     newUsuario = Console.ReadLine().ToLower();
-                    invalid = userLogic.ExistsUser(newUsuario);//valido si existe retorna true y va a volver a entrar al while sino false
-                                                               //y se va. 
+                    invalid = userLogic.ExistsUser(newUsuario);
+                                                               
                 }
             
                 Console.WriteLine("Ingrese contrasena nueva");
@@ -277,7 +277,7 @@ namespace VaporServer.Endpoint
                 }
                 catch (Exception e)
                 {
-                    //Console.WriteLine(e);
+                    
                     exit = true;
                 }
             }
@@ -344,7 +344,7 @@ namespace VaporServer.Endpoint
                 }
                 catch (Exception e)
                 {
-                    //Console.WriteLine($"Thread is closing, will not process more data...");
+                    
                     remoteConnectionClosed = true;
                 }
             }

@@ -19,16 +19,16 @@ namespace VaporServer
             Guid reviewMaxi = Guid.NewGuid();
 
             
-            //ambos tienen el mismo juego y le hacen una review.
+            
             
             reviewDataBase.AddReview(new Review()
             {
-                Id = reviewMica, Description = "este juego es muy bueno ", Rating = 4   /*, UserId = micaId*/
+                Id = reviewMica, Description = "este juego es muy bueno ", Rating = 4   
             });
             
             reviewDataBase.AddReview(new Review()
             {
-                Id = reviewMaxi, Description = "este juego es muy malo ", Rating = 2 /*, UserId = maxiId*/
+                Id = reviewMaxi, Description = "este juego es muy malo ", Rating = 2 
             });
             
             
