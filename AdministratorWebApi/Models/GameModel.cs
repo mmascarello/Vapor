@@ -1,4 +1,4 @@
-﻿namespace AdministrationWebApi.Models
+﻿namespace AdministratorWebApi.Models
 {
     public class GameModel
     {

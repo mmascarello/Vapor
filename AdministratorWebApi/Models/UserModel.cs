@@ -1,7 +1,5 @@
-﻿using System;
-using Domain;
-
-namespace AdministrationWebApi.Models
+﻿
+namespace AdministratorWebApi.Models
 {
     public class UserModel
     {

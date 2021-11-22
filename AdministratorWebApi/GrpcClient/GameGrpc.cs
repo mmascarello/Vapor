@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AdministrationWebApi.Models;
+using AdministratorWebApi.Models;
 using AdministratorWebApi.Connection;
 using GrpcCommon;
 using Newtonsoft.Json;
