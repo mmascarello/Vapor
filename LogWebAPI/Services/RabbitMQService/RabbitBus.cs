@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace WebAPI.Services.RabbitMQService
+namespace LogWebAPI.Services.RabbitMQService
 {
     public class RabbitBus : IBus
     {

@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Domain;
+using MqCommon;
 using RabbitMQ.Client;
 
 namespace VaporServer.MQHandler
@@ -12,9 +13,9 @@ namespace VaporServer.MQHandler
         private readonly IModel channel;
          public  MQProducer()
          {
-             var uri = new Uri("amqps://fhnocqil:3VamHErDywnXy607WYu3QD21i903fFTS@beaver.rmq.cloudamqp.com/fhnocqil");
+             var uri = new Uri(MqConstants.QueueUri);
             this.channel = new ConnectionFactory() { Uri = uri}.CreateConnection().CreateModel();
-            channel.QueueDeclare(queue: "log_queue",
+            channel.QueueDeclare(queue: MqConstants.QueueName,
                 durable: false,
                 exclusive: false,
                 autoDelete: false,
@@ -28,7 +29,7 @@ namespace VaporServer.MQHandler
             {
                 var body = Encoding.UTF8.GetBytes(message);
                 channel.BasicPublish(exchange: "",
-                    routingKey: "log_queue",
+                    routingKey: MqConstants.QueueName,
                     basicProperties: null,
                     body: body);
                 returnVal = true;

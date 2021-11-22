@@ -1,12 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain;
 using Microsoft.AspNetCore.Mvc;
-using WebAPI.BusinessLogic;
-using WebAPI.Models;
+using LogWebAPI.BusinessLogic;
+using LogWebAPI.Models;
 
-namespace WebAPI.Controllers
+namespace LogWebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -22,17 +21,9 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Log>>> GetFilteredLogs([FromQuery]LogModel logModel)
         {
-            try
-            {
                 var log= logModel.ToEntity();
                 var logs = await logLogic.GetFiltered(log);
-                if (logs.Count == 0) return NotFound();
-                return logs;
-            }
-            catch (Exception e)
-            {
-                return NotFound();
-            }
+                return logs; 
         }
     }
 }

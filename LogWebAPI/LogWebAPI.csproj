@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
+        <RootNamespace>LogWebAPI</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -18,6 +19,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Domain\Domain.csproj" />
+      <ProjectReference Include="..\MqCommon\MqCommon.csproj" />
     </ItemGroup>
 
 </Project>
