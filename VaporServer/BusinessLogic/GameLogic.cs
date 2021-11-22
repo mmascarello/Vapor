@@ -108,7 +108,7 @@ namespace VaporServer.BusinessLogic
                 throw new Exception(e.Message);
             }
         }
-//Todo: cambiar de lugar este metodo. 
+ 
         private ESRB GetEsrb(int num)
         {
             var ageEsrb = new ESRB();
@@ -161,7 +161,7 @@ namespace VaporServer.BusinessLogic
             {
                 var game = GetGame(gameTitle);
                 
-                //obtener lista de reviews para ese juego
+                
                 var reviewsInGame = reviewLogic.GetReviewsInGame(game);
                 
                 return reviewsInGame;
@@ -193,7 +193,7 @@ namespace VaporServer.BusinessLogic
 
         public string GetData(Byte[] gameTitle)
         {
-            //detalle de los datos del juego
+            
             var game = GetGame(gameTitle);
             
             var data = "";
@@ -202,7 +202,7 @@ namespace VaporServer.BusinessLogic
             data+="|"+game.Sinopsis;
             data+="|"+game.ageAllowed;
             
-            //ToDo: Agregar la imagen
+            
             
             return data;
         }

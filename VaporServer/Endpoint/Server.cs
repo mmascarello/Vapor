@@ -136,7 +136,7 @@ namespace VaporServer.Endpoint
             }
         }
 
-        private void UserDetail()//ToDo: Ver si hacer log de esto
+        private void UserDetail()
         {
             try
             {
@@ -155,7 +155,7 @@ namespace VaporServer.Endpoint
             
         }
 
-        private void GetUsers()//ToDo: Ver si hacer log de esto.
+        private void GetUsers()
         {
             try
             {
@@ -198,7 +198,7 @@ namespace VaporServer.Endpoint
             {
                 Console.WriteLine("Ingrese el nombre de un usuario NO existente");
                 usuario = UserValidation.ValidNotEmpty().ToLower();
-                invalid = userLogic.ExistsUser(usuario);//valido si existe retorna true y va a volver a entrar al while sino false y se va. 
+                invalid = userLogic.ExistsUser(usuario);
             }
             
             Console.WriteLine("Ingrese contrasena para el usuario");

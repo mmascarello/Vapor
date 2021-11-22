@@ -76,7 +76,7 @@ namespace VaporServer.BusinessLogic
         
         }
         
-        //ToDo: mejorar metodo. 
+         
         public bool ExistsUser(string user)
         {
             var exists = false;
@@ -152,7 +152,7 @@ namespace VaporServer.BusinessLogic
                 var users = userDb.GetUsers();
                 var games = gameLogic.GetGames();
                
-                //si no encuentra el usuario o juego tira excepcion. 
+                
                 var getUser = users.Find(u => u.UserLogin.Equals(user));
                 var getGame = games.Find(g => g.Title.Equals(game));
 

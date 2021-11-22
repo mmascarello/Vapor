@@ -129,10 +129,9 @@ namespace CommunicationImplementation
             var fileName = Encoding.UTF8.GetString(fileNameByte);
 
             long parts = SpecificationHelper.GetParts(fileSize);
-            long offset = 0; // el archivo armandose desde 0
+            long offset = 0; 
             long currentPart = 1;
-            //Console.WriteLine(path + fileName);
-            //Console.WriteLine($"Will receive file {fileName} with size {fileSize} that will be received in {parts} segments");
+            
             while (fileSize > offset)
             {
                 byte[] data;
@@ -141,21 +140,21 @@ namespace CommunicationImplementation
                     var lastPartSize = (int)(fileSize - offset);
                     
                     data = new byte[lastPartSize];
-                    //Console.WriteLine($"Will receive segment number {currentPart} with size {lastPartSize}");
+                    
                     await ReadDataAsync(tcpClient,lastPartSize,data).ConfigureAwait(false);
                     offset += lastPartSize;
                 }
                 else
                 {
                     data = new byte[Specification.MaxPacketSize];
-                    //Console.WriteLine($"Will receive segment number {currentPart} with size {Specification.MaxPacketSize}");
+                    
                     await ReadDataAsync(tcpClient,Specification.MaxPacketSize,data).ConfigureAwait(false);
                     offset += Specification.MaxPacketSize;
                 }
                 await fileStreamHandler.WriteAsync((path + fileName), data).ConfigureAwait(false);
                 currentPart++;
             }
-            //Console.WriteLine("SALI DE RECIVE FILE");
+            
         }
     }
 }

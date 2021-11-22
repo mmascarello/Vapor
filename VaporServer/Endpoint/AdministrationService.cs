@@ -76,7 +76,7 @@ namespace VaporServer.Endpoint
                 if (!string.IsNullOrEmpty(username) &&
                     !string.IsNullOrEmpty(password))
                 {
-                    if (!userDb.FindUser(username)) //Todo: Refactor, nunca entra en el if.
+                    if (!userDb.FindUser(username)) 
                     {
                         User user = new User()
                         {

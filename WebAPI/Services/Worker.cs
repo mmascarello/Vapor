@@ -38,7 +38,7 @@ namespace WebAPI.Services
             
             try
             {
-                using (var scope = serviceProvider.CreateScope()) // Creamos un contexto de invocacion
+                using (var scope = serviceProvider.CreateScope()) 
                 {
                     var db = new LogContext(scope.ServiceProvider.GetRequiredService<DbContextOptions<LogContext>>());
                     db.Logs.Add(log);
